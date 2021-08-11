@@ -1,0 +1,79 @@
+<RootWidget>:
+   # Connect:
+   #     name:"connect"
+    MainScreen:
+        name:"main_screen"
+<Connect>:
+    GridLayout
+        cols:1
+        RelativeLayout            
+            Button:
+                size_hint : 0.14, 0.15 
+                pos_hint: {'center_x':0.5 , 'center_y':0.5}
+                text:"Connect"
+                on_press:root.db_connect()
+        
+
+<MainScreen>:
+    GridLayout:
+        cols :1
+        GridLayout:
+            cols:1
+            size_hint :0.5,0.4
+            MDLabel:
+                halign: "center"
+                theme_text_color: "Custom"
+                text_color: 0, 0.1, 0, 1
+                id:title
+                text: "DataBases Management"
+                font_size: "22sp"
+        GridLayout:
+            cols: 2
+            size_hint :0.50,0.5
+            padding: 20,20
+            spacing: '15dp','15dp'
+            MDRaisedButton:
+                md_bg_color:  1,0.93150, 0.6, 1
+                font_size: "18sp"
+                size_hint :0.3,0.20 
+                text:"Choose DataBase"
+                on_press:
+                    #root.load_db()
+                    root.choose_db()
+                #on_press:root.test()
+            Button:
+                text:"Crypt DataBase"
+            Button:
+                text:"Send Database"
+                on_press : 
+                    print("root:", root)
+                    print("root parent:", root.parent)
+            Button:
+                text:"Operations"
+                on_press : print("root:", app)        
+        GridLayout:
+            cols:1
+            padding: 20,20
+            spacing: '15dp','15dp'
+            MDLabel:
+                halign: "center"
+                theme_text_color: "Custom"
+                text_color: 0, 0, 1, 1
+                id:labelshow
+                
+            MDTextField:
+                id:datainsert
+                hint_text:'Insert Database name'
+            MDTextField:
+                multiline: True
+                id:datashow
+                hint_text:'show Data'
+                text:""
+                
+
+
+
+                                                                            
+            
+
+
