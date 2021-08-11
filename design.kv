@@ -77,12 +77,15 @@
             MDTextField:
                 id:datainsert
                 hint_text:'Insert Database name'
-            MDTextField:
-                multiline: True
-                id:datashow
-                hint_text:'show Data'
-                text:""
-                
+            ScrollView:
+                MDTextField:
+                    multiline: True
+                    id:datashow
+                    hint_text:'show Data'
+                    text:""
+                    text_size: self.width, None
+                    size_hint_y: None
+                    #height: self.texture_size[1]
 
 
 

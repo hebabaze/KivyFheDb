@@ -1,10 +1,11 @@
 from logging import root
 import socket, os
 from encryptFunctions import *
+from encryptFunctions import Encrypt
+encrypt=Encrypt()
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 from plyer import filechooser
 from kivy.core.image import Image
-from tinydb import TinyDB
 import json,glob,random
 
 from pathlib import Path
@@ -38,14 +39,7 @@ class MainScreen(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)  
         self.varx=100  
-    def rsacrypt(self,data):       # Fonction de Cryptage RSA
-        message=data.encode()
-        crypto = rsa.encrypt(message, pubkey)
-        crypto = hexlify(crypto).decode()
-        return crypto
-    def enciph(self,y):            # get encipher text
-        x=pub_key.encrypt(y)
-        return x.ciphertext()  
+
     def affiche(self,tabx):
         L=""
         for Y in tabx:
@@ -61,19 +55,20 @@ class MainScreen(Screen):
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
         print(type(chosenpath))
-        fname=Path(str(selection[0])).name
-        print(fname)
+        self.fname=Path(str(selection[0])).name
+        print(self.fname)
         self.db = TinyDB(chosenpath)
         self.tabx=self.db.table('Hr')
         self.affiche(self.tabx)
         rdic=self.tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
         print(columns)        
-    def crypt_db(self):
-        X=Encrypt.crypt_table(self,self.tabx,self.db)
-        print(X)
-        self.ids.datashow.text=str(X)
 
+    def crypt_db(self):
+
+        X,dbname=encrypt.crypt_table(self.tabx,self.fname)
+        self.ids.datashow.text=str(X)
+        print(dbname)
     def send_db(self):
         pass
     def operations(self):
