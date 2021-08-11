@@ -66,11 +66,11 @@ class MainScreen(Screen):
 
     def crypt_db(self):
 
-        X,dbname=encrypt.crypt_table(self.tabx,self.fname)
+        X,self.dbname=encrypt.crypt_table(self.tabx,self.fname)
         self.ids.datashow.text=str(X)
-        print(dbname)
+        print(self.dbname)
     def send_db(self):
-        pass
+        
     def operations(self):
         pass
 
