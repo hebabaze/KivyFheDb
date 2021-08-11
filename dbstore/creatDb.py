@@ -11,7 +11,7 @@ cmd = 'del dbstore\*.db'
 os.system(cmd)
 
 def rentable() :
-  dbt = TinyDB('mydb.db')
+  dbt = TinyDB('ISTA.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
   for i in tqdm(range(1,20),unit_divisor=1,desc=f"Creating mydb.db..",colour= 'Blue'):
@@ -24,7 +24,7 @@ def rentable() :
 
 
 def school() :
-  dbt = TinyDB('school.db')
+  dbt = TinyDB('ensa.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
   tabx.insert({'nom': 'Salah', 'years':1000    ,'id':10 })

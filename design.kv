@@ -23,7 +23,7 @@
             MDLabel:
                 halign: "center"
                 theme_text_color: "Custom"
-                text_color: 0, 0.1, 0, 1
+                text_color: 0, 0, 0, 1
                 id:title
                 text: "DataBases Management"
                 font_size: "22sp"
@@ -34,22 +34,35 @@
             spacing: '15dp','15dp'
             MDRaisedButton:
                 md_bg_color:  1,0.93150, 0.6, 1
+                theme_text_color: "Custom"
+                text_color: app.theme_cls.primary_color
                 font_size: "18sp"
                 size_hint :0.3,0.20 
                 text:"Choose DataBase"
                 on_press:
-                    #root.load_db()
                     root.choose_db()
-                #on_press:root.test()
-            Button:
+            MDRaisedButton:
+                md_bg_color:  0.9,0.8, 0.6, 1
+                theme_text_color: "Custom"
+                font_size: "18sp"
+                size_hint :0.3,0.20 
                 text:"Crypt DataBase"
-            Button:
+                on_press:
+                    root.crypt_db()
+                    
+            MDRaisedButton:
                 text:"Send Database"
+                theme_text_color: "Custom"
+                size_hint :0.3,0.20
+                font_size: "18sp"
                 on_press : 
                     print("root:", root)
                     print("root parent:", root.parent)
-            Button:
+            MDRaisedButton:
                 text:"Operations"
+                size_hint :0.3,0.20
+                theme_text_color: "Custom"
+                font_size: "18sp"
                 on_press : print("root:", app)        
         GridLayout:
             cols:1
