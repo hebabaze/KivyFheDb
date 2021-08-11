@@ -27,17 +27,14 @@ class Encrypt:
         return transform
 
     def rsaEncr(self,x):    #Crypter les colonnes de types String
-        print("rsacryp colonn")
+ 
         def transform(self,doc):
             doc[x]=self.rsacrypt(doc[x])
         return transform
     def crypt_table(self,tabx,db):
-        print("Crypt table")
-    #tabname=rsacrypt(tabx.name)
         tabrx = db.table('Dx')
         print(tabrx.all())
         for x in tabx :
-            print("Crypt table For x")
             d={}
             for a,b in x.items() :
                 if str(b).isalpha():
@@ -47,5 +44,5 @@ class Encrypt:
             tabrx.insert(d)
 
         db.drop_table(tabx.name)
-        print(tabrx.all())
+        return(tabrx.all())
     

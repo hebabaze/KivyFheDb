@@ -7,7 +7,7 @@ import logging
 format="%(asctime)s.%(msecs)03d--%(levelname)s : %(message)s"
 logging.basicConfig(format=format,level=logging.INFO,datefmt="%H:%M:%S")
 ########################################################################
-cmd = 'del dbstore\*.db'
+cmd = 'del *.db'
 os.system(cmd)
 
 def rentable() :

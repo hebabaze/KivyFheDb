@@ -1,3 +1,4 @@
+from logging import root
 import socket, os
 from encryptFunctions import *
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
@@ -41,11 +42,9 @@ class MainScreen(Screen):
         message=data.encode()
         crypto = rsa.encrypt(message, pubkey)
         crypto = hexlify(crypto).decode()
-        print("rsacryp")
         return crypto
     def enciph(self,y):            # get encipher text
         x=pub_key.encrypt(y)
-        print("enciph")
         return x.ciphertext()  
     def affiche(self,tabx):
         L=""
@@ -71,8 +70,9 @@ class MainScreen(Screen):
         columns=list(rdic.keys())
         print(columns)        
     def crypt_db(self):
-        Encrypt.crypt_table(self,self.tabx,self.db)
-        pass
+        X=Encrypt.crypt_table(self,self.tabx,self.db)
+        print(X)
+        self.ids.datashow.text=str(X)
 
     def send_db(self):
         pass
