@@ -18,7 +18,7 @@ from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager,Screen
 Builder.load_file('design.kv')
-HOST = '192.168.1.105'  # The server's hostname or IP address
+HOST = '192.168.1.109'  # The server's hostname or IP address
 PORT = 65432        # The port used by the server
 SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
@@ -69,7 +69,7 @@ class MainScreen(Screen):
         rdic=self.tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
         print(columns)        
-
+#Add
     def crypt_db(self):
 
         X,self.dbname=encrypt.crypt_table(self.tabx,self.fname)
