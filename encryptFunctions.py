@@ -1,3 +1,6 @@
+import logging
+format="%(asctime)s.%(msecs)03d--%(levelname)s : %(message)s"
+logging.basicConfig(format=format,level=logging.INFO,datefmt="%H:%M:%S")
 from tinydb import TinyDB
 from tqdm import tqdm
 from binascii import hexlify , unhexlify
@@ -6,7 +9,7 @@ import rsa,dill
 # Security keys genration
 (pubkey, privkey) = rsa.newkeys(512)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
-pkr=pub_key.n
+
 class Encrypt:
 
     def rsacrypt(self,data):       # Fonction de Cryptage RSA
@@ -42,5 +45,5 @@ class Encrypt:
                 elif not str(b).isalpha() :
                     d[self.rsacrypt(a)]=self.enciph(int(b))
             tabrx.insert(d)
-        return(tabrx.all(),dbname)
+        return(tabrx,dbname)
     

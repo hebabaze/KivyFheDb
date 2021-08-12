@@ -23,8 +23,10 @@ PORT = 65432        # The port used by the server
 SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+pkr=pub_key.n
 colx=""
-""""""
+tabx =""
+Xtable=""
 class Connect(Screen):
     def db_connect(self):
         self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,17 +61,20 @@ class MainScreen(Screen):
         self.fname=Path(str(selection[0])).name
         print(self.fname)
         self.db = TinyDB(chosenpath)
-        self.tabx=self.db.table('Hr')
-        self.affiche(self.tabx)
-        rdic=self.tabx.get(doc_id=1) # to check value type
+        global tabx
+        tabx=self.db.table('Hr')
+        self.affiche(tabx)
+        rdic=tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
         print(columns) 
         global colx
         colx=columns
+             
 
-    def crypt_db(self):
-        X,self.dbname=encrypt.crypt_table(self.tabx,self.fname)
-        self.ids.datashow.text=str(X)
+    def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
+        global Xtable
+        Xtable,self.dbname=encrypt.crypt_table(tabx,self.fname)
+        self.ids.datashow.text=str(Xtable.all())
         print(self.dbname)
 
     def send_db(self):
@@ -95,18 +100,93 @@ class MainScreen(Screen):
         screen2 = self.manager.get_screen('operations_screen')
         screen2.ids.idinsert.hint_text = f" choose colonne to crypt {colx}"
 
-        
-
-
+###############################################################################
 class OperationsScreen(Screen):
-    def retcol(self):    
-        print('retcol',colx)
-        self.ids.idinsert.hint_text=colx
-        return colx
-    def build(self):
-        self.ids.idinsert.hint_text=colx
     def sumf(self):
-        print("colx",colx)
+        chosen_col=self.ids.idinsert.text
+        if chosen_col not in colx:
+            print("Choose a valid column name! ")
+        else :
+            x='4'
+            Soc.send(x.encode())
+            idc=colx.index(chosen_col)
+            Soc.send(str(idc).encode())
+            sum=Soc.recv(BS)
+            sum=dill.loads(sum)
+            sum=priv_key.decrypt(sum)
+            print(f" [+] Resultat de la somme est [{sum}]")
+
+    def mulru(self):
+        print("XTABLE TYPE ",Xtable)
+        print("XTABLE TYPE ",type(Xtable))
+        #print("ALL XTABLE VALUE ",Xtable.all())
+        print("pkr ",pkr)
+        print(" Type pkr",type(pkr))
+        print("Mul=====>",colx,type(colx))
+        x='60'
+        Soc.send(x.encode())
+        #def RussMul(s,pub_key,pkr,BS,tabp):
+        chosen_col=self.ids.idinsert.text
+        idd=colx.index(chosen_col)
+        print(" id To Calculate ",idd)
+        L=[] # Pour Stocker Les Valeurs à calculer 
+        pkp = paillier.PaillierPublicKey(int(pkr)) #pkr=pub_key.n pour reconstruire le ciphertext
+        print("pkp ",pkp)
+        print(" Type pkp",type(pkp))
+        # Stocker les valeur à calculer 
+        for y in range(1,len(Xtable)+1):
+            Far=Xtable.get(doc_id=y)
+            print("Far ===> ",Far)
+            print("type FAR",type(Far))
+            L.append(list(Far.values())[idd])
+            print("Curren L",L)
+        P=[paillier.EncryptedNumber(pkp, x, 0) for x in L]
+        #Decrypter les valeur à traiter
+        M=[priv_key.decrypt(x) for x in P]
+        print("This is M=====",M)
+        for x in M: # Check 0 result
+            if x==0:
+                print("0 Result Dectected")
+                tab="End"
+                tab=dill.dumps(tab)
+                Soc.send(tab)
+                print("Zéro Result Detected!..")
+                return "Zéro Result Detected!.."
+            else:
+                i=0
+                j=1
+                m1=M[i]
+                for i in range(0,len(M)-1):
+                    tab=[]
+                    m2=M[i+1]
+                    while m1>0:
+                        if m1%2==1 :
+                            e2=pub_key.encrypt(m2)
+                            tab.append(e2)
+                        m1=m1//2
+                        m2=m2*2
+            ##########___Send tab
+                    print(f"Sending Table n° {j} ==> {tab}")
+                    j+=1
+                    tab=dill.dumps(tab)
+                    #tab=zlib.compress(tab)
+                    Soc.send(tab)
+                #############___Receiv Sum
+                    result=Soc.recv(BS)
+                    #result=zlib.decompress(result)
+                    result=dill.loads(result)
+                ##################_____Decrypt
+                    result=priv_key.decrypt(result)
+                    print(f"Multiplication n° {j} Result :[{result}]")
+                    m1=result
+            #################__BreakOut
+                print(f"Final Result :[{result}]")
+                tab="End"
+                tab=dill.dumps(tab)
+                #tab=zlib.compress(tab)
+                Soc.send(tab)
+                print("Task Completed")
+                return "Completed Task" 
 
 
 class RootWidget(ScreenManager):

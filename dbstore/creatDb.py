@@ -12,7 +12,7 @@ cmd1 = 'del *.dbx'
 os.system(cmd)
 os.system(cmd1)
 def rentable() :
-  dbt = TinyDB('ISTA.db')
+  dbt = TinyDB('ISTAAAA.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
   for i in tqdm(range(1,20),unit_divisor=1,desc=f"Creating mydb.db..",colour= 'Blue'):
@@ -28,7 +28,7 @@ def school() :
   dbt = TinyDB('ensa.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
-  tabx.insert({'nom': 'Salah', 'years':1000    ,'id':10 })
+  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':10 })
   tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':2 })
   tabx.insert({'nom': 'Rajae', 'years':2500 ,'id':3 })
   tabx.insert({'nom': 'Hamid', 'years':1000 ,'id':4 })
