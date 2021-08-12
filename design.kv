@@ -1,13 +1,13 @@
 <RootWidget>:
-   # Connect:
-   #     name:"connect"
+    Connect:
+        name:"connect"
     MainScreen:
         name:"main_screen"
 <Connect>:
     GridLayout
         cols:1
         RelativeLayout            
-            Button:
+            MDRaisedButton:
                 size_hint : 0.14, 0.15 
                 pos_hint: {'center_x':0.5 , 'center_y':0.5}
                 text:"Connect"
@@ -57,8 +57,7 @@
                 size_hint :0.3,0.20
                 font_size: "18sp"
                 on_press : 
-                    print("root:", root)
-                    print("root parent:", root.parent)
+                    root.send_db()
             MDRaisedButton:
                 text:"Operations"
                 size_hint :0.3,0.20

@@ -1,11 +1,12 @@
 from tinydb import TinyDB
+from tqdm import tqdm
 from binascii import hexlify , unhexlify
 from phe import paillier
-import rsa
+import rsa,dill
 # Security keys genration
 (pubkey, privkey) = rsa.newkeys(512)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
-
+pkr=pub_key.n
 class Encrypt:
 
     def rsacrypt(self,data):       # Fonction de Cryptage RSA
