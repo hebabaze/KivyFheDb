@@ -53,6 +53,11 @@ class MainScreen(Screen):
         self.ids.datashow.text= L
 
     def choose_db(self): # fontion de choix de fichier 
+        try:
+            cmd1 = 'del dbstore/*x.dbx'
+            os.system(cmd1)
+        except:
+            print("Clean Folder")
         filechooser.open_file(on_selection=self.handle_selection)
 
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
@@ -105,7 +110,7 @@ class OperationsScreen(Screen):
     def sumf(self):
         chosen_col=self.ids.idinsert.text
         if chosen_col not in colx:
-            print("Choose a valid column name! ")
+            self.ids.opresult.text = "Warning : Choose a valid column name!"
         else :
             x='4'
             Soc.send(x.encode())
@@ -114,43 +119,28 @@ class OperationsScreen(Screen):
             sum=Soc.recv(BS)
             sum=dill.loads(sum)
             sum=priv_key.decrypt(sum)
-            print(f" [+] Resultat de la somme est [{sum}]")
+            self.ids.opresult.text=f" [+] Resultat de la somme est [{sum}]"
 
     def mulru(self):
-        print("XTABLE TYPE ",Xtable)
-        print("XTABLE TYPE ",type(Xtable))
-        #print("ALL XTABLE VALUE ",Xtable.all())
-        print("pkr ",pkr)
-        print(" Type pkr",type(pkr))
-        print("Mul=====>",colx,type(colx))
         x='60'
         Soc.send(x.encode())
-        #def RussMul(s,pub_key,pkr,BS,tabp):
         chosen_col=self.ids.idinsert.text
         idd=colx.index(chosen_col)
-        print(" id To Calculate ",idd)
         L=[] # Pour Stocker Les Valeurs à calculer 
         pkp = paillier.PaillierPublicKey(int(pkr)) #pkr=pub_key.n pour reconstruire le ciphertext
-        print("pkp ",pkp)
-        print(" Type pkp",type(pkp))
         # Stocker les valeur à calculer 
         for y in range(1,len(Xtable)+1):
             Far=Xtable.get(doc_id=y)
-            print("Far ===> ",Far)
-            print("type FAR",type(Far))
             L.append(list(Far.values())[idd])
-            print("Curren L",L)
         P=[paillier.EncryptedNumber(pkp, x, 0) for x in L]
         #Decrypter les valeur à traiter
         M=[priv_key.decrypt(x) for x in P]
-        print("This is M=====",M)
         for x in M: # Check 0 result
             if x==0:
-                print("0 Result Dectected")
+                self.ids.opresult.text="0 Result Dectected"
                 tab="End"
                 tab=dill.dumps(tab)
                 Soc.send(tab)
-                print("Zéro Result Detected!..")
                 return "Zéro Result Detected!.."
             else:
                 i=0
@@ -166,7 +156,7 @@ class OperationsScreen(Screen):
                         m1=m1//2
                         m2=m2*2
             ##########___Send tab
-                    print(f"Sending Table n° {j} ==> {tab}")
+                    self.ids.opresult.text=f"Sending Table n° {j} ==> {tab}"
                     j+=1
                     tab=dill.dumps(tab)
                     #tab=zlib.compress(tab)
@@ -177,15 +167,15 @@ class OperationsScreen(Screen):
                     result=dill.loads(result)
                 ##################_____Decrypt
                     result=priv_key.decrypt(result)
-                    print(f"Multiplication n° {j} Result :[{result}]")
+                    self.ids.opresult.text=f"Multiplication n° {j} Result :[{result}]"
                     m1=result
             #################__BreakOut
-                print(f"Final Result :[{result}]")
+                self.ids.opresult.text=f"Product Reslut With Ru Methode :[{result}]"
                 tab="End"
                 tab=dill.dumps(tab)
                 #tab=zlib.compress(tab)
                 Soc.send(tab)
-                print("Task Completed")
+                self.ids.opresult.text="Task Completed"
                 return "Completed Task" 
 
 

@@ -8,7 +8,7 @@ format="%(asctime)s.%(msecs)03d--%(levelname)s : %(message)s"
 logging.basicConfig(format=format,level=logging.INFO,datefmt="%H:%M:%S")
 ########################################################################
 cmd = 'del *.db'
-cmd1 = 'del *.dbx'
+cmd1 = 'del *x.db'
 os.system(cmd)
 os.system(cmd1)
 def rentable() :
