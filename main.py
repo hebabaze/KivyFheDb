@@ -23,7 +23,8 @@ PORT = 65432        # The port used by the server
 SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+colx=""
+""""""
 class Connect(Screen):
     def db_connect(self):
         self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,18 +34,12 @@ class Connect(Screen):
             print("[+] Connected.")
             pks=dill.dumps(pkr)
             Soc.send(pks)
-
-            #pks=dill.dumps(pkr)
-            #Soc.send(pks)
-            self.manager.current="main_screen"
-              #while Soc:
-                
+            self.manager.current="main_screen"                
 
 class MainScreen(Screen):
     
     def __init__(self, **kw):
-        super().__init__(**kw)  
-        self.varx=100  
+        super().__init__(**kw)    
 
     def affiche(self,tabx):
         L=""
@@ -68,15 +63,16 @@ class MainScreen(Screen):
         self.affiche(self.tabx)
         rdic=self.tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
-        print(columns)        
-#Add
-    def crypt_db(self):
+        print(columns) 
+        global colx
+        colx=columns
 
+    def crypt_db(self):
         X,self.dbname=encrypt.crypt_table(self.tabx,self.fname)
         self.ids.datashow.text=str(X)
         print(self.dbname)
-    def send_db(self):
 
+    def send_db(self):
             x='3'
             Soc.send(x.encode())
             fname=self.dbname
@@ -95,9 +91,22 @@ class MainScreen(Screen):
                             Soc.send(bytes_read)
                     break
     def operations(self):
-        pass
+        self.manager.current="operations_screen"
+        screen2 = self.manager.get_screen('operations_screen')
+        screen2.ids.idinsert.hint_text = f" choose colonne to crypt {colx}"
+
+        
 
 
+class OperationsScreen(Screen):
+    def retcol(self):    
+        print('retcol',colx)
+        self.ids.idinsert.hint_text=colx
+        return colx
+    def build(self):
+        self.ids.idinsert.hint_text=colx
+    def sumf(self):
+        print("colx",colx)
 
 
 class RootWidget(ScreenManager):
