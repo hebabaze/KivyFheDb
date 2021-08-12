@@ -1,7 +1,7 @@
 from kivy.clock import Clock
 Clock.max_iteration = 20
 from logging import root
-import socket, os
+import socket, os,math
 from encryptFunctions import *
 from encryptFunctions import Encrypt
 encrypt=Encrypt()
@@ -139,6 +139,7 @@ class OperationsScreen(Screen):
 
     #_______________#
     def mulru(self):
+        print("from mul PK",priv_key)
         x='60'
         Soc.send(x.encode())
         chosen_col=self.ids.idinsert.text
@@ -152,6 +153,11 @@ class OperationsScreen(Screen):
         P=[paillier.EncryptedNumber(pkp, x, 0) for x in L]
         #Decrypter les valeur à traiter
         M=[priv_key.decrypt(x) for x in P]
+        print("from Rusee P_K\n",priv_key)
+        print("Russe THIS IS PKR",pkr)
+        print("Russe PKR TYpe",type(pkr))
+        print("Russe THIS IS PKP ",pkp)
+        print("Russe PKP TYpe",type(pkp))
         for x in M: # Check 0 result
             if x==0:
                 self.ids.opresult.text="0 Result Dectected"
@@ -192,7 +198,59 @@ class OperationsScreen(Screen):
                 tab=dill.dumps(tab)
                 #tab=zlib.compress(tab)
                 Soc.send(tab)
-                return "Completed Task" 
+                return "Completed Task"
+    def mulog(self):
+        print("from mullog PK",priv_key)
+        chosen_col=self.ids.idinsert.text
+        if chosen_col not in colx:
+            self.ids.opresult.text = "Warning : Choose a valid column name!"
+        else :
+            x='6'
+            Soc.send(x.encode())
+            idm=colx.index(chosen_col)
+            L=[]
+            pkg = paillier.PaillierPublicKey(int(pkr))
+            for x in range(1,len(tabx)+1):
+                Far=tabx.get(doc_id=x)
+                L.append(list(Far.values())[idm])
+            P=[paillier.EncryptedNumber(pkg, x, 0) for x in L]
+            print("THIS IS P",P)
+            print("LOG from mullog P_K\n",priv_key)
+            print("LOG THIS IS PKR",pkr)
+            print("LOG TYpe",type(pkr))
+            print(" LOG THIS IS PKG ",pkg)
+            print("LOG PKG TYpe",type(pkg))
+            
+            M=[priv_key.decrypt(z) for z in P]
+            print("LOG This is M",M)
+            for x in M: # Check 0 result
+                if x==0:
+                    print(" Product equal to zéro")
+                    Lprod="End"
+                    Lprod=dill.dumps(Lprod)
+                    Soc.send(Lprod)
+                    return "Zéro Result Detected!.."
+                else:
+                    C=[math.log(e) for e in M]
+                    Ce=[pub_key.encrypt(x) for x in C]
+                    print(f"\n {Ce} \n")
+                    Lprod=dill.dumps(Ce)
+                    Soc.send(Lprod)
+                    rprod=Soc.recv(BS)
+                    rprod=dill.loads(rprod)
+                    rprod=priv_key.decrypt(rprod)
+                    logging.warning(f"Prod received before exp {rprod}")
+                    try:
+                        #709.78271 is the largest value I can compute the exp of on my machine
+                        rprod=round(math.exp(rprod))
+                        print(f" [+] Resultat produit  est [{rprod}]")
+                    except:
+                        print("Input value is greater than allowed limit")
+            Lprod="End"
+            Lprod=dill.dumps(Lprod)
+            Soc.send(Lprod)
+            return ("Log Mul Completed")
+
 
 ######################################################################
 class RootWidget(ScreenManager):
