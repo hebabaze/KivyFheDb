@@ -28,6 +28,7 @@ colx=""
 tabx =""
 Xtable=""
 class Connect(Screen):
+    #_______________#
     def db_connect(self):
         self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         with self.Soc:
@@ -37,12 +38,12 @@ class Connect(Screen):
             pks=dill.dumps(pkr)
             Soc.send(pks)
             self.manager.current="main_screen"                
-
+#########################################################################
 class MainScreen(Screen):
-    
+    #_______________#
     def __init__(self, **kw):
         super().__init__(**kw)    
-
+    #_______________#
     def affiche(self,tabx):
         L=""
         for Y in tabx:
@@ -51,7 +52,7 @@ class MainScreen(Screen):
                 L=L+pen
             L=L+"\n"
         self.ids.datashow.text= L
-
+    #_______________#
     def choose_db(self): # fontion de choix de fichier 
         try:
             cmd1 = 'del dbstore/*x.dbx'
@@ -59,7 +60,7 @@ class MainScreen(Screen):
         except:
             print("Clean Folder")
         filechooser.open_file(on_selection=self.handle_selection)
-
+    #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
         print(type(chosenpath))
@@ -73,23 +74,20 @@ class MainScreen(Screen):
         columns=list(rdic.keys())
         print(columns) 
         global colx
-        colx=columns
-             
-
+        colx=columns       
+    #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
         Xtable,self.dbname=encrypt.crypt_table(tabx,self.fname)
         self.ids.datashow.text=str(Xtable.all())
         print(self.dbname)
-
+    #_______________#
     def send_db(self):
             x='3'
             Soc.send(x.encode())
             fname=self.dbname
-            print("crypted db to send",fname)
             SEPARATOR = "~"
             filesize = os.path.getsize(fname)
-            print("filesize",filesize)
             Soc.send(f"{encrypt.rsacrypt(fname)}{SEPARATOR}{filesize}".encode('utf-8'))
             with open(fname, "rb") as f:
                 while True :
@@ -100,6 +98,7 @@ class MainScreen(Screen):
                             bytes_read = f.read(filesize-i)
                             Soc.send(bytes_read)
                     break
+    #_______________#
     def operations(self):
         self.manager.current="operations_screen"
         screen2 = self.manager.get_screen('operations_screen')
@@ -107,6 +106,7 @@ class MainScreen(Screen):
 
 ###############################################################################
 class OperationsScreen(Screen):
+    #_______________#
     def sumf(self):
         chosen_col=self.ids.idinsert.text
         if chosen_col not in colx:
@@ -120,7 +120,24 @@ class OperationsScreen(Screen):
             sum=dill.loads(sum)
             sum=priv_key.decrypt(sum)
             self.ids.opresult.text=f" [+] Resultat de la somme est [{sum}]"
+    
+    def avgf(self):
 
+        chosen_col=self.ids.idinsert.text
+        if chosen_col not in colx:
+            self.ids.opresult.text = "Warning : Choose a valid column name!"
+        else:
+            x='5'
+            Soc.send(x.encode())
+            idg=colx.index(chosen_col)
+            Soc.send(str(idg).encode())
+            avg=Soc.recv(BS)
+            avg=dill.loads(avg)
+            avg=priv_key.decrypt(avg)
+            self.ids.opresult.text=f" [+] Resultat d'AVG {avg}"
+
+
+    #_______________#
     def mulru(self):
         x='60'
         Soc.send(x.encode())
@@ -170,17 +187,17 @@ class OperationsScreen(Screen):
                     self.ids.opresult.text=f"Multiplication n° {j} Result :[{result}]"
                     m1=result
             #################__BreakOut
-                self.ids.opresult.text=f"Product Reslut With Ru Methode :[{result}]"
+                self.ids.opresult.text=f"[Task Completed] Product Reslut With Ru Methode :[{result}]"
                 tab="End"
                 tab=dill.dumps(tab)
                 #tab=zlib.compress(tab)
                 Soc.send(tab)
-                self.ids.opresult.text="Task Completed"
                 return "Completed Task" 
 
-
+######################################################################
 class RootWidget(ScreenManager):
     pass
+
 class MainApp(MDApp):
     def build(self):
         return RootWidget()
