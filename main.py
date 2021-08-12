@@ -26,7 +26,13 @@ Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 class Connect(Screen):
     def db_connect(self):
-        with Soc:
+        self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        with self.Soc:
+            Soc.connect((HOST, PORT))
+            print(f"[+] Connecting to {HOST}:{PORT}")
+            print("[+] Connected.")
+            pks=dill.dumps(pkr)
+            Soc.send(pks)
 
             #pks=dill.dumps(pkr)
             #Soc.send(pks)
@@ -70,13 +76,7 @@ class MainScreen(Screen):
         self.ids.datashow.text=str(X)
         print(self.dbname)
     def send_db(self):
-        Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        with Soc:
-            Soc.connect((HOST, PORT))
-            print(f"[+] Connecting to {HOST}:{PORT}")
-            print("[+] Connected.")
-            pks=dill.dumps(pkr)
-            Soc.send(pks)
+
             x='3'
             Soc.send(x.encode())
             fname=self.dbname
