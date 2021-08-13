@@ -24,9 +24,9 @@ SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 pkr=pub_key.n
-colx=""
-tabx =""
-Xtable=""
+colx="" #list des colonne 
+tabx ="" # Table en claire
+Xtable=""#Table Crypté
 class Connect(Screen):
     #_______________#
     def db_connect(self):
@@ -144,20 +144,17 @@ class OperationsScreen(Screen):
         Soc.send(x.encode())
         chosen_col=self.ids.idinsert.text
         idd=colx.index(chosen_col)
-        L=[] # Pour Stocker Les Valeurs à calculer 
+        T=[] # Pour Stocker Les Valeurs à calculer 
         pkp = paillier.PaillierPublicKey(int(pkr)) #pkr=pub_key.n pour reconstruire le ciphertext
         # Stocker les valeur à calculer 
         for y in range(1,len(Xtable)+1):
             Far=Xtable.get(doc_id=y)
-            L.append(list(Far.values())[idd])
-        P=[paillier.EncryptedNumber(pkp, x, 0) for x in L]
+            T.append(list(Far.values())[idd])
+        P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
+        print(" Russ THIS IS P",P)
         #Decrypter les valeur à traiter
         M=[priv_key.decrypt(x) for x in P]
-        print("from Rusee P_K\n",priv_key)
-        print("Russe THIS IS PKR",pkr)
-        print("Russe PKR TYpe",type(pkr))
-        print("Russe THIS IS PKP ",pkp)
-        print("Russe PKP TYpe",type(pkp))
+
         for x in M: # Check 0 result
             if x==0:
                 self.ids.opresult.text="0 Result Dectected"
@@ -200,7 +197,7 @@ class OperationsScreen(Screen):
                 Soc.send(tab)
                 return "Completed Task"
     def mulog(self):
-        print("from mullog PK",priv_key)
+
         chosen_col=self.ids.idinsert.text
         if chosen_col not in colx:
             self.ids.opresult.text = "Warning : Choose a valid column name!"
@@ -211,17 +208,16 @@ class OperationsScreen(Screen):
             L=[]
             pkg = paillier.PaillierPublicKey(int(pkr))
             for x in range(1,len(tabx)+1):
-                Far=tabx.get(doc_id=x)
+                Far=Xtable.get(doc_id=x)
                 L.append(list(Far.values())[idm])
             P=[paillier.EncryptedNumber(pkg, x, 0) for x in L]
             print("THIS IS P",P)
-            print("LOG from mullog P_K\n",priv_key)
-            print("LOG THIS IS PKR",pkr)
-            print("LOG TYpe",type(pkr))
-            print(" LOG THIS IS PKG ",pkg)
-            print("LOG PKG TYpe",type(pkg))
-            
-            M=[priv_key.decrypt(z) for z in P]
+
+            M=[]
+            for p in P:
+                dp=(priv_key.decrypt(p))
+                M.append(dp)
+                print(dp)
             print("LOG This is M",M)
             for x in M: # Check 0 result
                 if x==0:
@@ -243,7 +239,8 @@ class OperationsScreen(Screen):
                     try:
                         #709.78271 is the largest value I can compute the exp of on my machine
                         rprod=round(math.exp(rprod))
-                        print(f" [+] Resultat produit  est [{rprod}]")
+                        self.ids.opresult.text=f"[Task Completed] Product Reslut With Log Methode :[{rprod}]"
+                    
                     except:
                         print("Input value is greater than allowed limit")
             Lprod="End"
