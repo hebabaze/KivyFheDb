@@ -33,7 +33,8 @@
                     size_hint : 0.15, 0.17 
                     pos_hint: {'center_x':0.5 , 'center_y':1}
                     text:"Connect"
-                    on_press:root.db_connect()
+                    on_press:
+                        root.db_connect()                       
                 MDLabel:
                     halign: "center"
                     theme_text_color: "Custom"

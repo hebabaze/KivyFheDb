@@ -39,13 +39,14 @@ class Connect(Screen):
                 PORT=int(self.ids.Port.text)
                 print(f"host {HOST} port {PORT},type port {type(PORT)}")
                 Soc.connect((HOST, PORT))
-                print(f"[+] Connecting to {HOST}:{PORT}")
+                self.ids.constat.text=f"[+] Succefully Connecting to {HOST}:{PORT}"
                 print("[+] Connected.")
                 pks=dill.dumps(pkr)
                 Soc.send(pks)
-                self.manager.current="main_screen"     
+                self.manager.current="main_screen" 
         except:
-            self.ids.constat.text="Connexion Field Check Server Stat Or input Value"           
+            self.ids.constat.text="Connexion Field Check Server Stat Or input Value"   
+     
 #########################################################################
 class MainScreen(Screen):
     #_______________#
