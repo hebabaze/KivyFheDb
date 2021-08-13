@@ -1,6 +1,6 @@
 <RootWidget>:
-    Connect:
-        name:"connect"
+    #Connect:
+        #name:"connect"
     MainScreen:
         name:"main_screen"
     OperationsScreen
@@ -25,7 +25,6 @@
 
         GridLayout:
             cols:1
-            pos_hint: {'center_x':.5}
             size_hint :0.5,0.5
             pos_hint: {'center_x':0.5 , 'center_y':0.5}
             RelativeLayout            
@@ -46,9 +45,9 @@
 <MainScreen>:
     GridLayout:
         cols :1
-        GridLayout:
+        GridLayout: ##__DataBases Management
             cols:1
-            size_hint :0.5,0.4
+            size_hint :0.5,0.2
             MDLabel:
                 halign: "center"
                 theme_text_color: "Custom"
@@ -58,10 +57,10 @@
                 font_size: "22sp"
         GridLayout:
             cols: 2
-            size_hint :0.50,0.5
+            size_hint :0.50,0.7
             padding: 20,20
             spacing: '15dp','15dp'
-            MDRaisedButton:
+            MDRaisedButton:#________"Choose DataBase"
                 md_bg_color:  1,0.93150, 0.6, 1
                 theme_text_color: "Custom"
                 text_color: app.theme_cls.primary_color
@@ -70,7 +69,7 @@
                 text:"Choose DataBase"
                 on_press:
                     root.choose_db()
-            MDRaisedButton:
+            MDRaisedButton:#______"Crypt DataBase"
                 md_bg_color:  0.9,0.8, 0.6, 1
                 theme_text_color: "Custom"
                 font_size: "18sp"
@@ -79,7 +78,7 @@
                 on_press:
                     root.crypt_db()
                     
-            MDRaisedButton:
+            MDRaisedButton:    #_____"Send Database"
                 md_bg_color:  0.8,0.9, 0.5, 1
                 text:"Send Database"
                 theme_text_color: "Custom"
@@ -87,26 +86,28 @@
                 font_size: "18sp"
                 on_press : 
                     root.send_db()
-            MDRaisedButton:
+            MDRaisedButton:     #"Operations"
                 text:"Operations"
                 size_hint :0.3,0.20
                 theme_text_color: "Custom"
                 font_size: "18sp"
                 on_press : root.operations()
-
+            MDRaisedButton:#________"Crypt Column"
+                md_bg_color:  1,0.93150, 0.6, 1
+                theme_text_color: "Custom"
+                text_color: app.theme_cls.primary_color
+                font_size: "18sp"
+                size_hint :0.3,0.20 
+                text:"Crypt Column"
+                on_press:
+            MDTextField:
+                size_hint :0.3,0.20 
+                id:idinsert0
+                    
         GridLayout:
             cols:1
             padding: 20,20
             spacing: '15dp','15dp'
-            MDLabel:
-                halign: "center"
-                theme_text_color: "Custom"
-                text_color: 0, 0, 1, 1
-                id:labelshow
-                
-            MDTextField:
-                id:datainsert
-                hint_text:'Insert Database name'
             ScrollView:
                 MDTextField:
                     multiline: True
@@ -158,30 +159,31 @@
                         root.avgf()
 
         GridLayout: # PRoduct Label
+            
             size_hint: 0.2,0.2
             cols:1
             RelativeLayout
                 MDLabel:
-                    size_hint :0.8,0.40
+                    size_hint :0.7,0.30
                     text: "Product"
-                    md_bg_color:  0.9,0.8, 0.6, 1
-                    font_size: "24sp"
+                    md_bg_color:  238/255, 162/255, 154/255, 1
+                    font_size: "22sp"
                     halign: "center"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.5}
+                    pos_hint: {'center_x':0.5 , 'center_y':0.38}
 
-        GridLayout: # MUL RUSSE & LOG MULL
+        GridLayout: # MUL RUSSE & LOG MULL            
             size_hint: 0.2,0.1
             cols: 2
-            padding: 80,10
+            
+            padding: 80,0
             spacing: '15dp','0dp'
             RelativeLayout
                 MDRaisedButton:             # MUL RUSSE
                     size_hint :1,0.7
                     md_bg_color:  241/255, 137/255, 115/255, 1
-                    theme_text_color: "Custom"
-                    text_color: app.theme_cls.primary_color
                     font_size: "18sp"
                     text:"Russ Mul"
+                    pos_hint: {'center_x':0.5 , 'center_y':1}
                     on_press:
                         root.mulru()
             RelativeLayout
@@ -191,6 +193,7 @@
                     theme_text_color: "Custom"
                     font_size: "18sp"
                     text:"Log Mul"
+                    pos_hint: {'center_x':0.5 , 'center_y':1}
                     on_press:
                         root.mulog()
 
@@ -210,7 +213,7 @@
                 id: opresult
                 size_hint: 0.3,0.20
                 text: ""
-                md_bg_color:  1,0.93150, 0.6, 1
+                md_bg_color:  181/255, 231/255, 160/255, 1
                 halign: "center"
                 
             

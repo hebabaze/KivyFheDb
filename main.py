@@ -66,6 +66,7 @@ class MainScreen(Screen):
         except:
             print("Clean Folder")
         filechooser.open_file(on_selection=self.handle_selection)
+        self.ids.idinsert0.hint_text = f" Colunmn to crypt {colx}"
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
@@ -77,7 +78,9 @@ class MainScreen(Screen):
         rdic=tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
         global colx
-        colx=columns       
+        colx=columns
+        
+       
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
@@ -104,14 +107,15 @@ class MainScreen(Screen):
     def operations(self):
         self.manager.current="operations_screen"
         screen2 = self.manager.get_screen('operations_screen')
-        screen2.ids.idinsert.hint_text = f" choose colonne to crypt {colx}"
+        screen2.ids.idinsert.hint_text = f"colonne to compute {colx}"
+        
 
 ###############################################################################
 class OperationsScreen(Screen):
     #_______________#
     def sumf(self):
         chosen_col=self.ids.idinsert.text
-        if chosen_col not in colx:
+        if chosen_col not in colx :
             self.ids.opresult.text = "Warning : Choose a valid column name!"
         else :
             x='4'
