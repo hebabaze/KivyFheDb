@@ -18,8 +18,8 @@ from kivymd.uix.label import MDLabel
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager,Screen
 Builder.load_file('design.kv')
-HOST = '192.168.1.105'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+HOST = ''  # The server's hostname or IP address
+PORT = ''        # The port used by the server
 SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,13 +31,21 @@ class Connect(Screen):
     #_______________#
     def db_connect(self):
         self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        with self.Soc:
-            Soc.connect((HOST, PORT))
-            print(f"[+] Connecting to {HOST}:{PORT}")
-            print("[+] Connected.")
-            pks=dill.dumps(pkr)
-            Soc.send(pks)
-            self.manager.current="main_screen"                
+        try :
+            with self.Soc:
+                global HOST
+                HOST=self.ids.Ip.text
+                global PORT
+                PORT=int(self.ids.Port.text)
+                print(f"host {HOST} port {PORT},type port {type(PORT)}")
+                Soc.connect((HOST, PORT))
+                print(f"[+] Connecting to {HOST}:{PORT}")
+                print("[+] Connected.")
+                pks=dill.dumps(pkr)
+                Soc.send(pks)
+                self.manager.current="main_screen"     
+        except:
+            self.ids.constat.text="Connexion Field Check Server Stat Or input Value"           
 #########################################################################
 class MainScreen(Screen):
     #_______________#

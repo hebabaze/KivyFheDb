@@ -6,14 +6,40 @@
     OperationsScreen
         name:"operations_screen"
 <Connect>:
-    GridLayout
+    GridLayout:
         cols:1
-        RelativeLayout            
-            MDRaisedButton:
-                size_hint : 0.14, 0.15 
-                pos_hint: {'center_x':0.5 , 'center_y':0.5}
-                text:"Connect"
-                on_press:root.db_connect()
+        pos_hint: {'center_y':0.4}
+        GridLayout:
+            cols:2
+            padding: 20,20
+            spacing: '15dp','15dp'
+            
+            size_hint :0.5,0.3
+            MDTextField:
+                id:Ip
+                hint_text:'Insert IP'
+
+            MDTextField:
+                id:Port
+                hint_text:'Insert Port'
+
+        GridLayout:
+            cols:1
+            pos_hint: {'center_x':.5}
+            size_hint :0.5,0.5
+            pos_hint: {'center_x':0.5 , 'center_y':0.5}
+            RelativeLayout            
+                MDRaisedButton:
+                    size_hint : 0.15, 0.17 
+                    pos_hint: {'center_x':0.5 , 'center_y':1}
+                    text:"Connect"
+                    on_press:root.db_connect()
+                MDLabel:
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 1, 0, 0, 1
+                    id:constat
+                    font_size: "22sp"
         
 
 <MainScreen>:
