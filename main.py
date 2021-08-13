@@ -37,10 +37,7 @@ class Connect(Screen):
                 HOST=self.ids.Ip.text
                 global PORT
                 PORT=int(self.ids.Port.text)
-                print(f"host {HOST} port {PORT},type port {type(PORT)}")
                 Soc.connect((HOST, PORT))
-                self.ids.constat.text=f"[+] Succefully Connecting to {HOST}:{PORT}"
-                print("[+] Connected.")
                 pks=dill.dumps(pkr)
                 Soc.send(pks)
                 self.manager.current="main_screen" 
@@ -72,16 +69,13 @@ class MainScreen(Screen):
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
-        print(type(chosenpath))
         self.fname=Path(str(selection[0])).name
-        print(self.fname)
         self.db = TinyDB(chosenpath)
         global tabx
         tabx=self.db.table('Hr')
         self.affiche(tabx)
         rdic=tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
-        print(columns) 
         global colx
         colx=columns       
     #_______________#
@@ -89,7 +83,6 @@ class MainScreen(Screen):
         global Xtable
         Xtable,self.dbname=encrypt.crypt_table(tabx,self.fname)
         self.ids.datashow.text=str(Xtable.all())
-        print(self.dbname)
     #_______________#
     def send_db(self):
             x='3'
@@ -148,7 +141,6 @@ class OperationsScreen(Screen):
 
     #_______________#
     def mulru(self):
-        print("from mul PK",priv_key)
         x='60'
         Soc.send(x.encode())
         chosen_col=self.ids.idinsert.text
@@ -160,7 +152,6 @@ class OperationsScreen(Screen):
             Far=Xtable.get(doc_id=y)
             T.append(list(Far.values())[idd])
         P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
-        print(" Russ THIS IS P",P)
         #Decrypter les valeur à traiter
         M=[priv_key.decrypt(x) for x in P]
 
@@ -223,7 +214,7 @@ class OperationsScreen(Screen):
             M=[priv_key.decrypt(x) for x in P]
             for x in M: # Check 0 result
                 if x==0:
-                    print(" Product equal to zéro")
+                    self.ids.opresult.text(" Product equal to zéro")
                     Lprod="End"
                     Lprod=dill.dumps(Lprod)
                     Soc.send(Lprod)
@@ -231,7 +222,6 @@ class OperationsScreen(Screen):
                 else:
                     C=[math.log(e) for e in M]
                     Ce=[pub_key.encrypt(x) for x in C]
-                    print(f"\n {Ce} \n")
                     Lprod=dill.dumps(Ce)
                     Soc.send(Lprod)
                     rprod=Soc.recv(BS)
@@ -244,7 +234,7 @@ class OperationsScreen(Screen):
                         self.ids.opresult.text=f"[Task Completed] Product Reslut With Log Methode :[{rprod}]"
                     
                     except:
-                        print("Input value is greater than allowed limit")
+                        self.ids.opresult.text("Input value is greater than allowed limit")
             Lprod="End"
             Lprod=dill.dumps(Lprod)
             Soc.send(Lprod)
