@@ -17,11 +17,11 @@
             size_hint :0.5,0.3
             MDTextField:
                 id:Ip
-                hint_text:'Insert IP'
+                hint_text:'192.168.1.105'
 
             MDTextField:
                 id:Port
-                hint_text:'Insert Port'
+                hint_text:'4444'
 
         GridLayout:
             cols:1
@@ -139,7 +139,7 @@
             RelativeLayout
                 MDRaisedButton: # Sum
                     size_hint :1,0.7
-                    md_bg_color:  1,0.93150, 0.7, 1
+                    md_bg_color:  0.956,1, 0.824, 1
                     theme_text_color: "Custom"
                     text_color: app.theme_cls.primary_color
                     font_size: "18sp"
@@ -149,8 +149,9 @@
             RelativeLayout
                 MDRaisedButton:#AVG
                     size_hint :1,0.7
-                    md_bg_color:  0.9,0.8, 0.6, 1
+                    md_bg_color:  0.996078431372549,251/255, 216/255, 1
                     theme_text_color: "Custom"
+                    text_color: app.theme_cls.primary_color                    
                     font_size: "18sp"
                     text:"AVG"
                     on_press:
@@ -176,7 +177,7 @@
             RelativeLayout
                 MDRaisedButton:             # MUL RUSSE
                     size_hint :1,0.7
-                    md_bg_color:  1,0.93150, 0.6, 1
+                    md_bg_color:  241/255, 137/255, 115/255, 1
                     theme_text_color: "Custom"
                     text_color: app.theme_cls.primary_color
                     font_size: "18sp"
@@ -186,7 +187,7 @@
             RelativeLayout
                 MDRaisedButton:         # LOG MUL
                     size_hint :1,0.7
-                    md_bg_color:  0.9,0.8, 0.6, 1
+                    md_bg_color:  80/255, 57/255, 76/255, 1
                     theme_text_color: "Custom"
                     font_size: "18sp"
                     text:"Log Mul"
