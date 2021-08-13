@@ -211,14 +211,7 @@ class OperationsScreen(Screen):
                 Far=Xtable.get(doc_id=x)
                 L.append(list(Far.values())[idm])
             P=[paillier.EncryptedNumber(pkg, x, 0) for x in L]
-            print("THIS IS P",P)
-
-            M=[]
-            for p in P:
-                dp=(priv_key.decrypt(p))
-                M.append(dp)
-                print(dp)
-            print("LOG This is M",M)
+            M=[priv_key.decrypt(x) for x in P]
             for x in M: # Check 0 result
                 if x==0:
                     print(" Product equal to zéro")
