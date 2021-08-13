@@ -23,16 +23,20 @@ class Encrypt:
         return x.ciphertext()
     
     
-    def paillierEncr(self,x):      #Crypter les colonnes de types int
+    def paillierEncr(self,x):
+        self.x=x      #Crypter les colonnes de types int
         def transform(self,doc):
-            doc[x]=self.enciph(int(doc[x]))
+            self.doc=doc
+            self.doc[self.x]=self.enciph(int(self.doc[self.x]))
         return transform
 
     def rsaEncr(self,x):    #Crypter les colonnes de types String
- 
+        self.x=x 
         def transform(self,doc):
-            doc[x]=self.rsacrypt(doc[x])
+            self.doc=doc
+            self.doc[self.x]=self.rsacrypt(self.doc[self.x])
         return transform
+
     def crypt_table(self,tabx,fname):
         dbname=fname[:-3]+'x.db'
         dbx=TinyDB(dbname)
@@ -46,4 +50,15 @@ class Encrypt:
                     d[self.rsacrypt(a)]=self.enciph(int(b))
             tabrx.insert(d)
         return(tabrx,dbname)
-    
+    def encrypt_col(self,tabx,columns,e):   # crypter une colonne
+        i=1
+        rdic=tabx.get(doc_id=1)
+        if not str(rdic[columns[e]]).isalpha() :
+            for x in tabx:
+                tabx.update({columns[e]:self.enciph(x[columns[e]])},doc_ids=[i])
+                i+=1
+        else :
+            for x in tabx:
+                tabx.update({columns[e]:self.rsacrypt(x[columns[e]])},doc_ids=[i])
+                i+=1
+        return tabx

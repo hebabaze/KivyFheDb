@@ -86,6 +86,17 @@ class MainScreen(Screen):
         global Xtable
         Xtable,self.dbname=encrypt.crypt_table(tabx,self.fname)
         self.ids.datashow.text=str(Xtable.all())
+    def cryptcolumn(self):
+        #def encrypt(tabx,columns):   # crypter une colonne
+        chosen_col=self.ids.idinsert0.text
+        if chosen_col not in colx :
+            self.ids.datashow.text = "Warning : Choose a valid column name!"
+        else :
+            e=colx.index(chosen_col)
+            global Xtable
+            Xtable=encrypt.encrypt_col(tabx,colx,e)
+            self.ids.datashow.text=str(Xtable.all())
+        
     #_______________#
     def send_db(self):
             x='3'
@@ -103,6 +114,7 @@ class MainScreen(Screen):
                             bytes_read = f.read(filesize-i)
                             Soc.send(bytes_read)
                     break
+
     #_______________#
     def operations(self):
         self.manager.current="operations_screen"

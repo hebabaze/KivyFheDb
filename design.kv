@@ -1,6 +1,6 @@
 <RootWidget>:
-    #Connect:
-        #name:"connect"
+    Connect:
+        name:"connect"
     MainScreen:
         name:"main_screen"
     OperationsScreen
@@ -100,6 +100,7 @@
                 size_hint :0.3,0.20 
                 text:"Crypt Column"
                 on_press:
+                    root.cryptcolumn()
             MDTextField:
                 size_hint :0.3,0.20 
                 id:idinsert0
