@@ -27,6 +27,7 @@ pkr=pub_key.n
 colx="" #list des colonne 
 tabx ="" # Table en claire
 Xtable=""#Table Crypté
+dbname=""
 class Connect(Screen):
     #_______________#
     def db_connect(self):
@@ -70,10 +71,10 @@ class MainScreen(Screen):
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
-        self.fname=Path(str(selection[0])).name
-        self.db = TinyDB(chosenpath)
+        self.fname=Path(str(selection[0])).name # extract db name from path
+        self.db = TinyDB(chosenpath) # upload database
         global tabx
-        tabx=self.db.table('Hr')
+        tabx=self.db.table('Hr')      #upload database table 
         self.affiche(tabx)
         rdic=tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
@@ -84,7 +85,8 @@ class MainScreen(Screen):
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
-        Xtable,self.dbname=encrypt.crypt_table(tabx,self.fname)
+        global dbname
+        Xtable,dbname=encrypt.crypt_table(tabx,self.fname)
         self.ids.datashow.text=str(Xtable.all())
     def cryptcolumn(self):
         #def encrypt(tabx,columns):   # crypter une colonne

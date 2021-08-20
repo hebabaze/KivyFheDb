@@ -38,9 +38,9 @@ class Encrypt:
         return transform
 
     def crypt_table(self,tabx,fname):
-        dbname=fname[:-3]+'x.db'
-        dbx=TinyDB(dbname)
-        tabrx = dbx.table('Dx')
+        dbname=fname[:-3]+'x.db' # Create New DB file
+        dbx=TinyDB(dbname)        # Create Tinydb DB   
+        tabrx = dbx.table('Dx')   # Create New Table in New DB (dbx)
         for x in tabx :
             d={}
             for a,b in x.items() :
@@ -50,7 +50,8 @@ class Encrypt:
                     d[self.rsacrypt(a)]=self.enciph(int(b))
             tabrx.insert(d)
         return(tabrx,dbname)
-    def encrypt_col(self,tabx,columns,e):   # crypter une colonne
+    def encrypt_col(self,tabx,columns,e,fname):   # crypter une colonne
+        dbname=fname[:-3]+'x.db' # Create New DB file
         i=1
         rdic=tabx.get(doc_id=1)
         if not str(rdic[columns[e]]).isalpha() :
