@@ -1,4 +1,5 @@
 import logging
+
 format="%(asctime)s.%(msecs)03d--%(levelname)s : %(message)s"
 logging.basicConfig(format=format,level=logging.INFO,datefmt="%H:%M:%S")
 from tinydb import TinyDB
@@ -41,25 +42,49 @@ class Encrypt:
         dbname=fname[:-3]+'x.db' # Create New DB file
         dbx=TinyDB(dbname)        # Create Tinydb DB   
         tabrx = dbx.table('Dx')   # Create New Table in New DB (dbx)
+        #check Crypted Rows
+        L=[]
+        rdic=tabx.get(doc_id=1)
+        L=[x for x in rdic if len(str(rdic[x]))==128]
+        ####
         for x in tabx :
             d={}
             for a,b in x.items() :
-                if str(b).isalpha():
-                    d[self.rsacrypt(a)]=self.rsacrypt(b)
-                elif not str(b).isalpha() :
-                    d[self.rsacrypt(a)]=self.enciph(int(b))
+                if a in L:
+                    print(f"The Row {a} is aleardy Crypted")
+                else:
+                    if str(b).isalpha():
+                        d[self.rsacrypt(a)]=self.rsacrypt(b)
+                    elif not str(b).isalpha() :
+                        d[self.rsacrypt(a)]=self.enciph(int(b))
             tabrx.insert(d)
         return(tabrx,dbname)
+    
     def encrypt_col(self,tabx,columns,e,fname):   # crypter une colonne
+        
         dbname=fname[:-3]+'x.db' # Create New DB file
+        dby=TinyDB(dbname)  
+        tabrx = dby.table('Dx')
+        L=[]
+        if not tabrx :
+            for x in tabx:
+                tabrx.insert(x)
         i=1
-        rdic=tabx.get(doc_id=1)
-        if not str(rdic[columns[e]]).isalpha() :
-            for x in tabx:
-                tabx.update({columns[e]:self.enciph(x[columns[e]])},doc_ids=[i])
-                i+=1
-        else :
-            for x in tabx:
-                tabx.update({columns[e]:self.rsacrypt(x[columns[e]])},doc_ids=[i])
-                i+=1
-        return tabx
+        rdic=tabrx.get(doc_id=1)
+        print(f"rdic ==> {rdic}")
+        L=[x for x in rdic if len(str(rdic[x])) > 64  ]
+        print("Crypted Columns ",L)
+        
+        if columns[e] in L:
+            print(f"The Row {columns[e]} is aleardy Crypted")
+        elif columns[e] not in L :
+            if not str(rdic[columns[e]]).isalpha() :
+                for x in tabrx:
+                    tabrx.update({columns[e]:self.enciph(x[columns[e]])},doc_ids=[i])
+                    i+=1
+            else :
+                for x in tabrx:
+                    tabrx.update({columns[e]:self.rsacrypt(x[columns[e]])},doc_ids=[i])
+                    i+=1
+        return tabrx,dbname
+

@@ -14,7 +14,7 @@ from datetime import datetime
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivymd.app import MDApp
-from kivymd.uix.label import MDLabel
+
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager,Screen
 Builder.load_file('design.kv')
@@ -28,6 +28,7 @@ colx="" #list des colonne
 tabx ="" # Table en claire
 Xtable=""#Table Crypté
 dbname=""
+#CryptColumn=[]
 class Connect(Screen):
     #_______________#
     def db_connect(self):
@@ -89,6 +90,8 @@ class MainScreen(Screen):
         Xtable,dbname=encrypt.crypt_table(tabx,self.fname)
         self.ids.datashow.text=str(Xtable.all())
     def cryptcolumn(self):
+        print("pub_key" ,len(str(pub_key)))
+        print("priv_key" ,len(str(priv_key)))
         #def encrypt(tabx,columns):   # crypter une colonne
         chosen_col=self.ids.idinsert0.text
         if chosen_col not in colx :
@@ -96,7 +99,10 @@ class MainScreen(Screen):
         else :
             e=colx.index(chosen_col)
             global Xtable
-            Xtable=encrypt.encrypt_col(tabx,colx,e)
+            global dbname
+
+            
+            Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname)
             self.ids.datashow.text=str(Xtable.all())
         
     #_______________#
