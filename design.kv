@@ -1,11 +1,15 @@
 #! from kivymd.uix.label import MDLabel
 <RootWidget>:
-    Connect:
-        name:"connect"
+    #Connect:
+    #    name:"connect"
     MainScreen:
         name:"main_screen"
+    ShowDataTable:
+        name:"show_data_table"
+        id:sdt
     OperationsScreen
         name:"operations_screen"
+###############################################        
 <Connect>:
     GridLayout:
         cols:1
@@ -42,7 +46,7 @@
                     id:constat
                     font_size: "22sp"
         
-
+####################################################
 <MainScreen>:
     GridLayout:
         cols :1
@@ -123,21 +127,69 @@
                     text_size: self.width, None
                     size_hint_y: None
                     #height: self.texture_size[1]
- 
+            RelativeLayout            
+                MDRaisedButton:     #"Show DataTables"
+                    size_hint : 0.18, 0.17 
+                    pos_hint: {'center_x':0.5 , 'center_y':0.5}
+                    text:"Show DataTables"
+                    on_press:
+                        root.showdt()
 ##########################################
+<ShowDataTable> :
+    GridLayout:
+        cols:2
+        GridLayout:
+            cols:1
+            id:sdtleft
+            size_hint :0.8,1
+            padding: 20,10            
+            MDIconButton:
+                icon: "imgstore/back2.png"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_press:root.onback()
+
+        GridLayout:
+            cols: 1
+            id:right
+            size_hint :0.3,0.5
+            padding: 20,10
+            spacing: '15dp','10dp'
+            MDRaisedButton:#______"ADD"
+                md_bg_color:  0.9,0.8, 0.6, 1
+                theme_text_color: "Custom"
+                font_size: "18sp"
+                size_hint :0.3,0.20 
+                text:"Add Record"
+                on_press:
+            MDRaisedButton:#______"Edit"
+                md_bg_color:  0.9,0.8, 0.6, 1
+                theme_text_color: "Custom"
+                font_size: "18sp"
+                size_hint :0.3,0.20 
+                text:"Edit DataBase"
+                on_press:
+
+
+############################################
 <OperationsScreen>:
 
     GridLayout:
         cols :1
         GridLayout:
-            padding: 80,10
-            spacing: '20dp','15dp'
             cols:1
-            size_hint: 0.2,0.1
-            RelativeLayout:
-                MDTextField: # Insert Text
-                    id:idinsert
-                    size_hint :1,0.9
+            size_hint: 0.2,0.2
+            padding: 20,10
+            spacing: '20dp','15dp'
+            MDIconButton:
+                icon: "imgstore/lefth.png"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                on_press:root.onback()
+
+            #RelativeLayout:
+
+            MDTextField: # Insert Text
+                id:idinsert
+                size_hint :0.8,0.5
 
         GridLayout: # SUM and AVG
             size_hint: 0.2,0.1

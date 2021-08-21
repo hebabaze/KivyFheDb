@@ -6,6 +6,7 @@ from encryptFunctions import *
 from encryptFunctions import Encrypt
 encrypt=Encrypt()
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+from kivy.core.window import Window
 from kivymd.uix.datatables import MDDataTable
 from kivy.metrics import dp
 from plyer import filechooser
@@ -54,27 +55,7 @@ class Connect(Screen):
      
 #########################################################################
 class MainScreen(Screen):
-    #_______________#
-    def crtab(self,tab,mtrc):
-        global table
-        table=MDDataTable(
-            pos_hint={'center_x':0.5,'center_y':0.5},
-            size_hint=(0.9,0.6),
-            check=True,
-            use_pagination=True,
-            column_data=[(str(x),dp(mtrc))for x in colx],
-            row_data=[tuple(x.values()) for x in tab]
-            )
-        self.ids.sabah.add_widget(table)
-        table.bind(on_check_press=self.checked)
-        table.bind(on_row_press=self.row_checked)
-    #function for check presses
-    def checked(self,instance_table,current_row):
-        print(instance_table,current_row)
-    #Function for row presses
-    def row_checked(self,instance_table,instance_row):
-        print(instance_table,instance_row)
-        pass
+
     #_______________#
     def affiche(self,tabx):
         L=""
@@ -105,19 +86,24 @@ class MainScreen(Screen):
         columns=list(rdic.keys())
         global colx
         colx=columns
+        """
         try:
             self.ids.sabah.remove_widget(table)
         except:
             pass
-        self.crtab(tabx,30)
+        """
+        #ShowDataTable.crtab(self,tabx,30)
+        self.ids.datashow.text="Data base Loeded"
+
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
         global dbname
         Xtable,dbname=encrypt.crypt_table(tabx,self.fname,Xtable)
         #self.ids.datashow.text=""
-        self.ids.sabah.remove_widget(table)
-        self.crtab(Xtable,60)
+        #self.ids.sabah.remove_widget(table)
+        #self.crtab(Xtable,60)
+        self.ids.datashow.text="Data base Crypted succefully"
         # self.ids.datashow.text=str(Xtable.all())
     def cryptcolumn(self):
         print("pub_key" ,len(str(pub_key)))
@@ -131,9 +117,11 @@ class MainScreen(Screen):
             global Xtable
             global dbname
             Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname)
-            self.ids.sabah.remove_widget(table)
+            #self.ids.sabah.remove_widget(table)
             self.crtab(Xtable,60)
+            self.ids.datashow.text=f" column [{chosen_col} crypted succefully]"
             #self.ids.datashow.text=str(Xtable.all())
+            
         
     #_______________#
     def send_db(self):
@@ -156,10 +144,39 @@ class MainScreen(Screen):
     #_______________#
     def operations(self):
         self.manager.current="operations_screen"
-        screen2 = self.manager.get_screen('operations_screen')
-        screen2.ids.idinsert.hint_text = f"colonne to compute {colx}"
-        
-
+        screen3 = self.manager.get_screen('operations_screen')
+        screen3.ids.idinsert.hint_text = f"colonne to compute {colx}"
+    def showdt(self) :
+        self.manager.current="show_data_table"
+        screen2 = self.manager.get_screen('show_data_table')
+        screen2.crtab(tabx,30)
+#############################################################################        
+class ShowDataTable(Screen):
+    #_______________#
+    def crtab(self,tab,mtrc):
+        global table
+        table=MDDataTable(
+            pos_hint={'center_x':0.5,'center_y':0.5},
+            size_hint=(0.9,0.6),
+            check=True,
+            use_pagination=True,
+            rows_num=4,
+            pagination_menu_height='100dp',
+            column_data=[(str(x),dp(mtrc))for x in colx],
+            row_data=[tuple(x.values()) for x in tab]
+            )
+        self.ids.sdtleft.add_widget(table)
+        table.bind(on_check_press=self.checked)
+        table.bind(on_row_press=self.row_checked)
+    #function for check presses
+    def checked(self,instance_table,current_row):
+        print(instance_table,current_row)
+    #Function for row presses
+    def row_checked(self,instance_table,instance_row):
+        print(instance_table,instance_row)
+        pass
+    def onback(self):
+        self.manager.current="main_screen"
 ###############################################################################
 class OperationsScreen(Screen):
     #_______________#
@@ -293,7 +310,8 @@ class OperationsScreen(Screen):
             Lprod=dill.dumps(Lprod)
             Soc.send(Lprod)
             return ("Log Mul Completed")
-
+    def onback(self):
+        self.manager.current="main_screen"
 
 ######################################################################
 class RootWidget(ScreenManager):
