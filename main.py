@@ -61,6 +61,7 @@ class MainScreen(Screen):
             pos_hint={'center_x':0.5,'center_y':0.5},
             size_hint=(0.9,0.6),
             check=True,
+            use_pagination=True,
             column_data=[(str(x),dp(mtrc))for x in colx],
             row_data=[tuple(x.values()) for x in tab]
             )
