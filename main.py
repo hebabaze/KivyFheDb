@@ -6,6 +6,8 @@ from encryptFunctions import *
 from encryptFunctions import Encrypt
 encrypt=Encrypt()
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+from kivymd.uix.datatables import MDDataTable
+from kivy.metrics import dp
 from plyer import filechooser
 from kivy.core.image import Image
 import json,glob,random
@@ -14,9 +16,9 @@ from datetime import datetime
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivymd.app import MDApp
-
+from kivymd.uix.screen import Screen
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager,Screen
+from kivy.uix.screenmanager import ScreenManager
 Builder.load_file('design.kv')
 HOST = ''  # The server's hostname or IP address
 PORT = ''        # The port used by the server
@@ -28,6 +30,7 @@ colx="" #list des colonne
 tabx ="" # Table en claire
 Xtable=""#Table Crypté
 dbname=""
+table =""
 #CryptColumn=[]
 class Connect(Screen):
     #_______________#
@@ -36,9 +39,12 @@ class Connect(Screen):
         try :
             with self.Soc:
                 global HOST
-                HOST=self.ids.Ip.text
+                HOST="192.168.1.107"
+                #HOST="135.181.108.235"
+                #HOST=self.ids.Ip.text
                 global PORT
-                PORT=int(self.ids.Port.text)
+                PORT=65432
+                #PORT=int(self.ids.Port.text)
                 Soc.connect((HOST, PORT))
                 pks=dill.dumps(pkr)
                 Soc.send(pks)
@@ -49,8 +55,25 @@ class Connect(Screen):
 #########################################################################
 class MainScreen(Screen):
     #_______________#
-    def __init__(self, **kw):
-        super().__init__(**kw)    
+    def crtab(self,tab,mtrc):
+        global table
+        table=MDDataTable(
+            pos_hint={'center_x':0.5,'center_y':0.5},
+            size_hint=(0.9,0.6),
+            check=True,
+            column_data=[(str(x),dp(mtrc))for x in colx],
+            row_data=[tuple(x.values()) for x in tab]
+            )
+        self.ids.sabah.add_widget(table)
+        table.bind(on_check_press=self.checked)
+        table.bind(on_row_press=self.row_checked)
+    #function for check presses
+    def checked(self,instance_table,current_row):
+        print(instance_table,current_row)
+    #Function for row presses
+    def row_checked(self,instance_table,instance_row):
+        print(instance_table,instance_row)
+        pass
     #_______________#
     def affiche(self,tabx):
         L=""
@@ -59,7 +82,7 @@ class MainScreen(Screen):
                 pen=str(f" {x} : {y} "+'| ')
                 L=L+pen
             L=L+"\n"
-        self.ids.datashow.text= L
+        #self.ids.datashow.text= L
     #_______________#
     def choose_db(self): # fontion de choix de fichier 
         try:
@@ -81,14 +104,20 @@ class MainScreen(Screen):
         columns=list(rdic.keys())
         global colx
         colx=columns
-        
-       
+        try:
+            self.ids.sabah.remove_widget(table)
+        except:
+            pass
+        self.crtab(tabx,30)
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
         global dbname
-        Xtable,dbname=encrypt.crypt_table(tabx,self.fname)
-        self.ids.datashow.text=str(Xtable.all())
+        Xtable,dbname=encrypt.crypt_table(tabx,self.fname,Xtable)
+        #self.ids.datashow.text=""
+        self.ids.sabah.remove_widget(table)
+        self.crtab(Xtable,60)
+        # self.ids.datashow.text=str(Xtable.all())
     def cryptcolumn(self):
         print("pub_key" ,len(str(pub_key)))
         print("priv_key" ,len(str(priv_key)))
@@ -100,16 +129,16 @@ class MainScreen(Screen):
             e=colx.index(chosen_col)
             global Xtable
             global dbname
-
-            
             Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname)
-            self.ids.datashow.text=str(Xtable.all())
+            self.ids.sabah.remove_widget(table)
+            self.crtab(Xtable,60)
+            #self.ids.datashow.text=str(Xtable.all())
         
     #_______________#
     def send_db(self):
             x='3'
             Soc.send(x.encode())
-            fname=self.dbname
+            fname=dbname
             SEPARATOR = "~"
             filesize = os.path.getsize(fname)
             Soc.send(f"{encrypt.rsacrypt(fname)}{SEPARATOR}{filesize}".encode('utf-8'))
@@ -271,7 +300,8 @@ class RootWidget(ScreenManager):
 
 class MainApp(MDApp):
     def build(self):
+        self.theme_cls.theme_style="Light"
+        self.theme_cls.primary_palette="BlueGray"
         return RootWidget()
-
 if __name__ == "__main__":
     MainApp().run()

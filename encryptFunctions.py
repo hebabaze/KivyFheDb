@@ -1,5 +1,4 @@
 import logging
-
 format="%(asctime)s.%(msecs)03d--%(levelname)s : %(message)s"
 logging.basicConfig(format=format,level=logging.INFO,datefmt="%H:%M:%S")
 from tinydb import TinyDB
@@ -38,20 +37,21 @@ class Encrypt:
             self.doc[self.x]=self.rsacrypt(self.doc[self.x])
         return transform
 
-    def crypt_table(self,tabx,fname):
+    def crypt_table(self,tabx,fname,Xtable):
+        print("Crypt all Data")
         dbname=fname[:-3]+'x.db' # Create New DB file
         dbx=TinyDB(dbname)        # Create Tinydb DB   
         tabrx = dbx.table('Dx')   # Create New Table in New DB (dbx)
-        #check Crypted Rows
-        L=[]
-        rdic=tabx.get(doc_id=1)
-        L=[x for x in rdic if len(str(rdic[x]))==128]
-        ####
+        if Xtable :
+            tabx=Xtable
+            print(" This is new TaBx",tabx)
         for x in tabx :
             d={}
             for a,b in x.items() :
-                if a in L:
+                if len(str(b)) >64 :
+                    print("Crypted item ",b)
                     print(f"The Row {a} is aleardy Crypted")
+                    d[self.rsacrypt(a)]=b
                 else:
                     if str(b).isalpha():
                         d[self.rsacrypt(a)]=self.rsacrypt(b)
@@ -87,4 +87,3 @@ class Encrypt:
                     tabrx.update({columns[e]:self.rsacrypt(x[columns[e]])},doc_ids=[i])
                     i+=1
         return tabrx,dbname
-
