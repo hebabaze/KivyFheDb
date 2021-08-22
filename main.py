@@ -1,11 +1,10 @@
+import socket, os,math
+os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 from kivy.clock import Clock
 Clock.max_iteration = 20
-from logging import root
-import socket, os,math
 from encryptFunctions import *
 from encryptFunctions import Encrypt
-encrypt=Encrypt()
-os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+
 from kivymd.uix.datatables import MDDataTable
 from kivy.metrics import dp
 from plyer import filechooser
@@ -26,6 +25,7 @@ tabx ="" # Table en claire
 Xtable=""#Table Crypté
 dbname=""
 table =""
+encrypt=Encrypt()
 #CryptColumn=[]
 class Connect(Screen):
     #_______________#
@@ -218,6 +218,7 @@ class OperationsScreen(Screen):
         P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
         #Decrypter les valeur à traiter
         M=[priv_key.decrypt(x) for x in P]
+        print("The M list ",M)
         for x in M: # Check 0 result
             if x==0:
                 self.ids.opresult.text="0 Result Dectected"
@@ -230,9 +231,10 @@ class OperationsScreen(Screen):
         for i in range(0,len(M)-1):
             tab=[]
             m2=M[i+1]
+            print("the new m2 valuer from list",m2)
             while m1>0:
                 if m1%2==1 :
-                    print("and this m2",m2)
+                    print("in While ..this m2",m2)
                     e2=pub_key.encrypt(m2)
                     tab.append(e2)
                 m1=m1//2
@@ -246,8 +248,10 @@ class OperationsScreen(Screen):
             result=dill.loads(result)
         ##################_____Decrypt
             result=priv_key.decrypt(result)
-            self.ids.opresult.text=f"Multiplication n° {j} Result :[{result}]"
+            #m1=m2
+            print(f" the result for {m1} and {M[i+1]} = {result}")
             m1=result
+            
     #################__BreakOut
         self.ids.opresult.text=f"[Task Completed] Product Reslut With Ru Methode :[{result}]"
         tab="End"

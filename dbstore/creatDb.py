@@ -12,7 +12,7 @@ cmd1 = 'del *x.db'
 os.system(cmd)
 os.system(cmd1)
 def rentable() :
-  dbt = TinyDB('ISTAAAA.db')
+  dbt = TinyDB('ISTA.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
   for i in tqdm(range(1,21),unit_divisor=1,desc=f"Creating mydb.db..",colour= 'Blue'):
