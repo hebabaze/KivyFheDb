@@ -1,4 +1,4 @@
-import socket, os,math
+import socket, os,math,time
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 from kivy.clock import Clock
 Clock.max_iteration = 20
@@ -177,9 +177,10 @@ class ShowDataTable(Screen):
 class OperationsScreen(Screen):
     #_______________#
     def sumf(self):
+        start=time.time()
         chosen_col=self.ids.idinsert.text
         if chosen_col not in colx :
-            self.ids.opresult.text = "Warning : Choose a valid column name!"
+            self.ids.lresult.text = "Warning : Choose a valid column name!"
         else :
             x='4'
             Soc.send(x.encode())
@@ -188,12 +189,14 @@ class OperationsScreen(Screen):
             sum=Soc.recv(BS)
             sum=dill.loads(sum)
             sum=priv_key.decrypt(sum)
-            self.ids.opresult.text=f" [+] Resultat de la somme est [{sum}]"
-    
+            self.ids.lresult.text=f" [+] Sum Result : \n  [{sum}]"
+        endt=(time.time() - start)*1000
+        self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
     def avgf(self):
+        start=time.time()
         chosen_col=self.ids.idinsert.text
         if chosen_col not in colx:
-            self.ids.opresult.text = "Warning : Choose a valid column name!"
+            self.ids.lresult.text = "Warning : Choose a valid column name!"
         else:
             x='5'
             Soc.send(x.encode())
@@ -202,9 +205,12 @@ class OperationsScreen(Screen):
             avg=Soc.recv(BS)
             avg=dill.loads(avg)
             avg=priv_key.decrypt(avg)
-            self.ids.opresult.text=f" [+] Resultat d'AVG {avg}"
+            self.ids.lresult.text=f" [+] AVG Result : \n {avg}"
+        endt=(time.time() - start)*1000
+        self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "            
     #_______________#
     def mulru(self):
+        start=time.time()
         x='60'
         Soc.send(x.encode())
         chosen_col=self.ids.idinsert.text
@@ -221,7 +227,7 @@ class OperationsScreen(Screen):
         print("The M list ",M)
         for x in M: # Check 0 result
             if x==0:
-                self.ids.opresult.text="0 Result Dectected"
+                self.ids.lresult.text="0 Result Dectected"
                 tab="End"
                 tab=dill.dumps(tab)
                 Soc.send(tab)
@@ -253,17 +259,18 @@ class OperationsScreen(Screen):
             m1=result
             
     #################__BreakOut
-        self.ids.opresult.text=f"[Task Completed] Product Reslut With Ru Methode :[{result}]"
+        self.ids.lresult.text=f"Ru_mul Result : \n [{result}]"
         tab="End"
         tab=dill.dumps(tab)
-        #tab=zlib.compress(tab)
         Soc.send(tab)
+        endt=(time.time() - start)*1000
+        self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
         return "Completed Task"
     def mulog(self):
-
+        start=time.time()
         chosen_col=self.ids.idinsert.text
         if chosen_col not in colx:
-            self.ids.opresult.text = "Warning : Choose a valid column name!"
+            self.ids.lresult.text = "Warning : Choose a valid column name!"
         else :
             x='6'
             Soc.send(x.encode())
@@ -277,7 +284,7 @@ class OperationsScreen(Screen):
             M=[priv_key.decrypt(x) for x in P]
             for x in M: # Check 0 result
                 if x==0:
-                    self.ids.opresult.text(" Product equal to zéro")
+                    self.ids.lresult.text(" Product equal to zéro")
                     Lprod="End"
                     Lprod=dill.dumps(Lprod)
                     Soc.send(Lprod)
@@ -294,12 +301,14 @@ class OperationsScreen(Screen):
                     try:
                         #709.78271 is the largest value I can compute the exp of on my machine
                         rprod=round(math.exp(rprod))
-                        self.ids.opresult.text=f"[Task Completed] Product Reslut With Log Methode :[{rprod}]"
+                        self.ids.lresult.text=f"Log_mul Result : \n [{rprod}]"
                     except:
-                        self.ids.opresult.text("Input value is greater than allowed limit")
+                        self.ids.lresult.text("Input value is greater than allowed limit")
             Lprod="End"
             Lprod=dill.dumps(Lprod)
             Soc.send(Lprod)
+            endt=(time.time() - start)*1000
+            self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
             return ("Log Mul Completed")
     def onback(self):
         self.manager.current="main_screen"

@@ -170,111 +170,109 @@
 
 
 ############################################
-<OperationsScreen>:
 
+<OperationsScreen>:
     GridLayout:
         cols :1
-        GridLayout:
-            cols:1
-            size_hint: 0.2,0.2
-            padding: 20,10
-            spacing: '20dp','15dp'
-            MDIconButton:
-                icon: "imgstore/lefth.png"
-                pos_hint: {"center_x": .5, "center_y": .5}
-                on_press:root.onback()
-
-            #RelativeLayout:
-
+        padding: 20,20
+        spacing: '15dp','15dp'
+        RelativeLayout:
             MDTextField: # Insert Text
                 id:idinsert
-                size_hint :0.8,0.5
+                size_hint :0.2,0.2
+                halign: "center"
+                valign : "midle"
+                pos_hint: {'center_x':0.7 , 'center_y':0.8}
+            MDLabel: #Elapsed Time
+                text: "Elapsed Time"
+                id : ltime
+                md_bg_color:  255/255,255/255,255/255, 1
+                pos_hint: {'center_x':.61 , 'center_y':.6}
+                size_hint: 0.42,0.13
+                font_size: "16sp"           
+                halign: "center"
+                text_color: 0, 0, 1, 1
+            MDIcon:
+                halign: "center"
+                icon: "clock"
+                pos_hint: {'center_x':.77 , 'center_y':.6}
+                user_font_size: "99sp"
+            MDLabel:#lresult
+                text: "Operation Result"
+                id: lresult
+                pos_hint: {'center_x':0.61 , 'center_y':0.4}
+                size_hint: 0.42,0.13
+                md_bg_color:  181/255, 231/255, 160/255, 1
+                halign: "center" 
+                size: self.texture_size
+                font_size: "18sp" 
+###############################################################################################
+    MDNavigationDrawer :
+        id : nav_drawer
+        orientation: 'vertical'
+        padding: "20dp","20dp"
+        spacing: '15dp'
+        RelativeLayout:
+            MDRaisedButton: # Sum
+                text:"Sum"
+                pos_hint: {'center_x':0.5 , 'center_y':0.6}
+                size_hint: 0.7,0.2
+                md_bg_color:  0.956,1, 0.824, 1
+                text_color:app.theme_cls.primary_color
+                font_size: "20sp" 
+                on_press:root.sumf()
+            MDRaisedButton:#AVG
+                text:"AVG"
+                pos_hint: {'center_x':0.5 , 'center_y':0.33}
+                size_hint: 0.7,0.2            
+                md_bg_color:  0.996078431372549,251/255, 216/255, 1
+                theme_text_color: "Custom"
+                text_color: app.theme_cls.primary_color                    
+                font_size: "20sp" 
+                on_press:root.avgf()
 
-        GridLayout: # SUM and AVG
-            size_hint: 0.2,0.1
-            cols:2
-            padding: 80,10
-            spacing: '20dp','15dp'
-            RelativeLayout
-                MDRaisedButton: # Sum
-                    size_hint :1,0.7
-                    md_bg_color:  0.956,1, 0.824, 1
-                    theme_text_color: "Custom"
-                    text_color: app.theme_cls.primary_color
-                    font_size: "18sp"
-                    text:"Sum"
-                    on_press:
-                        root.sumf()
-            RelativeLayout
-                MDRaisedButton:#AVG
-                    size_hint :1,0.7
-                    md_bg_color:  0.996078431372549,251/255, 216/255, 1
-                    theme_text_color: "Custom"
-                    text_color: app.theme_cls.primary_color                    
-                    font_size: "18sp"
-                    text:"AVG"
-                    on_press:
-                        root.avgf()
-
-        GridLayout: # PRoduct Label
-            
-            size_hint: 0.2,0.2
-            cols:1
+        ScrollView:
             RelativeLayout
                 MDLabel:
-                    size_hint :0.7,0.30
+                    pos_hint: {'center_x':0.5 , 'center_y':0.9}
+                    size_hint: 0.7,0.2    
                     text: "Product"
+                    halign : "center"
+                    height: self.texture_size[1]
                     md_bg_color:  238/255, 162/255, 154/255, 1
-                    font_size: "22sp"
-                    halign: "center"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.38}
-
-        GridLayout: # MUL RUSSE & LOG MULL            
-            size_hint: 0.2,0.1
-            cols: 2
-            
-            padding: 80,0
-            spacing: '15dp','0dp'
-            RelativeLayout
-                MDRaisedButton:             # MUL RUSSE
-                    size_hint :1,0.7
-                    md_bg_color:  241/255, 137/255, 115/255, 1
-                    font_size: "18sp"
+                MDRaisedButton:
                     text:"Russ Mul"
-                    pos_hint: {'center_x':0.5 , 'center_y':1}
-                    on_press:
+                    pos_hint: {'center_x':0.5 , 'center_y':.6}
+                    size_hint: 0.7,0.2                
+                    md_bg_color:  241/255, 137/255, 115/255, 1
+                    font_size: "20sp"
+                    on_press: 
                         root.mulru()
-            RelativeLayout
-                MDRaisedButton:         # LOG MUL
-                    size_hint :1,0.7
+                        print("Hello==============")
+                MDRaisedButton:
+                    text:"Log Mul"
+                    pos_hint: {'center_x':0.5 , 'center_y':.3}
+                    size_hint: 0.7,0.2                 
                     md_bg_color:  80/255, 57/255, 76/255, 1
                     theme_text_color: "Custom"
-                    font_size: "18sp"
-                    text:"Log Mul"
-                    pos_hint: {'center_x':0.5 , 'center_y':1}
-                    on_press:
+                    
+                    font_size: "20sp"
+                    on_press: 
                         root.mulog()
+                        print("Hello==============")
+################################################
+    GridLayout:
+        cols :1
+        padding: 20,20
+        spacing: '15dp','15dp'
+        MDToolbar:
+            title: 'Operations'
+            left_action_items: [['menu', lambda x: nav_drawer.set_state('toggle')]]
+            elevation:15
+        
+        ############################
+             
 
-        GridLayout:#_________________Show Result Labels
-            size_hint: 0.2,0.2
-            padding: 20,20
-            spacing: '15dp','15dp'
-            cols:1
-            MDLabel:
-                size_hint: 0.3,0.20
-                font_size: "18sp"           
-                text: "Result"
-                halign: "center"
-                md_bg_color:  0.9,0.8, 0.6, 1
-                font_size: "24sp"
-            MDLabel:
-                id: opresult
-                size_hint: 0.3,0.20
-                text: ""
-                md_bg_color:  181/255, 231/255, 160/255, 1
-                halign: "center"
-                
-            
 
 
 
