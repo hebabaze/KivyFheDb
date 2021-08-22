@@ -6,16 +6,10 @@ from encryptFunctions import *
 from encryptFunctions import Encrypt
 encrypt=Encrypt()
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
-from kivy.core.window import Window
 from kivymd.uix.datatables import MDDataTable
 from kivy.metrics import dp
 from plyer import filechooser
-from kivy.core.image import Image
-import json,glob,random
 from pathlib import Path
-from datetime import datetime
-from kivy.uix.image import Image
-from kivy.uix.behaviors import ButtonBehavior
 from kivymd.app import MDApp
 from kivymd.uix.screen import Screen
 from kivy.lang import Builder
@@ -86,13 +80,6 @@ class MainScreen(Screen):
         columns=list(rdic.keys())
         global colx
         colx=columns
-        """
-        try:
-            self.ids.sabah.remove_widget(table)
-        except:
-            pass
-        """
-        #ShowDataTable.crtab(self,tabx,30)
         self.ids.datashow.text="Data base Loeded"
 
     #_______________#
@@ -100,15 +87,10 @@ class MainScreen(Screen):
         global Xtable
         global dbname
         Xtable,dbname=encrypt.crypt_table(tabx,self.fname,Xtable)
-        #self.ids.datashow.text=""
-        #self.ids.sabah.remove_widget(table)
-        #self.crtab(Xtable,60)
-        self.ids.datashow.text="Data base Crypted succefully"
-        # self.ids.datashow.text=str(Xtable.all())
+        self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
     def cryptcolumn(self):
         print("pub_key" ,len(str(pub_key)))
         print("priv_key" ,len(str(priv_key)))
-        #def encrypt(tabx,columns):   # crypter une colonne
         chosen_col=self.ids.idinsert0.text
         if chosen_col not in colx :
             self.ids.datashow.text = "Warning : Choose a valid column name!"
@@ -117,12 +99,8 @@ class MainScreen(Screen):
             global Xtable
             global dbname
             Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname)
-            #self.ids.sabah.remove_widget(table)
-            self.crtab(Xtable,60)
             self.ids.datashow.text=f" column [{chosen_col} crypted succefully]"
-            #self.ids.datashow.text=str(Xtable.all())
-            
-        
+
     #_______________#
     def send_db(self):
             x='3'
@@ -149,7 +127,15 @@ class MainScreen(Screen):
     def showdt(self) :
         self.manager.current="show_data_table"
         screen2 = self.manager.get_screen('show_data_table')
-        screen2.crtab(tabx,30)
+        try:
+            screen2.ids.sdtleft.remove_widget(table)
+        except:
+            pass
+        if Xtable:
+            screen2.crtab(Xtable,60)
+        else:
+            screen2.crtab(tabx,30)
+        
 #############################################################################        
 class ShowDataTable(Screen):
     #_______________#
@@ -165,6 +151,10 @@ class ShowDataTable(Screen):
             column_data=[(str(x),dp(mtrc))for x in colx],
             row_data=[tuple(x.values()) for x in tab]
             )
+        try:
+            self.ids.sdtleft.remove_widget(table)
+        except:
+            pass
         self.ids.sdtleft.add_widget(table)
         table.bind(on_check_press=self.checked)
         table.bind(on_row_press=self.row_checked)
