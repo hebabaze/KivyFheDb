@@ -86,7 +86,11 @@ class MainScreen(Screen):
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
         global dbname
-        Xtable,dbname=encrypt.crypt_table(tabx,self.fname,Xtable)
+        try:
+            Xtable,dbname=encrypt.crypt_table(tabx,self.fname,Xtable,dbname)
+        except:
+            self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
+
         self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
     def cryptcolumn(self):
         print("pub_key" ,len(str(pub_key)))
@@ -98,7 +102,10 @@ class MainScreen(Screen):
             e=colx.index(chosen_col)
             global Xtable
             global dbname
-            Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname)
+            try:
+                Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname,dbname)
+            except:
+                self.ids.datashow.text=f"Warning !.. Column [{chosen_col} Aleardy crypted ]"
             self.ids.datashow.text=f" column [{chosen_col} crypted succefully]"
 
     #_______________#
@@ -118,7 +125,6 @@ class MainScreen(Screen):
                             bytes_read = f.read(filesize-i)
                             Soc.send(bytes_read)
                     break
-
     #_______________#
     def operations(self):
         self.manager.current="operations_screen"
@@ -185,7 +191,6 @@ class OperationsScreen(Screen):
             self.ids.opresult.text=f" [+] Resultat de la somme est [{sum}]"
     
     def avgf(self):
-
         chosen_col=self.ids.idinsert.text
         if chosen_col not in colx:
             self.ids.opresult.text = "Warning : Choose a valid column name!"
@@ -198,8 +203,6 @@ class OperationsScreen(Screen):
             avg=dill.loads(avg)
             avg=priv_key.decrypt(avg)
             self.ids.opresult.text=f" [+] Resultat d'AVG {avg}"
-
-
     #_______________#
     def mulru(self):
         x='60'
@@ -215,7 +218,6 @@ class OperationsScreen(Screen):
         P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
         #Decrypter les valeur à traiter
         M=[priv_key.decrypt(x) for x in P]
-
         for x in M: # Check 0 result
             if x==0:
                 self.ids.opresult.text="0 Result Dectected"
@@ -223,40 +225,36 @@ class OperationsScreen(Screen):
                 tab=dill.dumps(tab)
                 Soc.send(tab)
                 return "Zéro Result Detected!.."
-            else:
-                i=0
-                j=1
-                m1=M[i]
-                for i in range(0,len(M)-1):
-                    tab=[]
-                    m2=M[i+1]
-                    while m1>0:
-                        if m1%2==1 :
-                            e2=pub_key.encrypt(m2)
-                            tab.append(e2)
-                        m1=m1//2
-                        m2=m2*2
-            ##########___Send tab
-                    self.ids.opresult.text=f"Sending Table n° {j} ==> {tab}"
-                    j+=1
-                    tab=dill.dumps(tab)
-                    #tab=zlib.compress(tab)
-                    Soc.send(tab)
-                #############___Receiv Sum
-                    result=Soc.recv(BS)
-                    #result=zlib.decompress(result)
-                    result=dill.loads(result)
-                ##################_____Decrypt
-                    result=priv_key.decrypt(result)
-                    self.ids.opresult.text=f"Multiplication n° {j} Result :[{result}]"
-                    m1=result
-            #################__BreakOut
-                self.ids.opresult.text=f"[Task Completed] Product Reslut With Ru Methode :[{result}]"
-                tab="End"
-                tab=dill.dumps(tab)
-                #tab=zlib.compress(tab)
-                Soc.send(tab)
-                return "Completed Task"
+        i=0
+        m1=M[i]
+        for i in range(0,len(M)-1):
+            tab=[]
+            m2=M[i+1]
+            while m1>0:
+                if m1%2==1 :
+                    print("and this m2",m2)
+                    e2=pub_key.encrypt(m2)
+                    tab.append(e2)
+                m1=m1//2
+                m2=m2+m2
+    ##########___Send tab
+            tab=dill.dumps(tab)
+            Soc.send(tab)
+        #############___Receiv Sum
+            result=Soc.recv(BS)
+            #result=zlib.decompress(result)
+            result=dill.loads(result)
+        ##################_____Decrypt
+            result=priv_key.decrypt(result)
+            self.ids.opresult.text=f"Multiplication n° {j} Result :[{result}]"
+            m1=result
+    #################__BreakOut
+        self.ids.opresult.text=f"[Task Completed] Product Reslut With Ru Methode :[{result}]"
+        tab="End"
+        tab=dill.dumps(tab)
+        #tab=zlib.compress(tab)
+        Soc.send(tab)
+        return "Completed Task"
     def mulog(self):
 
         chosen_col=self.ids.idinsert.text
@@ -293,7 +291,6 @@ class OperationsScreen(Screen):
                         #709.78271 is the largest value I can compute the exp of on my machine
                         rprod=round(math.exp(rprod))
                         self.ids.opresult.text=f"[Task Completed] Product Reslut With Log Methode :[{rprod}]"
-                    
                     except:
                         self.ids.opresult.text("Input value is greater than allowed limit")
             Lprod="End"

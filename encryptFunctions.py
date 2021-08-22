@@ -37,9 +37,10 @@ class Encrypt:
             self.doc[self.x]=self.rsacrypt(self.doc[self.x])
         return transform
 
-    def crypt_table(self,tabx,fname,Xtable):
+    def crypt_table(self,tabx,fname,Xtable,dbname):
         print("Crypt all Data")
-        dbname=fname[:-3]+'x.db' # Create New DB file
+        if not dbname:
+            dbname=fname[:-3]+'x.db' # Create New DB file        
         dbx=TinyDB(dbname)        # Create Tinydb DB   
         tabrx = dbx.table('Dx')   # Create New Table in New DB (dbx)
         if Xtable :
@@ -60,9 +61,10 @@ class Encrypt:
             tabrx.insert(d)
         return(tabrx,dbname)
     
-    def encrypt_col(self,tabx,columns,e,fname):   # crypter une colonne
-        
-        dbname=fname[:-3]+'x.db' # Create New DB file
+    def encrypt_col(self,tabx,columns,e,fname,dbname):   # crypter une colonne
+
+        if not dbname:   
+            dbname=fname[:-3]+'x.db' # Create New DB file
         dby=TinyDB(dbname)  
         tabrx = dby.table('Dx')
         L=[]
