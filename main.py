@@ -1,6 +1,6 @@
 import socket, os,math,time
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
-from kivymd.uix.list import MDList,OneLineListItem
+from kivymd.uix.list import OneLineListItem
 from kivy.clock import Clock
 Clock.max_iteration = 20
 from encryptFunctions import *
@@ -36,8 +36,8 @@ class Connect(Screen):
         try :
             with self.Soc:
                 global HOST
-                HOST="192.168.1.107"
-                #HOST="135.181.108.235"
+                #HOST="192.168.1.107"
+                HOST="135.181.108.235"
                 #HOST=self.ids.Ip.text
                 global PORT
                 PORT=65432
@@ -117,20 +117,20 @@ class MainScreen(Screen):
             SEPARATOR = "~"
             filesize = os.path.getsize(fname)
             Soc.send(f"{encrypt.rsacrypt(fname)}{SEPARATOR}{filesize}".encode('utf-8'))
-            current=self.ids.my_bar.value
+            current=self.ids.my_bar.value #initialise Pbar
             with open(fname, "rb") as f:
                 while True :
                     for i in range(64,filesize,64):
                         bytes_read = f.read(64)
                         Soc.send(bytes_read)
-                        current+=i/filesize  #increment progres bar
+                        current+=(i/filesize)*100  #increment progres bar
                         self.ids.my_bar.value=current #update Progress bar                          
                         if filesize-i < 64 :
                             bytes_read = f.read(filesize-i)
                             Soc.send(bytes_read)
                             current+=filesize-i  #increment progres bar
                             self.ids.my_bar.value=current #update Progress bar  
-                    self.ids.datashow.text = f" [{ fname } Sent Succefully ..!"   
+                    self.ids.datashow.text = f" [ { fname } ] .. Sent Succefully ..!"   
                     break
     #_______________#
     def operations(self):

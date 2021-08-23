@@ -2,7 +2,6 @@ import logging
 format="%(asctime)s.%(msecs)03d--%(levelname)s : %(message)s"
 logging.basicConfig(format=format,level=logging.INFO,datefmt="%H:%M:%S")
 from tinydb import TinyDB
-from tqdm import tqdm
 from binascii import hexlify , unhexlify
 from phe import paillier
 import rsa,dill
