@@ -64,7 +64,7 @@
                     font_size: "22sp"
                     
         GridLayout:# Grid 2
-            size_hint: 1,0.86 
+            size_hint: 1,1 
             cols: 2
             padding: 20,20
             spacing: '15dp','10dp'
@@ -101,15 +101,23 @@
                 theme_text_color: "Custom"
                 font_size: "18sp"
                 on_press : root.operations()
+
         #*****************************************************#
         GridLayout: #Grid3 
             cols:1
-            size_hint: 1,0.8
+            size_hint: 1,1
             padding: 10,10
             spacing: '10dp','10dp'
             RelativeLayout                  
+                ProgressBar:
+                    id : my_bar
+                    min: 0
+                    max: 100
+                    value:0
+                    pos_hint: {'center_x':0.5 , 'center_y':1}
+                    size_hint :0.5,0.20            
                 MDLabel:
-                    pos_hint: {'center_x':0.5 , 'center_y':0.85}
+                    pos_hint: {'center_x':0.5 , 'center_y':0.76}
                     multiline: True
                     id:datashow
                     text_size: self.width, None
@@ -117,7 +125,7 @@
                     theme_text_color: "Error"
                     halign : "center"  
                 MDRaisedButton:     #"Show DataTables"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.56}
+                    pos_hint: {'center_x':0.5 , 'center_y':0.4}
                     size_hint : 0.3, 0.3 
                     text:"Show DataTables"
                     on_press: root.showdt()                 
@@ -133,7 +141,7 @@
                     MDList:
                         
                         id: container    
-                        size_hint :0.1,0.3
+                        size_hint :0.2,0.3
                         anchor_x: 'center'
                         anchor_y: 'top'                    
                     
@@ -200,7 +208,7 @@
                 pos_hint: {'center_x':1 , 'center_y':.4}
                 MDList:
                     id: container2    
-                    size_hint :0.1,0.3
+                    size_hint :0.2,0.3
                     anchor_x: 'center'
                     anchor_y: 'top'   
             MDLabel: 

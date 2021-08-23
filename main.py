@@ -68,6 +68,7 @@ class MainScreen(Screen):
             print("Clean Folder")
         filechooser.open_file(on_selection=self.handle_selection)
         self.listfil(colx) #update list with column name 
+        self.ids.my_bar.value=0
         #self.ids.idinsert0.hint_text = f" Colunmn to crypt {colx}"
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
@@ -116,14 +117,20 @@ class MainScreen(Screen):
             SEPARATOR = "~"
             filesize = os.path.getsize(fname)
             Soc.send(f"{encrypt.rsacrypt(fname)}{SEPARATOR}{filesize}".encode('utf-8'))
+            current=self.ids.my_bar.value
             with open(fname, "rb") as f:
                 while True :
-                    for i in tqdm(range(64,filesize,64),unit="Bytes",unit_divisor=64,desc=f"Sending [{fname}]",colour= 'green'):
+                    for i in range(64,filesize,64):
                         bytes_read = f.read(64)
                         Soc.send(bytes_read)
+                        current+=i/filesize  #increment progres bar
+                        self.ids.my_bar.value=current #update Progress bar                          
                         if filesize-i < 64 :
                             bytes_read = f.read(filesize-i)
                             Soc.send(bytes_read)
+                            current+=filesize-i  #increment progres bar
+                            self.ids.my_bar.value=current #update Progress bar  
+                    self.ids.datashow.text = f" [{ fname } Sent Succefully ..!"   
                     break
     #_______________#
     def operations(self):
