@@ -36,8 +36,8 @@ class Connect(Screen):
         try :
             with self.Soc:
                 global HOST
-                #HOST="192.168.1.107"
-                HOST="135.181.108.235"
+                HOST="192.168.1.107"
+                #HOST="135.181.108.235"
                 #HOST=self.ids.Ip.text
                 global PORT
                 PORT=65432
@@ -54,9 +54,13 @@ class MainScreen(Screen):
 
     #_______________#
     def listfil(self,lista):
+        try:
+            self.ids.container.clear_widgets()
+        except:
+            pass
         for x in lista:
             self.ids.container.add_widget(OneLineListItem(text=f"{x}" , on_press=lambda x: self.listchecked(x.text)))
-    def listchecked(self,x):
+    def listchecked(self,x): # Function return selected element in the list 
         global checked_ele
         checked_ele=x
         self.ids.datashow.text = f" The column [ {x} ] is now Selected"
@@ -114,9 +118,10 @@ class MainScreen(Screen):
             x='3'
             Soc.send(x.encode())
             fname=dbname
-            SEPARATOR = "~"
+            #SEPARATOR = "@"
             filesize = os.path.getsize(fname)
-            Soc.send(f"{encrypt.rsacrypt(fname)}{SEPARATOR}{filesize}".encode('utf-8'))
+            Soc.send(f"{encrypt.rsacrypt(fname)}".encode('utf-8'))
+            Soc.send(str(filesize).encode('utf-8'))
             current=self.ids.my_bar.value #initialise Pbar
             with open(fname, "rb") as f:
                 while True :
@@ -138,8 +143,13 @@ class MainScreen(Screen):
         screen3 = self.manager.get_screen('operations_screen')
         #screen3.ids.idinsert.hint_text = f"colonne to compute {colx}"
         for x in colx:
-            screen3.ids.container2.add_widget(OneLineListItem(text=f"{x}" 
-            , on_press=lambda x: screen3.listchecked2(x.text)))
+            try:
+                screen3.ids.container2.clear_widgets()
+            except:
+                pass
+            for x in colx:
+                screen3.ids.container2.add_widget(OneLineListItem(text=f"{x}",
+                 on_press=lambda x: screen3.listchecked2(x.text)))
     def showdt(self) :
         self.manager.current="show_data_table"
         screen2 = self.manager.get_screen('show_data_table')
@@ -186,14 +196,14 @@ class ShowDataTable(Screen):
 ###############################################################################
 class OperationsScreen(Screen):
     #_______________#
-    def listchecked2(self,x):
+    def listchecked2(self,x): #selection de clonne 
         global checked_ele
         checked_ele=x
         self.ids.showchecked.text = f" The column [ {x} ] is now Selected"
     def sumf(self):
         start=time.time()
         chosen_col=checked_ele
-        if chosen_col not in colx :
+        if chosen_col not in colx or not chosen_col :
             self.ids.lresult.text = "Warning : Choose a valid column name!"
         else :
             x='4'
@@ -209,7 +219,7 @@ class OperationsScreen(Screen):
     def avgf(self):
         start=time.time()
         chosen_col=checked_ele
-        if chosen_col not in colx:
+        if chosen_col not in colx or not chosen_col :
             self.ids.lresult.text = "Warning : Choose a valid column name!"
         else:
             x='5'
@@ -225,67 +235,68 @@ class OperationsScreen(Screen):
     #_______________#
     def mulru(self):
         chosen_col=checked_ele
-        if chosen_col not in colx :
+        if chosen_col not in colx or not chosen_col :
             self.ids.lresult.text = "Warning : Choose a valid column name!"
-        start=time.time()
-        x='60'
-        Soc.send(x.encode())
-        idd=colx.index(chosen_col)
-        T=[] # Pour Stocker Les Valeurs à calculer 
-        pkp = paillier.PaillierPublicKey(int(pkr)) #pkr=pub_key.n pour reconstruire le ciphertext
-        # Stocker les valeur à calculer 
-        for y in range(1,len(Xtable)+1):
-            Far=Xtable.get(doc_id=y)
-            T.append(list(Far.values())[idd])
-        P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
-        #Decrypter les valeur à traiter
-        M=[priv_key.decrypt(x) for x in P]
-        print("The M list ",M)
-        for x in M: # Check 0 result
-            if x==0:
-                self.ids.lresult.text="0 Result Dectected"
-                tab="End"
+        else :
+            start=time.time()
+            x='60'
+            Soc.send(x.encode())
+            idd=colx.index(chosen_col)
+            T=[] # Pour Stocker Les Valeurs à calculer 
+            pkp = paillier.PaillierPublicKey(int(pkr)) #pkr=pub_key.n pour reconstruire le ciphertext
+            # Stocker les valeur à calculer 
+            for y in range(1,len(Xtable)+1):
+                Far=Xtable.get(doc_id=y)
+                T.append(list(Far.values())[idd])
+            P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
+            #Decrypter les valeur à traiter
+            M=[priv_key.decrypt(x) for x in P]
+            print("The M list ",M)
+            for x in M: # Check 0 result
+                if x==0:
+                    self.ids.lresult.text="0 Result Dectected"
+                    tab="End"
+                    tab=dill.dumps(tab)
+                    Soc.send(tab)
+                    return "Zéro Result Detected!.."
+            i=0
+            m1=M[i]
+            for i in range(0,len(M)-1):
+                tab=[]
+                m2=M[i+1]
+                print("the new m2 valuer from list",m2)
+                while m1>0:
+                    if m1%2==1 :
+                        print("in While ..this m2",m2)
+                        e2=pub_key.encrypt(m2)
+                        tab.append(e2)
+                    m1=m1//2
+                    m2=m2+m2
+        ##########___Send tab
                 tab=dill.dumps(tab)
                 Soc.send(tab)
-                return "Zéro Result Detected!.."
-        i=0
-        m1=M[i]
-        for i in range(0,len(M)-1):
-            tab=[]
-            m2=M[i+1]
-            print("the new m2 valuer from list",m2)
-            while m1>0:
-                if m1%2==1 :
-                    print("in While ..this m2",m2)
-                    e2=pub_key.encrypt(m2)
-                    tab.append(e2)
-                m1=m1//2
-                m2=m2+m2
-    ##########___Send tab
+            #############___Receiv Sum
+                result=Soc.recv(BS)
+                #result=zlib.decompress(result)
+                result=dill.loads(result)
+            ##################_____Decrypt
+                result=priv_key.decrypt(result)
+                #m1=m2
+                print(f" the result for {m1} and {M[i+1]} = {result}")
+                m1=result
+                
+        #################__BreakOut
+            self.ids.lresult.text=f"Ru_mul Result : \n [{result}]"
+            tab="End"
             tab=dill.dumps(tab)
             Soc.send(tab)
-        #############___Receiv Sum
-            result=Soc.recv(BS)
-            #result=zlib.decompress(result)
-            result=dill.loads(result)
-        ##################_____Decrypt
-            result=priv_key.decrypt(result)
-            #m1=m2
-            print(f" the result for {m1} and {M[i+1]} = {result}")
-            m1=result
-            
-    #################__BreakOut
-        self.ids.lresult.text=f"Ru_mul Result : \n [{result}]"
-        tab="End"
-        tab=dill.dumps(tab)
-        Soc.send(tab)
-        endt=(time.time() - start)*1000
-        self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
-        return "Completed Task"
+            endt=(time.time() - start)*1000
+            self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
+            return "Completed Task"
     def mulog(self):
         start=time.time()
         chosen_col=checked_ele
-        if chosen_col not in colx :
+        if chosen_col not in colx or not chosen_col :
             self.ids.lresult.text = "Warning : Choose a valid column name!"        
         else :
             x='6'
