@@ -4,9 +4,9 @@
     #    name:"connect"
     MainScreen:
         name:"main_screen"
-    #ShowDataTable:
-    #    name:"show_data_table"
-    #    id:sdt
+    ShowDataTable:
+        name:"show_data_table"
+        id:sdt
     OperationsScreen
         name:"operations_screen"
 ###############################################        
@@ -49,21 +49,25 @@
 <MainScreen>:
     GridLayout:
         cols :1
-        GridLayout: ##__DataBases Management
+        GridLayout: ##__DataBases Management # Grid 1
             cols:1
-            size_hint :0.5,0.2
-            MDLabel:
-                halign: "center"
-                theme_text_color: "Custom"
-                text_color: 0, 0, 0, 1
-                id:title
-                text: "DataBases Management"
-                font_size: "22sp"
-        GridLayout:
-            cols: 2
-            size_hint :0.50,0.7
             padding: 20,20
-            spacing: '15dp','15dp'
+            size_hint: 1,0.2 
+            RelativeLayout:
+                MDLabel:
+                    pos_hint: {'center_y':0}
+                    text: "DataBases Management"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: 0, 0, 0, 1
+                    id:title
+                    font_size: "22sp"
+                    
+        GridLayout:# Grid 2
+            size_hint: 1,0.86 
+            cols: 2
+            padding: 20,20
+            spacing: '15dp','10dp'
             MDRaisedButton:#________"Choose DataBase"
                 md_bg_color:  1,0.93150, 0.6, 1
                 theme_text_color: "Custom"
@@ -97,42 +101,46 @@
                 theme_text_color: "Custom"
                 font_size: "18sp"
                 on_press : root.operations()
+        #*****************************************************#
+        GridLayout: #Grid3 
+            cols:1
+            size_hint: 1,0.8
+            padding: 10,10
+            spacing: '10dp','10dp'
+            RelativeLayout                  
+                MDLabel:
+                    pos_hint: {'center_x':0.5 , 'center_y':0.85}
+                    multiline: True
+                    id:datashow
+                    text_size: self.width, None
+                    size_hint_y: None
+                    theme_text_color: "Error"
+                    halign : "center"  
+                MDRaisedButton:     #"Show DataTables"
+                    pos_hint: {'center_x':0.5 , 'center_y':0.56}
+                    size_hint : 0.3, 0.3 
+                    text:"Show DataTables"
+                    on_press: root.showdt()                 
+        BoxLayout:
+            orientation: 'vertical'
+            ScrollView:
+                MDList:
+                    pos_hint: {'center_x':0.5 , 'center_y':1}
+                    id: container    
+                    size_hint :0.4,0.8
+                    
+
             MDRaisedButton:#________"Crypt Column"
+                text:"Crypt Column"
                 md_bg_color:  1,0.93150, 0.6, 1
                 theme_text_color: "Custom"
                 text_color: app.theme_cls.primary_color
                 font_size: "18sp"
-                size_hint :0.3,0.20 
-                text:"Crypt Column"
-                on_press:
-                    root.cryptcolumn()
-            MDTextField:
-                size_hint :0.3,0.20 
-                id:idinsert0
-                    
-        GridLayout:
-            cols:1
-            padding: 20,0
-            spacing: '15dp','0dp'
-            id :sabah
-            size_hint :0.8,0.9
-            ScrollView:
-                size_hint :0.8,0.2
-                MDTextField:
-                    multiline: True
-                    id:datashow
-                    hint_text:'show Data'
-                    text:""
-                    text_size: self.width, None
-                    size_hint_y: None
-                    #height: self.texture_size[1]
-            RelativeLayout            
-                MDRaisedButton:     #"Show DataTables"
-                    size_hint : 0.18, 0.17 
-                    pos_hint: {'center_x':0.5 , 'center_y':0.5}
-                    text:"Show DataTables"
-                    on_press:
-                        root.showdt()
+                size_hint :0.5,0.20 
+                pos_hint: {'center_x':0.5 , 'center_y':0.9}
+                on_press: root.cryptcolumn()                
+
+                      
 ##########################################
 <ShowDataTable> :
     GridLayout:
@@ -170,7 +178,6 @@
 
 
 ############################################
-
 <OperationsScreen>:
     GridLayout:
         cols :1
@@ -181,7 +188,6 @@
                 id:idinsert
                 size_hint :0.2,0.2
                 halign: "center"
-                valign : "midle"
                 pos_hint: {'center_x':0.7 , 'center_y':0.8}
             MDLabel: #Elapsed Time
                 text: "Elapsed Time"
@@ -272,12 +278,3 @@
             elevation:20
         
         ############################
-             
-
-
-
-
-                                                                            
-            
-
-

@@ -1,5 +1,6 @@
 import socket, os,math,time
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+from kivymd.uix.list import MDList,OneLineListItem
 from kivy.clock import Clock
 Clock.max_iteration = 20
 from encryptFunctions import *
@@ -25,6 +26,7 @@ tabx ="" # Table en claire
 Xtable=""#Table Crypté
 dbname=""
 table =""
+checked_ele=""
 encrypt=Encrypt()
 #CryptColumn=[]
 class Connect(Screen):
@@ -46,20 +48,18 @@ class Connect(Screen):
                 self.manager.current="main_screen" 
         except:
             self.ids.constat.text="Connexion Field Check Server Stat Or input Value"   
-     
+    
 #########################################################################
 class MainScreen(Screen):
 
     #_______________#
-    def affiche(self,tabx):
-        L=""
-        for Y in tabx:
-            for x,y in Y.items():
-                pen=str(f" {x} : {y} "+'| ')
-                L=L+pen
-            L=L+"\n"
-        #self.ids.datashow.text= L
-    #_______________#
+    def listfil(self,lista):
+        for x in lista:
+            self.ids.container.add_widget(OneLineListItem(text=f"{x}" , on_press=lambda x: self.listchecked(x.text)))
+    def listchecked(self,x):
+        global checked_ele
+        checked_ele=x
+        self.ids.datashow.text = f" The column [ {x} ] is now Selected"
     def choose_db(self): # fontion de choix de fichier 
         try:
             cmd1 = 'del dbstore/*x.dbx'
@@ -67,7 +67,8 @@ class MainScreen(Screen):
         except:
             print("Clean Folder")
         filechooser.open_file(on_selection=self.handle_selection)
-        self.ids.idinsert0.hint_text = f" Colunmn to crypt {colx}"
+        self.listfil(colx) #update list with column name 
+        #self.ids.idinsert0.hint_text = f" Colunmn to crypt {colx}"
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
@@ -75,12 +76,12 @@ class MainScreen(Screen):
         self.db = TinyDB(chosenpath) # upload database
         global tabx
         tabx=self.db.table('Hr')      #upload database table 
-        self.affiche(tabx)
         rdic=tabx.get(doc_id=1) # to check value type
         columns=list(rdic.keys())
         global colx
         colx=columns
         self.ids.datashow.text="Data base Loeded"
+        
 
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
@@ -92,10 +93,9 @@ class MainScreen(Screen):
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
 
         self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
+        print(f"--- {checked_ele}")
     def cryptcolumn(self):
-        print("pub_key" ,len(str(pub_key)))
-        print("priv_key" ,len(str(priv_key)))
-        chosen_col=self.ids.idinsert0.text
+        chosen_col=checked_ele
         if chosen_col not in colx :
             self.ids.datashow.text = "Warning : Choose a valid column name!"
         else :
@@ -106,7 +106,7 @@ class MainScreen(Screen):
                 Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname,dbname)
             except:
                 self.ids.datashow.text=f"Warning !.. Column [{chosen_col} Aleardy crypted ]"
-            self.ids.datashow.text=f" column [{chosen_col} crypted succefully]"
+            self.ids.datashow.text=f" Column [{chosen_col}] crypted succefully"
 
     #_______________#
     def send_db(self):
@@ -210,10 +210,12 @@ class OperationsScreen(Screen):
         self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "            
     #_______________#
     def mulru(self):
+        chosen_col=self.ids.idinsert.text
+        if chosen_col not in colx :
+            self.ids.lresult.text = "Warning : Choose a valid column name!"
         start=time.time()
         x='60'
         Soc.send(x.encode())
-        chosen_col=self.ids.idinsert.text
         idd=colx.index(chosen_col)
         T=[] # Pour Stocker Les Valeurs à calculer 
         pkp = paillier.PaillierPublicKey(int(pkr)) #pkr=pub_key.n pour reconstruire le ciphertext
@@ -269,8 +271,8 @@ class OperationsScreen(Screen):
     def mulog(self):
         start=time.time()
         chosen_col=self.ids.idinsert.text
-        if chosen_col not in colx:
-            self.ids.lresult.text = "Warning : Choose a valid column name!"
+        if chosen_col not in colx :
+            self.ids.lresult.text = "Warning : Choose a valid column name!"        
         else :
             x='6'
             Soc.send(x.encode())
@@ -311,7 +313,7 @@ class OperationsScreen(Screen):
             self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
             return ("Log Mul Completed")
     def onback(self):
-        self.manager.current="main_screen"
+         self.manager.current="main_screen"
 
 ######################################################################
 class RootWidget(ScreenManager):
@@ -322,5 +324,6 @@ class MainApp(MDApp):
         self.theme_cls.theme_style="Light"
         self.theme_cls.primary_palette="BlueGray"
         return RootWidget()
+
 if __name__ == "__main__":
     MainApp().run()
