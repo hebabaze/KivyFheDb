@@ -1,7 +1,7 @@
 #! from kivymd.uix.label import MDLabel
 <RootWidget>:
-    #Connect:
-    #    name:"connect"
+    Connect:
+        name:"connect"
     MainScreen:
         name:"main_screen"
     ShowDataTable:
@@ -121,24 +121,33 @@
                     size_hint : 0.3, 0.3 
                     text:"Show DataTables"
                     on_press: root.showdt()                 
-        BoxLayout:
-            orientation: 'vertical'
-            ScrollView:
-                MDList:
-                    pos_hint: {'center_x':0.5 , 'center_y':1}
-                    id: container    
-                    size_hint :0.4,0.8
+        AnchorLayout:
+            anchor_x: 'center'
+            anchor_y: 'top'
+            RelativeLayout
+                ScrollView:
+                    do_scroll_x: False
+                    do_scroll_y: True
+                    scroll_distance : 20
+                    pos_hint: {'center_x':0.94 , 'center_y':0.8}
+                    MDList:
+                        
+                        id: container    
+                        size_hint :0.1,0.3
+                        anchor_x: 'center'
+                        anchor_y: 'top'                    
                     
-
-            MDRaisedButton:#________"Crypt Column"
-                text:"Crypt Column"
-                md_bg_color:  1,0.93150, 0.6, 1
-                theme_text_color: "Custom"
-                text_color: app.theme_cls.primary_color
-                font_size: "18sp"
-                size_hint :0.5,0.20 
-                pos_hint: {'center_x':0.5 , 'center_y':0.9}
-                on_press: root.cryptcolumn()                
+                MDRaisedButton:#________"Crypt Column"
+                    text:"Crypt Column"
+                    md_bg_color:  1,0.93150, 0.6, 1
+                    theme_text_color: "Custom"
+                    text_color: app.theme_cls.primary_color
+                    font_size: "18sp"
+                    size_hint :0.3,0.20
+                    halign:"center" 
+                    valign: "midle"
+                    pos_hint: {'center_x':0.5 , 'center_y':0.26}
+                    on_press: root.cryptcolumn()                
 
                       
 ##########################################
@@ -179,39 +188,57 @@
 
 ############################################
 <OperationsScreen>:
-    GridLayout:
+    GridLayout: #before text id :idinsert
         cols :1
         padding: 20,20
         spacing: '15dp','15dp'
         RelativeLayout:
-            MDTextField: # Insert Text
-                id:idinsert
-                size_hint :0.2,0.2
+            ScrollView:
+                do_scroll_x: False
+                do_scroll_y: True
+                scroll_distance : 20
+                pos_hint: {'center_x':1 , 'center_y':.4}
+                MDList:
+                    id: container2    
+                    size_hint :0.1,0.3
+                    anchor_x: 'center'
+                    anchor_y: 'top'   
+            MDLabel: 
+                text: "Selected column"
+                id : showchecked
+                md_bg_color:  246/255,83/255,20/255, 1
+                pos_hint: {'center_x':.61 , 'center_y':.4}
+                size_hint: 0.4,0.1
+                font_size: "16sp"           
                 halign: "center"
-                pos_hint: {'center_x':0.7 , 'center_y':0.8}
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
             MDLabel: #Elapsed Time
                 text: "Elapsed Time"
                 id : ltime
-                md_bg_color:  255/255,255/255,255/255, 1
-                pos_hint: {'center_x':.61 , 'center_y':.6}
-                size_hint: 0.42,0.13
+                md_bg_color:  0/255,161/255,241/255, 1
+                pos_hint: {'center_x':.61 , 'center_y':.28}
+                size_hint: 0.4,0.1
                 font_size: "16sp"           
                 halign: "center"
-                text_color: 0, 0, 1, 1
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
             MDIcon:
                 halign: "center"
                 icon: "clock"
-                pos_hint: {'center_x':.77 , 'center_y':.6}
+                pos_hint: {'center_x':.77 , 'center_y':.28}
                 user_font_size: "99sp"
             MDLabel:#lresult
                 text: "Operation Result"
                 id: lresult
-                pos_hint: {'center_x':0.61 , 'center_y':0.4}
-                size_hint: 0.42,0.13
-                md_bg_color:  181/255, 231/255, 160/255, 1
+                pos_hint: {'center_x':0.61 , 'center_y':0.15}
+                size_hint: 0.4,0.13
+                md_bg_color:  124/255, 187/255, 0/255, 1
                 halign: "center" 
                 size: self.texture_size
-                font_size: "18sp" 
+                font_size: "18sp"
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
 ###############################################################################################
     MDNavigationDrawer :
         id : nav_drawer

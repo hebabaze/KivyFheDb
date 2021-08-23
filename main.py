@@ -129,7 +129,10 @@ class MainScreen(Screen):
     def operations(self):
         self.manager.current="operations_screen"
         screen3 = self.manager.get_screen('operations_screen')
-        screen3.ids.idinsert.hint_text = f"colonne to compute {colx}"
+        #screen3.ids.idinsert.hint_text = f"colonne to compute {colx}"
+        for x in colx:
+            screen3.ids.container2.add_widget(OneLineListItem(text=f"{x}" 
+            , on_press=lambda x: screen3.listchecked2(x.text)))
     def showdt(self) :
         self.manager.current="show_data_table"
         screen2 = self.manager.get_screen('show_data_table')
@@ -176,9 +179,13 @@ class ShowDataTable(Screen):
 ###############################################################################
 class OperationsScreen(Screen):
     #_______________#
+    def listchecked2(self,x):
+        global checked_ele
+        checked_ele=x
+        self.ids.showchecked.text = f" The column [ {x} ] is now Selected"
     def sumf(self):
         start=time.time()
-        chosen_col=self.ids.idinsert.text
+        chosen_col=checked_ele
         if chosen_col not in colx :
             self.ids.lresult.text = "Warning : Choose a valid column name!"
         else :
@@ -194,7 +201,7 @@ class OperationsScreen(Screen):
         self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
     def avgf(self):
         start=time.time()
-        chosen_col=self.ids.idinsert.text
+        chosen_col=checked_ele
         if chosen_col not in colx:
             self.ids.lresult.text = "Warning : Choose a valid column name!"
         else:
@@ -210,7 +217,7 @@ class OperationsScreen(Screen):
         self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "            
     #_______________#
     def mulru(self):
-        chosen_col=self.ids.idinsert.text
+        chosen_col=checked_ele
         if chosen_col not in colx :
             self.ids.lresult.text = "Warning : Choose a valid column name!"
         start=time.time()
@@ -270,7 +277,7 @@ class OperationsScreen(Screen):
         return "Completed Task"
     def mulog(self):
         start=time.time()
-        chosen_col=self.ids.idinsert.text
+        chosen_col=checked_ele
         if chosen_col not in colx :
             self.ids.lresult.text = "Warning : Choose a valid column name!"        
         else :
