@@ -14,6 +14,8 @@ from kivymd.app import MDApp
 from kivymd.uix.screen import MDScreen
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
+from kivymd.theming import ThemeManager
+theme_cls = ThemeManager()
 from kivy.core.window import Window
 Window.size=(440,690)
 Builder.load_file('design.kv')
@@ -402,8 +404,8 @@ class RootWidget(ScreenManager):
 
 class MainApp(MDApp):
     def build(self):
-        self.theme_cls.theme_style="Light"
-        self.theme_cls.primary_palette="BlueGray"
+        theme_cls.theme_style="Light"
+        theme_cls.primary_palette="BlueGray"
         return RootWidget()
 
 if __name__ == "__main__":

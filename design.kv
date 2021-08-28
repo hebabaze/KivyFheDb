@@ -23,13 +23,18 @@
                 MDTextField:
                     id:Ip
                     hint_text:'IP Adress'
-                    size_hint: 0.4,.3
+                    size_hint: 0.4,.2
                     pos_hint: {'center_x':0.33 , 'center_y':0.5}
+                    valign: "midle"
+                    mode: 'rectangle'
 
                 MDTextField:
                     id:Port
+                    mode: 'rectangle'
+                    valign: "midle"
+                    halign: "center"
                     hint_text:'Port'
-                    size_hint: 0.13,0.33
+                    size_hint: 0.13,0.2
                     pos_hint: {'center_x':0.7 , 'center_y':0.5}
         MDGridLayout:
             cols:1
