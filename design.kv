@@ -11,29 +11,33 @@
         name:"operations_screen"
 ###############################################        
 <Connect>:
-    GridLayout:
+    MDGridLayout:
         cols:1
         pos_hint: {'center_y':0.4}
-        GridLayout:
+        MDGridLayout:
             cols:2
             padding: 20,20
             spacing: '15dp','15dp'
-            
-            size_hint :0.5,0.3
-            MDTextField:
-                id:Ip
-                hint_text:'192.168.1.105'
+            size_hint:0.5,0.3
+            RelativeLayout
+                MDTextField:
+                    id:Ip
+                    hint_text:'IP Adress'
+                    size_hint: 0.4,.3
+                    pos_hint: {'center_x':0.33 , 'center_y':0.5}
 
-            MDTextField:
-                id:Port
-                hint_text:'4444'
-        GridLayout:
+                MDTextField:
+                    id:Port
+                    hint_text:'Port'
+                    size_hint: 0.13,0.33
+                    pos_hint: {'center_x':0.7 , 'center_y':0.5}
+        MDGridLayout:
             cols:1
             size_hint :0.5,0.5
             pos_hint: {'center_x':0.5 , 'center_y':0.5}
             RelativeLayout            
                 MDRaisedButton:
-                    size_hint : 0.15, 0.17 
+                    size_hint : 0.15, 0.1 
                     pos_hint: {'center_x':0.5 , 'center_y':1}
                     text:"Connect"
                     on_press:
@@ -64,7 +68,7 @@
                     font_size: "22sp"
                     
         GridLayout:# Grid 2
-            size_hint: 1,1 
+            size_hint: 1,0.6 
             cols: 2
             padding: 20,20
             spacing: '15dp','10dp'
@@ -73,7 +77,7 @@
                 theme_text_color: "Custom"
                 text_color: app.theme_cls.primary_color
                 font_size: "18sp"
-                size_hint :0.3,0.20 
+                size_hint :0.3,.05 
                 text:"Choose DataBase"
                 on_press:
                     root.choose_db()
@@ -82,7 +86,7 @@
                 md_bg_color:  0.9,0.8, 0.6, 1
                 theme_text_color: "Custom"
                 font_size: "18sp"
-                size_hint :0.3,0.20 
+                size_hint :0.3,.05 
                 text:"Crypt DataBase"
                 on_press:
                     root.crypt_db()
@@ -91,13 +95,13 @@
                 md_bg_color:  0.8,0.9, 0.5, 1
                 text:"Send Database"
                 theme_text_color: "Custom"
-                size_hint :0.3,0.20
+                size_hint :0.3,.05
                 font_size: "18sp"
                 on_press : 
                     root.send_db()
             MDRaisedButton:     #"Operations"
                 text:"Operations"
-                size_hint :0.3,0.20
+                size_hint :0.3,.05
                 theme_text_color: "Custom"
                 font_size: "18sp"
                 on_press : root.operations()
@@ -126,7 +130,7 @@
                     halign : "center"  
                 MDRaisedButton:     #"Show DataTables"
                     pos_hint: {'center_x':0.5 , 'center_y':0.4}
-                    size_hint : 0.3, 0.3 
+                    size_hint : 0.3, 0.2 
                     text:"Show DataTables"
                     on_press: root.showdt()                 
         AnchorLayout:

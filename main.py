@@ -1,35 +1,39 @@
-import socket, os,math,time
+import socket, os,math,time,rsa,dill
+from tinydb import TinyDB
+from phe import paillier
+from binascii import hexlify 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 from kivymd.uix.list import OneLineListItem
 from kivy.clock import Clock
 Clock.max_iteration = 20
-from encryptFunctions import *
-from encryptFunctions import Encrypt
-
 from kivymd.uix.datatables import MDDataTable
 from kivy.metrics import dp
 from plyer import filechooser
 from pathlib import Path
 from kivymd.app import MDApp
-from kivymd.uix.screen import Screen
+from kivymd.uix.screen import MDScreen
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
+from kivy.core.window import Window
+Window.size=(440,690)
 Builder.load_file('design.kv')
 HOST = ''  # The server's hostname or IP address
 PORT = ''        # The port used by the server
 SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-pkr=pub_key.n
+
 colx="" #list des colonne 
 tabx ="" # Table en claire
 Xtable=""#Table Crypté
-dbname=""
-table =""
-checked_ele=""
-encrypt=Encrypt()
-#CryptColumn=[]
-class Connect(Screen):
+dbname="" #database
+table ="" #Table affiché dans show datatable 
+checked_ele="" # le nome de colonne selectionner 
+# Security keys genration
+(pubkey, privkey) = rsa.newkeys(512)
+pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
+pkr=pub_key.n
+class Connect(MDScreen):
     #_______________#
     def db_connect(self):
         self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,7 +54,7 @@ class Connect(Screen):
             self.ids.constat.text="Connexion Field Check Server Stat Or input Value"   
     
 #########################################################################
-class MainScreen(Screen):
+class MainScreen(MDScreen):
 
     #_______________#
     def listfil(self,lista):
@@ -65,11 +69,6 @@ class MainScreen(Screen):
         checked_ele=x
         self.ids.datashow.text = f" The column [ {x} ] is now Selected"
     def choose_db(self): # fontion de choix de fichier 
-        try:
-            cmd1 = 'del dbstore/*x.dbx'
-            os.system(cmd1)
-        except:
-            print("Clean Folder")
         filechooser.open_file(on_selection=self.handle_selection)
         self.listfil(colx) #update list with column name 
         self.ids.my_bar.value=0
@@ -82,61 +81,116 @@ class MainScreen(Screen):
         global tabx
         tabx=self.db.table('Hr')      #upload database table 
         rdic=tabx.get(doc_id=1) # to check value type
-        columns=list(rdic.keys())
+        self.columns=list(rdic.keys())
         global colx
-        colx=columns
+        colx=self.columns
         self.ids.datashow.text="Data base Loeded"
         
-
+    def rsacrypt(self,data):       # Fonction de Cryptage RSA
+        message=data.encode()
+        crypto = rsa.encrypt(message, pubkey)
+        crypto = hexlify(crypto).decode()
+        return crypto
+    def enciph(self,y):            # get encipher text
+        x=pub_key.encrypt(y)
+        return x.ciphertext()
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
         global dbname
-        try:
-            Xtable,dbname=encrypt.crypt_table(tabx,self.fname,Xtable,dbname)
-        except:
+        if dbname:
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
+        else :
+            dbname=self.fname[:-3]+'x.db' # Create New DB file 
+            dbx=TinyDB(dbname)        # Create Tinydb DB  
+            Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
+            global tabx
+            if Xtable :
+                tabx=Xtable
+            for x in tabx :
+                d={}
+                for a,b in x.items() :
+                    if len(str(b)) >64 :
+                        print("Crypted item ",b)
+                        print(f"The Row {a} is aleardy Crypted")
+                        d[self.rsacrypt(a)]=b
+                    else:
+                        if str(b).isalpha():
+                            d[self.rsacrypt(a)]=self.rsacrypt(b)
+                        elif not str(b).isalpha() :
+                            d[self.rsacrypt(a)]=self.enciph(int(b))
+                Xtable.insert(d)
+                self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
 
-        self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
-        print(f"--- {checked_ele}")
     def cryptcolumn(self):
         chosen_col=checked_ele
+        global colx
         if chosen_col not in colx :
             self.ids.datashow.text = "Warning : Choose a valid column name!"
-        else :
-            e=colx.index(chosen_col)
-            global Xtable
-            global dbname
+        #def encrypt_col(self,tabx,columns,e,fname,dbname):   # crypter une colonne
+        e=colx.index(chosen_col)
+        global dbname
+        if not dbname:   
+            dbname=self.fname[:-3]+'x.db' # Create New DB file
+        dby=TinyDB(dbname) 
+        global Xtable 
+        Xtable = dby.table('Dx')
+        L=[]
+        if not Xtable :
+            for x in tabx:
+                Xtable.insert(x)
+        i=1
+        rdic=Xtable.get(doc_id=1)
+        print(f"rdic ==> {rdic}")
+        L=[x for x in rdic if len(str(rdic[x])) > 64  ]
+        self.ids.datashow.text=str(L)
+        if colx[e] in L:
+            self.ids.datashow.text=f"The Row {colx[e]} is aleardy Crypted"
+        elif colx[e] not in L :
             try:
-                Xtable,dbname=encrypt.encrypt_col(tabx,colx,e,self.fname,dbname)
+                if not str(rdic[colx[e]]).isalpha() :
+                    for x in Xtable:
+                        Xtable.update({colx[e]:self.enciph(x[colx[e]])},doc_ids=[i])
+                        i+=1
+                else :
+                    for x in Xtable:
+                        Xtable.update({colx[e]:self.rsacrypt(x[colx[e]])},doc_ids=[i])
+                        i+=1
+                self.ids.datashow.text=f" Column [{chosen_col}] crypted succefully"
             except:
                 self.ids.datashow.text=f"Warning !.. Column [{chosen_col} Aleardy crypted ]"
-            self.ids.datashow.text=f" Column [{chosen_col}] crypted succefully"
+            
 
     #_______________#
     def send_db(self):
-            x='3'
-            Soc.send(x.encode())
-            fname=dbname
-            #SEPARATOR = "@"
-            filesize = os.path.getsize(fname)
-            Soc.send(f"{encrypt.rsacrypt(fname)}".encode('utf-8'))
-            Soc.send(str(filesize).encode('utf-8'))
-            current=self.ids.my_bar.value #initialise Pbar
-            with open(fname, "rb") as f:
-                while True :
-                    for i in range(64,filesize,64):
-                        bytes_read = f.read(64)
-                        Soc.send(bytes_read)
-                        current+=(i/filesize)*100  #increment progres bar
-                        self.ids.my_bar.value=current #update Progress bar                          
-                        if filesize-i < 64 :
-                            bytes_read = f.read(filesize-i)
+            if not dbname:
+                self.ids.datashow.text="Crypt Database Before"
+            else :
+                x='3'
+                Soc.send(x.encode())
+                fname=dbname
+                print("before load fname",fname)
+                #SEPARATOR = "@"
+                filesize = os.path.getsize(fname)
+                print("befor send fname",fname)
+                Soc.send(f"{self.rsacrypt(fname)}".encode('utf-8'))
+                print("after send fname",fname)
+                Soc.send(str(filesize).encode('utf-8'))
+                current=self.ids.my_bar.value #initialise Pbar
+                with open(fname, "rb") as f:
+                    while True :
+                        for i in range(64,filesize,64):
+                            bytes_read = f.read(64)
                             Soc.send(bytes_read)
-                            current+=filesize-i  #increment progres bar
-                            self.ids.my_bar.value=current #update Progress bar  
-                    self.ids.datashow.text = f" [ { fname } ] .. Sent Succefully ..!"   
-                    break
+                            current+=(i/filesize)*100  #increment progres bar
+                            self.ids.my_bar.value=current #update Progress bar                          
+                            if filesize-i < 64 :
+                                bytes_read = f.read(filesize-i)
+                                Soc.send(bytes_read)
+                                current+=filesize-i  #increment progres bar
+                                self.ids.my_bar.value=current #update Progress bar  
+                        self.ids.datashow.text = f" [ { fname } ] .. Sent Succefully ..!"   
+                        break
     #_______________#
     def operations(self):
         self.manager.current="operations_screen"
@@ -163,7 +217,7 @@ class MainScreen(Screen):
             screen2.crtab(tabx,30)
         
 #############################################################################        
-class ShowDataTable(Screen):
+class ShowDataTable(MDScreen):
     #_______________#
     def crtab(self,tab,mtrc):
         global table
@@ -194,12 +248,14 @@ class ShowDataTable(Screen):
     def onback(self):
         self.manager.current="main_screen"
 ###############################################################################
-class OperationsScreen(Screen):
+class OperationsScreen(MDScreen):
     #_______________#
     def listchecked2(self,x): #selection de clonne 
         global checked_ele
         checked_ele=x
         self.ids.showchecked.text = f" The column [ {x} ] is now Selected"
+        self.ids.lresult.text=f" [+] Waitting for Result "
+        self.ids.ltime.text=f"[+] Waitting for Elapsed Time "
     def sumf(self):
         start=time.time()
         chosen_col=checked_ele
@@ -324,7 +380,7 @@ class OperationsScreen(Screen):
                     rprod=Soc.recv(BS)
                     rprod=dill.loads(rprod)
                     rprod=priv_key.decrypt(rprod)
-                    logging.warning(f"Prod received before exp {rprod}")
+                    print(f"Prod received before exp {rprod}")
                     try:
                         #709.78271 is the largest value I can compute the exp of on my machine
                         rprod=round(math.exp(rprod))
