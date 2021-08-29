@@ -122,8 +122,7 @@ class MainScreen(MDScreen):
                 d={}
                 for a,b in x.items() :
                     if len(str(b)) >64 :
-                        print("Crypted item ",b)
-                        print(f"The Row {a} is aleardy Crypted")
+                        self.ids.datashow.text=f"The Row {a} is aleardy Crypted"
                         d[self.rsacrypt(a)]=b
                     else:
                         if str(b).isalpha():
@@ -146,7 +145,6 @@ class MainScreen(MDScreen):
                 Xtable.insert(x)
         i=1
         rdic=Xtable.get(doc_id=1)
-        print(f"rdic ==> {rdic}")
         L=[x for x in rdic if len(str(rdic[x])) > 64  ]
         self.ids.datashow.text=str(L)
         if colx[e] in L:
@@ -174,12 +172,8 @@ class MainScreen(MDScreen):
         else :
             x='3'
             Soc.send(x.encode())
-            print("before load fname",dbname)
-            #SEPARATOR = "@"
             filesize = os.path.getsize(dbname)
-            print("befor send fname",dbname)
             Soc.send(f"{self.rsacrypt(dbname)}".encode('utf-8'))
-            print("after send fname",dbname)
             Soc.send(str(filesize).encode('utf-8'))
             current=self.ids.my_bar.value #initialise Pbar
             with open(dbname, "rb") as f:
@@ -227,7 +221,6 @@ class XFileChooserIconView(MDScreen):
         def fselected(self,*args):
             try:
                 self.file_selected=args[1][0]
-                print("Selected File",self.file_selected)
             except: pass
         def ok(self):
             global file_name,tabx,colx
@@ -247,7 +240,6 @@ class XFileChooserIconView(MDScreen):
                  on_press=lambda x: screen1.listchecked(x.text)))
         def cancel(self):
             self.manager.current="main_screen"
-            print("from cancel file name",file_name)
 ########################################################### #########
 class ShowDataTable(MDScreen):
     #_______________#
@@ -287,7 +279,7 @@ class OperationsScreen(MDScreen):
         checked_ele=x
         self.ids.showchecked.text = f" The column [ {x} ] is now Selected"
         self.ids.lresult.text=f" [+] Waitting for Result "
-        self.ids.ltime.text=f"[+] Waitting for Elapsed Time "
+        self.ids.ltime.text=f"  [+] Waitting for Elapsed Time "
     def sumf(self):
         start=time.time()
         chosen_col=checked_ele
@@ -303,7 +295,7 @@ class OperationsScreen(MDScreen):
             sum=priv_key.decrypt(sum)
             self.ids.lresult.text=f" [+] Sum Result : \n  [{sum}]"
         endt=(time.time() - start)*1000
-        self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
+        self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "
     def avgf(self):
         start=time.time()
         chosen_col=checked_ele
@@ -319,7 +311,7 @@ class OperationsScreen(MDScreen):
             avg=priv_key.decrypt(avg)
             self.ids.lresult.text=f" [+] AVG Result : \n {avg}"
         endt=(time.time() - start)*1000
-        self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "            
+        self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "            
     #_______________#
     def mulru(self):
         chosen_col=checked_ele
@@ -339,7 +331,6 @@ class OperationsScreen(MDScreen):
             P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
             #Decrypter les valeur à traiter
             M=[priv_key.decrypt(x) for x in P]
-            print("The M list ",M)
             for x in M: # Check 0 result
                 if x==0:
                     self.ids.lresult.text="0 Result Dectected"
@@ -352,10 +343,8 @@ class OperationsScreen(MDScreen):
             for i in range(0,len(M)-1):
                 tab=[]
                 m2=M[i+1]
-                print("the new m2 valuer from list",m2)
                 while m1>0:
                     if m1%2==1 :
-                        print("in While ..this m2",m2)
                         e2=pub_key.encrypt(m2)
                         tab.append(e2)
                     m1=m1//2
@@ -370,7 +359,6 @@ class OperationsScreen(MDScreen):
             ##################_____Decrypt
                 result=priv_key.decrypt(result)
                 #m1=m2
-                print(f" the result for {m1} and {M[i+1]} = {result}")
                 m1=result
                 
         #################__BreakOut
@@ -379,7 +367,7 @@ class OperationsScreen(MDScreen):
             tab=dill.dumps(tab)
             Soc.send(tab)
             endt=(time.time() - start)*1000
-            self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
+            self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "
             return "Completed Task"
     def mulog(self):
         start=time.time()
@@ -412,7 +400,6 @@ class OperationsScreen(MDScreen):
                     rprod=Soc.recv(BS)
                     rprod=dill.loads(rprod)
                     rprod=priv_key.decrypt(rprod)
-                    print(f"Prod received before exp {rprod}")
                     try:
                         #709.78271 is the largest value I can compute the exp of on my machine
                         rprod=round(math.exp(rprod))
@@ -423,7 +410,7 @@ class OperationsScreen(MDScreen):
             Lprod=dill.dumps(Lprod)
             Soc.send(Lprod)
             endt=(time.time() - start)*1000
-            self.ids.ltime.text=f"[+] Elapsed Time : \n [{endt}] ms "
+            self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "
             return ("Log Mul Completed")
     def onback(self):
          self.manager.current="main_screen"
