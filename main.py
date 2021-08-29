@@ -3,8 +3,6 @@ from tinydb import TinyDB
 from phe import paillier
 from binascii import hexlify 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
-from kivy.utils import platform
-from kivy import platform
 from kivymd.uix.list import OneLineListItem
 from kivy.clock import Clock
 Clock.max_iteration = 20
@@ -21,10 +19,9 @@ theme_cls = ThemeManager()
 from kivy.core.window import Window
 from  kivy.uix.filechooser import FileChooserIconView
 Window.size=(440,690)
-Builder.load_file('design.kv')
+Builder.load_file('main.kv')
 HOST = ''  # The server's hostname or IP address
 PORT = ''        # The port used by the server
-SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -39,9 +36,15 @@ checked_ele=None # le nome de colonne selectionner
 (pubkey, privkey) = rsa.newkeys(512)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
 pkr=pub_key.n
-if platform == "android":
-	from android.permissions import Permission,request_permissions
-	request_permissions([Permission.READ_EXTERNAL_STORAGE,Permission.WRITE_EXTERNAL_STORAGE,Permission.MANAGE_MEDIA])
+from kivy.utils import platform
+
+if platform == 'android':
+    from android.permissions import request_permissions, Permission
+    request_permissions([
+        Permission.WRITE_EXTERNAL_STORAGE,
+        Permission.READ_EXTERNAL_STORAGE,
+        Permission.INTERNET,
+    ])
 class Connect(MDScreen):
     #_______________#
     def db_connect(self):
@@ -140,9 +143,8 @@ class MainScreen(MDScreen):
         dby=TinyDB(dbname) 
         Xtable = dby.table('Dx')
         L=[]
-        if not Xtable :
-            for x in tabx:
-                Xtable.insert(x)
+        for x in tabx:
+            Xtable.insert(x)
         i=1
         rdic=Xtable.get(doc_id=1)
         L=[x for x in rdic if len(str(rdic[x])) > 64  ]
@@ -208,13 +210,11 @@ class MainScreen(MDScreen):
         screen2 = self.manager.get_screen('show_data_table')
         try:
             screen2.ids.sdtleft.remove_widget(table)
-        except:
-            pass
-        if Xtable:
-            screen2.crtab(Xtable,60)
-        else:
-            screen2.crtab(tabx,30)
-        
+            if Xtable:
+                screen2.crtab(Xtable,60)
+            else:
+                screen2.crtab(tabx,30)
+        except:pass
 #############################################################################        
 class XFileChooserIconView(MDScreen):
 
@@ -244,18 +244,18 @@ class XFileChooserIconView(MDScreen):
 class ShowDataTable(MDScreen):
     #_______________#
     def crtab(self,tab,mtrc):
-        global table
-        table=MDDataTable(
-            pos_hint={'center_x':0.5,'center_y':0.5},
-            size_hint=(0.9,0.6),
-            check=True,
-            use_pagination=True,
-            rows_num=4,
-            pagination_menu_height='100dp',
-            column_data=[(str(x),dp(mtrc))for x in colx],
-            row_data=[tuple(x.values()) for x in tab]
-            )
+        global table,colx
         try:
+            table=MDDataTable(
+                pos_hint={'center_x':0.5,'center_y':0.5},
+                size_hint=(0.9,0.6),
+                check=True,
+                use_pagination=True,
+                rows_num=4,
+                pagination_menu_height='100dp',
+                column_data=[(str(x),dp(mtrc))for x in colx],
+                row_data=[tuple(x.values()) for x in tab]
+                )
             self.ids.sdtleft.remove_widget(table)
         except:
             pass
