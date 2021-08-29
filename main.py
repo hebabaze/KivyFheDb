@@ -3,6 +3,8 @@ from tinydb import TinyDB
 from phe import paillier
 from binascii import hexlify 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+from kivy.utils import platform
+from kivy import platform
 from kivymd.uix.list import OneLineListItem
 from kivy.clock import Clock
 Clock.max_iteration = 20
@@ -17,6 +19,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivymd.theming import ThemeManager
 theme_cls = ThemeManager()
 from kivy.core.window import Window
+from  kivy.uix.filechooser import FileChooserIconView
 Window.size=(440,690)
 Builder.load_file('design.kv')
 HOST = ''  # The server's hostname or IP address
@@ -28,13 +31,17 @@ Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 colx="" #list des colonne 
 tabx ="" # Table en claire
 Xtable=""#Table Crypté
-dbname="" #database
+dbname="" #database crypted
+file_name="" #file uploaded
 table ="" #Table affiché dans show datatable 
 checked_ele="" # le nome de colonne selectionner 
 # Security keys genration
 (pubkey, privkey) = rsa.newkeys(512)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
 pkr=pub_key.n
+if platform == "android":
+	from android.permissions import Permission,request_permissions
+	request_permissions([Permission.READ_EXTERNAL_STORAGE,Permission.WRITE_EXTERNAL_STORAGE,Permission.MANAGE_MEDIA])
 class Connect(MDScreen):
     #_______________#
     def db_connect(self):
@@ -57,8 +64,10 @@ class Connect(MDScreen):
     
 #########################################################################
 class MainScreen(MDScreen):
-
     #_______________#
+    def to_chfile(self):
+        self.manager.current="file_chooser_icon_view"
+        screen5 = self.manager.get_screen('file_chooser_icon_view')
     def listfil(self,lista):
         try:
             self.ids.container.clear_widgets()
@@ -78,7 +87,8 @@ class MainScreen(MDScreen):
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
-        self.fname=Path(str(selection[0])).name # extract db name from path
+        global file_name
+        file_name=Path(str(selection[0])).name # extract db name from path
         self.db = TinyDB(chosenpath) # upload database
         global tabx
         tabx=self.db.table('Hr')      #upload database table 
@@ -100,10 +110,15 @@ class MainScreen(MDScreen):
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable
         global dbname
+        global file_name
         if dbname:
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
+        
+        elif not file_name:
+            self.ids.datashow.text=f"Warning ! .Choose Database !"
         else :
-            dbname=self.fname[:-3]+'x.db' # Create New DB file 
+            try:dbname=file_name[:-3]+'x.db' # Create New DB file 
+            except:self.ids.datashow.text=f"Warning ! .Choose Database !"
             dbx=TinyDB(dbname)        # Create Tinydb DB  
             Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
             global tabx
@@ -125,15 +140,10 @@ class MainScreen(MDScreen):
                 self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
 
     def cryptcolumn(self):
-        chosen_col=checked_ele
-        global colx
-        if chosen_col not in colx :
-            self.ids.datashow.text = "Warning : Choose a valid column name!"
-        #def encrypt_col(self,tabx,columns,e,fname,dbname):   # crypter une colonne
-        e=colx.index(chosen_col)
         global dbname
-        if not dbname:   
-            dbname=self.fname[:-3]+'x.db' # Create New DB file
+        if not dbname:  
+            dbname=file_name[:-3]+'x.db' # Create New DB file
+        e=colx.index(checked_ele)
         dby=TinyDB(dbname) 
         global Xtable 
         Xtable = dby.table('Dx')
@@ -158,41 +168,41 @@ class MainScreen(MDScreen):
                     for x in Xtable:
                         Xtable.update({colx[e]:self.rsacrypt(x[colx[e]])},doc_ids=[i])
                         i+=1
-                self.ids.datashow.text=f" Column [{chosen_col}] crypted succefully"
+                self.ids.datashow.text=f" Column [{checked_ele}] crypted succefully"
             except:
-                self.ids.datashow.text=f"Warning !.. Column [{chosen_col} Aleardy crypted ]"
+                self.ids.datashow.text=f"Warning !.. Column [{checked_ele} Aleardy crypted ]"
             
 
     #_______________#
     def send_db(self):
-            if not dbname:
-                self.ids.datashow.text="Crypt Database Before"
-            else :
-                x='3'
-                Soc.send(x.encode())
-                fname=dbname
-                print("before load fname",fname)
-                #SEPARATOR = "@"
-                filesize = os.path.getsize(fname)
-                print("befor send fname",fname)
-                Soc.send(f"{self.rsacrypt(fname)}".encode('utf-8'))
-                print("after send fname",fname)
-                Soc.send(str(filesize).encode('utf-8'))
-                current=self.ids.my_bar.value #initialise Pbar
-                with open(fname, "rb") as f:
-                    while True :
-                        for i in range(64,filesize,64):
-                            bytes_read = f.read(64)
+        global dbname
+        if not dbname:
+            self.ids.datashow.text="Crypt Database Before"
+        else :
+            x='3'
+            Soc.send(x.encode())
+            print("before load fname",dbname)
+            #SEPARATOR = "@"
+            filesize = os.path.getsize(dbname)
+            print("befor send fname",dbname)
+            Soc.send(f"{self.rsacrypt(dbname)}".encode('utf-8'))
+            print("after send fname",dbname)
+            Soc.send(str(filesize).encode('utf-8'))
+            current=self.ids.my_bar.value #initialise Pbar
+            with open(dbname, "rb") as f:
+                while True :
+                    for i in range(64,filesize,64):
+                        bytes_read = f.read(64)
+                        Soc.send(bytes_read)
+                        current+=(i/filesize)*100  #increment progres bar
+                        self.ids.my_bar.value=current #update Progress bar                          
+                        if filesize-i < 64 :
+                            bytes_read = f.read(filesize-i)
                             Soc.send(bytes_read)
-                            current+=(i/filesize)*100  #increment progres bar
-                            self.ids.my_bar.value=current #update Progress bar                          
-                            if filesize-i < 64 :
-                                bytes_read = f.read(filesize-i)
-                                Soc.send(bytes_read)
-                                current+=filesize-i  #increment progres bar
-                                self.ids.my_bar.value=current #update Progress bar  
-                        self.ids.datashow.text = f" [ { fname } ] .. Sent Succefully ..!"   
-                        break
+                            current+=filesize-i  #increment progres bar
+                            self.ids.my_bar.value=current #update Progress bar  
+                    self.ids.datashow.text = f" [ { dbname } ] .. Sent Succefully ..!"   
+                    break
     #_______________#
     def operations(self):
         self.manager.current="operations_screen"
@@ -219,6 +229,35 @@ class MainScreen(MDScreen):
             screen2.crtab(tabx,30)
         
 #############################################################################        
+class XFileChooserIconView(MDScreen):
+
+        def fselected(self,*args):
+            try:
+                self.file_selected=args[1][0]
+                print("Selected File",self.file_selected)
+            except: pass
+        def ok(self):
+            global file_name
+            file_name=Path(str(self.file_selected)).name
+            self.db = TinyDB(self.file_selected) # upload database
+            global tabx
+            tabx=self.db.table('Hr')      #upload database table 
+            rdic=tabx.get(doc_id=1) # to check value type
+            self.columns=list(rdic.keys())
+            global colx
+            colx=self.columns
+            self.manager.current="main_screen"
+            screen1 = self.manager.get_screen('main_screen')
+            screen1.ids.datashow.text="Data base Loeded"
+            try :screen1.ids.container.clear_widgets()
+            except:pass
+            for x in colx:
+                screen1.ids.container.add_widget(OneLineListItem(text=f"{x}",
+                 on_press=lambda x: screen1.listchecked(x.text)))
+        def cancel(self):
+            self.manager.current="main_screen"
+            print("from cancel file name",file_name)
+########################################################### #########
 class ShowDataTable(MDScreen):
     #_______________#
     def crtab(self,tab,mtrc):
@@ -404,8 +443,8 @@ class RootWidget(ScreenManager):
 
 class MainApp(MDApp):
     def build(self):
-        theme_cls.theme_style="Light"
-        theme_cls.primary_palette="BlueGray"
+        theme_cls.theme_style="Dark"
+        theme_cls.primary_palette="Teal"        
         return RootWidget()
 
 if __name__ == "__main__":
