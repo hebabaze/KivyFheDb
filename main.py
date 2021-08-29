@@ -28,13 +28,13 @@ SEPARATOR = "<SEPARATOR>"
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-colx="" #list des colonne 
-tabx ="" # Table en claire
-Xtable=""#Table Crypté
-dbname="" #database crypted
-file_name="" #file uploaded
-table ="" #Table affiché dans show datatable 
-checked_ele="" # le nome de colonne selectionner 
+colx=None #list des colonne 
+tabx =None # Table en claire
+Xtable=None#Table Crypté
+dbname=None #database crypted
+file_name=None #file uploaded
+table =None #Table affiché dans show datatable 
+checked_ele=None # le nome de colonne selectionner 
 # Security keys genration
 (pubkey, privkey) = rsa.newkeys(512)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
@@ -48,11 +48,10 @@ class Connect(MDScreen):
         self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try :
             with self.Soc:
-                global HOST
+                global HOST,PORT
                 HOST="192.168.1.107"
                 #HOST="135.181.108.235"
                 #HOST=self.ids.Ip.text
-                global PORT
                 PORT=65432
                 #PORT=int(self.ids.Port.text)
                 Soc.connect((HOST, PORT))
@@ -87,14 +86,12 @@ class MainScreen(MDScreen):
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         chosenpath=selection[0]
-        global file_name
+        global file_name,tabx,colx
         file_name=Path(str(selection[0])).name # extract db name from path
         self.db = TinyDB(chosenpath) # upload database
-        global tabx
         tabx=self.db.table('Hr')      #upload database table 
         rdic=tabx.get(doc_id=1) # to check value type
         self.columns=list(rdic.keys())
-        global colx
         colx=self.columns
         self.ids.datashow.text="Data base Loeded"
         
@@ -108,9 +105,7 @@ class MainScreen(MDScreen):
         return x.ciphertext()
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
-        global Xtable
-        global dbname
-        global file_name
+        global Xtable,dbname,file_name,tabx
         if dbname:
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
         
@@ -121,7 +116,6 @@ class MainScreen(MDScreen):
             except:self.ids.datashow.text=f"Warning ! .Choose Database !"
             dbx=TinyDB(dbname)        # Create Tinydb DB  
             Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
-            global tabx
             if Xtable :
                 tabx=Xtable
             for x in tabx :
@@ -140,12 +134,11 @@ class MainScreen(MDScreen):
                 self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
 
     def cryptcolumn(self):
-        global dbname
+        global dbname,Xtable
         if not dbname:  
             dbname=file_name[:-3]+'x.db' # Create New DB file
         e=colx.index(checked_ele)
         dby=TinyDB(dbname) 
-        global Xtable 
         Xtable = dby.table('Dx')
         L=[]
         if not Xtable :
@@ -237,14 +230,12 @@ class XFileChooserIconView(MDScreen):
                 print("Selected File",self.file_selected)
             except: pass
         def ok(self):
-            global file_name
+            global file_name,tabx,colx
             file_name=Path(str(self.file_selected)).name
             self.db = TinyDB(self.file_selected) # upload database
-            global tabx
             tabx=self.db.table('Hr')      #upload database table 
             rdic=tabx.get(doc_id=1) # to check value type
             self.columns=list(rdic.keys())
-            global colx
             colx=self.columns
             self.manager.current="main_screen"
             screen1 = self.manager.get_screen('main_screen')
