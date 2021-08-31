@@ -19,11 +19,13 @@
             type: "top"
             right_action_items: [["close", lambda x: root.onback()]]
             elevation:20
+            bold: True
         MDScreen:
             MDLabel:
                 text: "Please Fill the form bellow to procced"
                 pos_hint: {'center_x':0.5 , 'center_y':0.9}
                 halign:"center"
+                bold: True
             MDLabel:
                 halign: "center"
                 theme_text_color: "Custom"
@@ -54,6 +56,7 @@
                 pos_hint: {'center_x':0.5 , 'center_y':0.4}
                 text:"Connect"
                 on_press:root.db_connect()
+                
 
 
 <MainScreen>:
