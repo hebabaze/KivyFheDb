@@ -1,6 +1,21 @@
+<MDRB@MDRaisedButton>:
+    md_bg_color:  0,0, 0, 1
+    theme_text_color: "Custom"
+    text_color: 1,1,1,1
+    font_size: "16sp"
+    size_hint: 0.3,.05
+    line_color: 1, 1, 1, 1
+<MDTXT@MDTextField>:
+    size_hint: 0.4,.1
+    pos_hint: {'center_x':0.5 , 'center_y':0.6}
+    required: True
+    font_size: "14sp"
+    text_color: 0,0,0,1
+    bold:True
+    halign: "center"
 <RootWidget>:
-    Connect:
-        name:"connect"
+    #Connect:
+    #    name:"connect"
     MainScreen:
         name:"main_screen"
     ShowDataTable:
@@ -13,7 +28,7 @@
         id:fciv
 <Connect>:
     canvas.before:
-        Color: 
+        Color:
             rgba:(.96,.87,.30,.8)
         Rectangle:
             size:self.size
@@ -36,34 +51,21 @@
             MDLabel:
                 halign: "center"
                 theme_text_color: "Custom"
+                text_color:0.80,0.35,0.18,1
                 pos_hint: {'center_x':0.5 , 'center_y':0.78}
-                text_color: 1, 0, 0, 1
                 id:constat
                 font_size: "14sp"
-            MDTextField:
+                bold: True
+            MDTXT:
                 id:Ip
                 hint_text:'IP Adress'
-                size_hint: 0.4,.1
-                pos_hint: {'center_x':0.5 , 'center_y':0.6}
-                valign: 'bottom'
-                required: True
-                font_size: "13sp"
-                text_color: 0,0,0,1
-                bold:True
                 focus:True
                 on_text_validate:Port.focus=True
-            MDTextField:
+            MDTXT:
                 id:Port
-                halign: "center"
                 hint_text:'Port'
-                size_hint: 0.4,0.1
-                pos_hint: {'center_x':0.5 , 'center_y':0.46}
+                pos_hint: {'center_x':.5,'center_y':0.46}
                 max_text_length: 5
-                valign: 'bottom'
-                required: True
-                font_size: "13sp"
-                text_color: 0,0,0,1
-                bold:True
                 on_text_validate:root.db_connect()
             MDRaisedButton:
                 size_hint : 0.45, 0.07
@@ -71,61 +73,50 @@
                 text:"Connect"
                 on_press:root.db_connect()
                 md_bg_color:0,0,0,0.8
-                
-
-
+                line_color: 1, 1, 1, 1
 <MainScreen>:
-    GridLayout:
+    canvas.before:
+        Color:
+            rgba:(.96,.87,.30,.8)
+        Rectangle:
+            size:self.size
+            pos: self.pos
+    MDGridLayout:
         cols :1
-        GridLayout: ##__DataBases Management # Grid 1
+        spacing: '10dp','15dp',
+        MDGridLayout: ##__Database Proccessing # Grid 1
             cols:1
-            padding: 20,20
-            size_hint: 1,0.2
+            size_hint: 1,0.3
             RelativeLayout:
                 MDLabel:
-                    pos_hint: {'center_y':0}
-                    text: "DataBases Management"
+                    md_bg_color:0,0,0,1
+                    size_hint:1,1
+                    text: "Database Management"
                     halign: "center"
                     theme_text_color: "Custom"
-                    text_color: 0, 0, 0, 1
+                    text_color: 1, 1, 1, 1
                     id:title
                     font_size: "22sp"
+        MDBoxLayout:
+            size_hint:1,0.2
         GridLayout:
-            size_hint: 1,0.6
+            size_hint: 1,0.7
             cols: 2
             padding: 20,20
             spacing: '15dp','10dp'
-            MDRaisedButton:#________"Choose DataBase"
-                md_bg_color:  1,0.93150, 0.6, 1
-                theme_text_color: "Custom"
-                text_color: app.theme_cls.primary_color
-                font_size: "18sp"
-                size_hint :0.3,.05
-                text:"Choose DataBase"
+            MDRB:#________"Choose DataBase"
+                text:" Select Databse"
                 on_press:root.choose_db()
-                    #root.to_chfile()
-            MDRaisedButton:#______"Crypt DataBase"
-                md_bg_color:  0.9,0.8, 0.6, 1
-                theme_text_color: "Custom"
-                font_size: "18sp"
-                size_hint :0.3,.05
-                text:"Crypt DataBase"
+            MDRB:#______"Crypt DataBase"
+                text:" Crypt Databse "
                 on_press:
                     root.crypt_db()
-            MDRaisedButton:    #_____"Send Database"
-                md_bg_color:  0.8,0.9, 0.5, 1
-                text:"Send Database"
-                theme_text_color: "Custom"
-                size_hint :0.3,.05
-                font_size: "18sp"
+            MDRB:    #_____"Send Database"
+                text:" Send Databse "
                 on_press :root.send_db()
-            MDRaisedButton:     #"Operations"
-                text:"Operations"
-                size_hint :0.3,.05
-                theme_text_color: "Custom"
-                font_size: "18sp"
+            MDRB:     #"Operations"
+                text:" Operations "
                 on_press : root.to_chfile()
-
         #*****************************************************#
         GridLayout: #Grid3
             cols:1
@@ -141,15 +132,15 @@
                     pos_hint: {'center_x':0.5 , 'center_y':1}
                     size_hint :0.5,0.20
                 MDLabel:
-                    pos_hint: {'center_x':0.5 , 'center_y':0.76}
+                    pos_hint: {'center_x':0.5 , 'center_y':0.87}
                     multiline: True
                     id:datashow
                     size_hint_y: None
                     theme_text_color: "Error"
                     halign : "center"
-                MDRaisedButton:     #"Show DataTables"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.4}
-                    size_hint : 0.32, 0.2
+                MDRB:     #"Show DataTables"
+                    pos_hint: {'center_x':0.5 , 'center_y':0.63}
+                    size_hint : 0.4, 0.25
                     text:"Show DataTables"
                     on_press: root.showdt()
         AnchorLayout:
@@ -159,23 +150,16 @@
                 ScrollView:
                     do_scroll_x: False
                     do_scroll_y: True
-                    scroll_distance : 20
-                    pos_hint: {'center_x':0.94 , 'center_y':0.8}
+                    pos_hint: {'center_x':.94 , 'center_y':1}
                     MDList:
                         id: container
                         size_hint :0.2,0.3
                         anchor_x: 'center'
                         anchor_y: 'top'
-                MDRaisedButton:#________"Crypt Column"
+                MDRB:#________"Crypt Column"
                     text:"Crypt Column"
-                    md_bg_color:  1,0.93150, 0.6, 1
-                    theme_text_color: "Custom"
-                    text_color: app.theme_cls.primary_color
-                    font_size: "18sp"
-                    size_hint :0.32,0.20
-                    halign:"center"
-                    valign: "midle"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.26}
+                    size_hint :0.4,0.22
+                    pos_hint: {'center_x':.5 , 'center_y':.3}
                     on_press: root.cryptcolumn()
 ###############################
 <ShowDataTable> :
@@ -189,7 +173,8 @@
             MDToolbar:
                 title: 'Show Data'
                 right_action_items: [["home", lambda x: root.onback()]]
-                elevation:20
+                elevation:15
+                md_bg_color:0,0,0,1
 ###################################################
 <OperationsScreen>:
     GridLayout: #before text id :idinsert

@@ -68,7 +68,7 @@ class Connect(Screen):
                 Soc.send(pks)
                 self.manager.current="main_screen" 
         except:
-            self.ids.constat.text="Connexion failed..!"   
+            self.ids.constat.text='Connexion failed..!'
 #########################################################################
 class MainScreen(Screen):
     selection = ListProperty([])
@@ -91,20 +91,23 @@ class MainScreen(Screen):
         filechooser.open_file(on_selection=self.handle_selection)
     #_______________#
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
-        self.selection = selection
-        chosenpath=self.selection[0]
-        global file_name,tabx,colx
-        file_name=Path(str(self.selection[0])).name # extract db name from path
-        print(f"file name{file_name} and chosepath {chosenpath}")
-        print(type(chosenpath),type(self.selection),type(selection))
-        self.db = TinyDB(chosenpath) # upload database
-        tabx=self.db.table('Hr')      #upload database table 
-        rdic=tabx.get(doc_id=1) # to check value type
-        self.columns=list(rdic.keys())
-        colx=self.columns
-        self.listfil(colx) #update list with column name 
-        self.ids.my_bar.value=0
-        self.ids.datashow.text="Data base Loeded"
+        if not selection:
+            pass
+        else:
+            self.selection = selection
+            chosenpath=self.selection[0]
+            global file_name,tabx,colx
+            file_name=Path(str(self.selection[0])).name # extract db name from path
+            print(f"file name{file_name} and chosepath {chosenpath}")
+            print(type(chosenpath),type(self.selection),type(selection))
+            self.db = TinyDB(chosenpath) # upload database
+            tabx=self.db.table('Hr')      #upload database table 
+            rdic=tabx.get(doc_id=1) # to check value type
+            self.columns=list(rdic.keys())
+            colx=self.columns
+            self.listfil(colx) #update list with column name 
+            self.ids.my_bar.value=0
+            self.ids.datashow.text="Data base Loeded"
         
     def rsacrypt(self,data):       # Fonction de Cryptage RSA
         message=data.encode()
