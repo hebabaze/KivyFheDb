@@ -11,60 +11,58 @@
     XFileChooserIconView:
         name:"file_chooser_icon_view"
         id:fciv
-###############################################        
 <Connect>:
-    MDScreen:
-        MDGridLayout:
-            cols:1
-            pos_hint: {'center_y':0.4}
-            MDGridLayout:
-                cols:2
-                padding: 20,20
-                spacing: '15dp','15dp'
-                size_hint:0.5,0.3
-                RelativeLayout
-                    MDTextField:
-                        id:Ip
-                        hint_text:'IP Adress'
-                        size_hint: 0.4,.23
-                        pos_hint: {'center_x':0.33 , 'center_y':0.5}
-                        valign: "midle"
-                        mode: 'rectangle'
+    MDGridLayout:
+        cols:1
+        MDToolbar:
+            title: 'Access Screen'
+            type: "top"
+            right_action_items: [["close", lambda x: root.onback()]]
+            elevation:20
+        MDScreen:
+            MDLabel:
+                text: "Please Fill the form bellow to procced"
+                pos_hint: {'center_x':0.5 , 'center_y':0.9}
+                halign:"center"
+            MDLabel:
+                halign: "center"
+                theme_text_color: "Custom"
+                pos_hint: {'center_x':0.5 , 'center_y':0.78}
+                text_color: 1, 0, 0, 1
+                id:constat
+                font_size: "14sp"
+            MDTextField:
+                id:Ip
+                hint_text:'IP Adress'
+                size_hint: 0.4,.1
+                pos_hint: {'center_x':0.5 , 'center_y':0.68}
+                valign: 'bottom'
+                required: True
+                font_size: "13sp"
+            MDTextField:
+                id:Port
+                halign: "center"
+                hint_text:'Port'
+                size_hint: 0.4,0.1
+                pos_hint: {'center_x':0.5 , 'center_y':0.54}
+                max_text_length: 5
+                valign: 'bottom'
+                required: True
+                font_size: "13sp"
+            MDRaisedButton:
+                size_hint : 0.45, 0.07
+                pos_hint: {'center_x':0.5 , 'center_y':0.4}
+                text:"Connect"
+                on_press:root.db_connect()
 
-                    MDTextField:
-                        id:Port
-                        mode: 'rectangle'
-                        valign: "midle"
-                        halign: "center"
-                        hint_text:'Port'
-                        size_hint: 0.16,0.23
-                        pos_hint: {'center_x':0.7 , 'center_y':0.5}
-            MDGridLayout:
-                cols:1
-                size_hint :0.5,0.5
-                pos_hint: {'center_x':0.5 , 'center_y':0.5}
-                RelativeLayout            
-                    MDRaisedButton:
-                        size_hint : 0.2, 0.12 
-                        pos_hint: {'center_x':0.5 , 'center_y':1}
-                        text:"Connect"
-                        on_press:
-                            root.db_connect()                       
-                    MDLabel:
-                        halign: "center"
-                        theme_text_color: "Custom"
-                        text_color: 1, 0, 0, 1
-                        id:constat
-                        font_size: "16sp"
-            
-####################################################
+
 <MainScreen>:
     GridLayout:
         cols :1
         GridLayout: ##__DataBases Management # Grid 1
             cols:1
             padding: 20,20
-            size_hint: 1,0.2 
+            size_hint: 1,0.2
             RelativeLayout:
                 MDLabel:
                     pos_hint: {'center_y':0}
@@ -74,9 +72,8 @@
                     text_color: 0, 0, 0, 1
                     id:title
                     font_size: "22sp"
-                    
-        GridLayout:# Grid 2
-            size_hint: 1,0.6 
+        GridLayout:
+            size_hint: 1,0.6
             cols: 2
             padding: 20,20
             spacing: '15dp','10dp'
@@ -85,62 +82,58 @@
                 theme_text_color: "Custom"
                 text_color: app.theme_cls.primary_color
                 font_size: "18sp"
-                size_hint :0.3,.05 
+                size_hint :0.3,.05
                 text:"Choose DataBase"
-                on_press:
-                    root.to_chfile()
-                    
+                on_press:root.choose_db()
+                    #root.to_chfile()
             MDRaisedButton:#______"Crypt DataBase"
                 md_bg_color:  0.9,0.8, 0.6, 1
                 theme_text_color: "Custom"
                 font_size: "18sp"
-                size_hint :0.3,.05 
+                size_hint :0.3,.05
                 text:"Crypt DataBase"
                 on_press:
                     root.crypt_db()
-                    
             MDRaisedButton:    #_____"Send Database"
                 md_bg_color:  0.8,0.9, 0.5, 1
                 text:"Send Database"
                 theme_text_color: "Custom"
                 size_hint :0.3,.05
                 font_size: "18sp"
-                on_press : 
-                    root.send_db()
+                on_press :root.send_db()
             MDRaisedButton:     #"Operations"
                 text:"Operations"
                 size_hint :0.3,.05
                 theme_text_color: "Custom"
                 font_size: "18sp"
-                on_press : root.operations()
+                on_press : root.to_chfile()
 
         #*****************************************************#
-        GridLayout: #Grid3 
+        GridLayout: #Grid3
             cols:1
             size_hint: 1,1
             padding: 10,10
             spacing: '10dp','10dp'
-            RelativeLayout                  
+            RelativeLayout
                 ProgressBar:
                     id : my_bar
                     min: 0
                     max: 100
                     value:0
                     pos_hint: {'center_x':0.5 , 'center_y':1}
-                    size_hint :0.5,0.20            
+                    size_hint :0.5,0.20
                 MDLabel:
                     pos_hint: {'center_x':0.5 , 'center_y':0.76}
                     multiline: True
                     id:datashow
-                    text_size: self.width, None
                     size_hint_y: None
                     theme_text_color: "Error"
-                    halign : "center"  
+                    halign : "center"
                 MDRaisedButton:     #"Show DataTables"
                     pos_hint: {'center_x':0.5 , 'center_y':0.4}
-                    size_hint : 0.32, 0.2 
+                    size_hint : 0.32, 0.2
                     text:"Show DataTables"
-                    on_press: root.showdt()                 
+                    on_press: root.showdt()
         AnchorLayout:
             anchor_x: 'center'
             anchor_y: 'top'
@@ -151,12 +144,10 @@
                     scroll_distance : 20
                     pos_hint: {'center_x':0.94 , 'center_y':0.8}
                     MDList:
-                        
-                        id: container    
+                        id: container
                         size_hint :0.2,0.3
                         anchor_x: 'center'
-                        anchor_y: 'top'                    
-                    
+                        anchor_y: 'top'
                 MDRaisedButton:#________"Crypt Column"
                     text:"Crypt Column"
                     md_bg_color:  1,0.93150, 0.6, 1
@@ -164,10 +155,10 @@
                     text_color: app.theme_cls.primary_color
                     font_size: "18sp"
                     size_hint :0.32,0.20
-                    halign:"center" 
+                    halign:"center"
                     valign: "midle"
                     pos_hint: {'center_x':0.5 , 'center_y':0.26}
-                    on_press: root.cryptcolumn()             
+                    on_press: root.cryptcolumn()
 ###############################
 <ShowDataTable> :
     GridLayout:
@@ -175,36 +166,13 @@
         GridLayout:
             cols:1
             id:sdtleft
-            size_hint :0.8,1
-            padding: 20,10            
-            MDIconButton:
-                icon: "imgstore/back2.png"
-                pos_hint: {"center_x": .5, "center_y": .5}
-                on_press:root.onback()
-
-        GridLayout:
-            cols: 1
-            id:right
-            size_hint :0.3,0.5
+            size_hint :1,1
             padding: 20,10
-            spacing: '15dp','10dp'
-            MDRaisedButton:#______"ADD"
-                md_bg_color:  0.9,0.8, 0.6, 1
-                theme_text_color: "Custom"
-                font_size: "18sp"
-                size_hint :0.3,0.20 
-                text:"Add Record"
-                on_press:
-            MDRaisedButton:#______"Edit"
-                md_bg_color:  0.9,0.8, 0.6, 1
-                theme_text_color: "Custom"
-                font_size: "18sp"
-                size_hint :0.3,0.20 
-                text:"Edit DataBase"
-                on_press:
-
-
-############################################
+            MDToolbar:
+                title: 'Show Data'
+                right_action_items: [["home", lambda x: root.onback()]]
+                elevation:20
+###################################################
 <OperationsScreen>:
     GridLayout: #before text id :idinsert
         cols :1
@@ -217,10 +185,10 @@
                 scroll_distance : 20
                 pos_hint: {'center_x':1 , 'center_y':.3}
                 MDList:
-                    id: container2    
+                    id: container2
                     size_hint :0.2,0.3
                     anchor_x: 'center'
-                    anchor_y: 'top'   
+                    anchor_y: 'top'
         GridLayout: #before text id :idinsert
             cols :2
             GridLayout:
@@ -230,7 +198,7 @@
                 cols: 1
                 padding: 20,20
                 spacing: '15dp','15dp'
-                MDLabel: 
+                MDLabel:
                     pos_hint: {'center_x':.61 , 'center_y':.4}
                     text: "Selected column"
                     halign: "center"
@@ -245,21 +213,17 @@
                         id : ltime
                         md_bg_color:  0,.63,.94, 1
                         pos_hint: {'center_x':.5 , 'center_y':.5}
-                        font_size: "16sp"           
+                        font_size: "16sp"
                         halign: "center"
                         theme_text_color: "Custom"
                         text_color: 1, 1, 1, 1
-                    MDIcon:
-                        halign: "center"
-                        icon: "clock"
-                        pos_hint: {'center_x':.1 , 'center_y':.5}
-                        user_font_size: "99sp"
+
                 MDLabel:#lresult
                     text: "Operation Result"
                     id: lresult
                     pos_hint: {'center_x':0.61 , 'center_y':0.15}
                     md_bg_color:  .5, .7, 0, 1
-                    halign: "center" 
+                    halign: "center"
                     size: self.texture_size
                     #font_size: "18sp"
                     theme_text_color: "Custom"
@@ -277,23 +241,23 @@
                 size_hint: 0.7,0.2
                 md_bg_color:  0.956,1, 0.824, 1
                 text_color:app.theme_cls.primary_color
-                font_size: "20sp" 
+                font_size: "20sp"
                 on_press:root.sumf()
             MDRaisedButton:#AVG
                 text:"AVG"
                 pos_hint: {'center_x':0.5 , 'center_y':0.33}
-                size_hint: 0.7,0.2            
+                size_hint: 0.7,0.2
                 md_bg_color:  0.9,.98, .84, 1
                 theme_text_color: "Custom"
-                text_color: app.theme_cls.primary_color                    
-                font_size: "20sp" 
+                text_color: app.theme_cls.primary_color
+                font_size: "20sp"
                 on_press:root.avgf()
 
         ScrollView:
             RelativeLayout
                 MDLabel:
                     pos_hint: {'center_x':0.5 , 'center_y':0.9}
-                    size_hint: 0.7,0.2    
+                    size_hint: 0.7,0.2
                     text: "Product"
                     theme_text_color: "Custom"
                     text_color: 0, 0, 0, 1
@@ -303,21 +267,20 @@
                 MDRaisedButton:
                     text:"Russ Mul"
                     pos_hint: {'center_x':0.5 , 'center_y':.6}
-                    size_hint: 0.7,0.2                
+                    size_hint: 0.7,0.2
                     md_bg_color:  .94,.53, .45, 1
                     font_size: "20sp"
-                    on_press: 
+                    on_press:
                         root.mulru()
                         print("Hello==============")
                 MDRaisedButton:
                     text:"Log Mul"
                     pos_hint: {'center_x':0.5 , 'center_y':.3}
-                    size_hint: 0.7,0.2                 
+                    size_hint: 0.7,0.2
                     md_bg_color:  .31, .22, .29, 1
                     theme_text_color: "Custom"
-                    
                     font_size: "20sp"
-                    on_press: 
+                    on_press:
                         root.mulog()
                         print("Hello==============")
 ################################################
@@ -331,12 +294,10 @@
             left_action_items: [['menu', lambda x: nav_drawer.set_state('toggle')]]
             right_action_items: [["home", lambda x: root.onback()]]
             elevation:20
-        
         ############################
-<XFileChooserIconView>:	
-    rootpath: '/storage/emulated/0/' if platform == 'android' else '/'
+<XFileChooserIconView>:
+    rootpath: '/storage/emulated/0/'
 	orientation: 'vertical'
-
 	# Creating the File list / icon view
 	MDBoxLayout:
 		# Creating Icon view other side
