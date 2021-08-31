@@ -22,6 +22,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.lang import Builder
 from kivymd.theming import ThemeManager
 theme_cls = ThemeManager()
+theme_cls.theme_style="Dark"
+theme_cls.primary_palette="Yellow" 
 from kivy.core.window import Window
 from  kivy.uix.filechooser import FileChooserIconView
 Window.size=(440,650)
@@ -447,7 +449,7 @@ class RootWidget(ScreenManager):
 class MainApp(MDApp):
     def build(self):
         theme_cls.theme_style="Dark"
-        theme_cls.primary_palette="Teal"        
+        theme_cls.primary_palette="Yellow"        
         return RootWidget()
 
 if __name__ == "__main__":
