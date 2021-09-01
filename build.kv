@@ -1,10 +1,12 @@
 <MDRB@MDRaisedButton>:
     md_bg_color:  0,0, 0, 1
     theme_text_color: "Custom"
-    text_color: 1,1,1,1
-    font_size: "16sp"
+    text_color: 1,1,0,1
     size_hint: 0.3,.05
     line_color: 1, 1, 1, 1
+    font_style:"Subtitle2"
+    font_name: 'assets/Bodoni Bold'
+    font_size: "18sp"
 <MDTXT@MDTextField>:
     size_hint: 0.4,.1
     pos_hint: {'center_x':0.5 , 'center_y':0.6}
@@ -14,8 +16,8 @@
     bold:True
     halign: "center"
 <RootWidget>:
-    #Connect:
-    #    name:"connect"
+    Connect:
+        name:"connect"
     MainScreen:
         name:"main_screen"
     ShowDataTable:
@@ -41,7 +43,6 @@
             right_action_items: [["close", lambda x: root.onback()]]
             elevation:10
             bold: True
-            md_bg_color:0,0,0,1
         MDScreen:
             MDLabel:
                 text: "Please Fill the form bellow to procced"
@@ -68,16 +69,20 @@
                 max_text_length: 5
                 on_text_validate:root.db_connect()
             MDRaisedButton:
-                size_hint : 0.45, 0.07
+                md_bg_color:0,0,0,1
+                theme_text_color: "Custom"
+                text_color: 0.9,1,1,1
+                size_hint: 0.45, 0.07
                 pos_hint: {'center_x':0.5 , 'center_y':0.32}
                 text:"Connect"
+                font_name: 'assets/Bodoni Bold'
+                font_size: "18sp"
                 on_press:root.db_connect()
-                md_bg_color:0,0,0,0.8
                 line_color: 1, 1, 1, 1
 <MainScreen>:
     canvas.before:
         Color:
-            rgba:(.96,.87,.30,.8)
+            rgba:(1,.8,0,1)
         Rectangle:
             size:self.size
             pos: self.pos
@@ -116,7 +121,7 @@
                 on_press :root.send_db()
             MDRB:     #"Operations"
                 text:" Operations "
-                on_press : root.to_chfile()
+                on_press : root.operations()
         #*****************************************************#
         GridLayout: #Grid3
             cols:1
@@ -144,6 +149,8 @@
                     text:"Show DataTables"
                     on_press: root.showdt()
         AnchorLayout:
+            theme_text_color: "Primary"
+            text_color: 1,0,0,1        
             anchor_x: 'center'
             anchor_y: 'top'
             RelativeLayout
@@ -174,69 +181,99 @@
                 title: 'Show Data'
                 right_action_items: [["home", lambda x: root.onback()]]
                 elevation:15
-                md_bg_color:0,0,0,1
 ###################################################
 <OperationsScreen>:
-    GridLayout: #before text id :idinsert
-        cols :1
-        padding: 20,20
-        spacing: '15dp','15dp'
-        RelativeLayout:
-            ScrollView:
-                do_scroll_x: False
-                do_scroll_y: True
-                scroll_distance : 20
-                pos_hint: {'center_x':1 , 'center_y':.3}
-                MDList:
-                    id: container2
-                    size_hint :0.2,0.3
-                    anchor_x: 'center'
-                    anchor_y: 'top'
-        GridLayout: #before text id :idinsert
-            cols :2
-            GridLayout:
+    clickedbtn:""
+    BoxLayout:
+        orientation:"vertical"
+        size_hint : 0.2,0.5
+        pos_hint:{'center_x':.5,'center_y':.6}
+        canvas:
+            Color:
+                rgba: 0,0,0,0.005
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        MDLabel:
+            text:'Crypted Columns'
+            halign:'center'
+            size_hint_y:0.2
+        ScrollView:
+            halign:'center'
+            do_scroll_x: False
+            do_scroll_y: True
+            MDList:
+                pos_hint:{'center_x':.5,'center_y':.6}
+                id: container2
+                size_hint :1,0.4
+                halign:'center'
+        ScrollView:
+    MDGridLayout:
+        cols:2
+        size_hint : 1,0.6
+        MDScreen:
+            MDGridLayout:
                 cols:1
-                size_hint: 0.65, 1
-            GridLayout:
-                cols: 1
-                padding: 20,20
-                spacing: '15dp','15dp'
+                padding:10
+                spacing:10
+                size_hint : 0.7,0.6
+                pos_hint:{'center_x':0.4,'center_y':0.33}
                 MDLabel:
-                    pos_hint: {'center_x':.61 , 'center_y':.4}
                     text: "Selected column"
-                    halign: "center"
-                    theme_text_color: "Custom"
-                    text_color: 0, 0, 0, 1
-                    id:showchecked
-                    font_size: "16sp"
-                    md_bg_color:  0.9,0.32,0.07, 1
-                RelativeLayout:
-                    MDLabel: #Elapsed Time
-                        text: "Elapsed Time"
-                        id : ltime
-                        md_bg_color:  0,.63,.94, 1
-                        pos_hint: {'center_x':.5 , 'center_y':.5}
-                        font_size: "16sp"
-                        halign: "center"
-                        theme_text_color: "Custom"
-                        text_color: 1, 1, 1, 1
-
+                    valign :"middle"
+                    size_hint : 0.5,0.1
+                MDLabel:
+                    text: "Operation"
+                    size_hint : 0.5,0.1
+                MDLabel:
+                    text: "Elapsed Time"
+                    valign :"middle"
+                    size_hint : 0.5,0.1
                 MDLabel:#lresult
-                    text: "Operation Result"
+                    text: " Result"
+                    valign :"middle"
+                    size_hint : 0.5,0.1
+        MDScreen:
+            MDGridLayout:
+                cols:1
+                padding:10
+                spacing:5
+                size_hint : 1,0.69
+                pos_hint:{'center_x':.2,'center_y':.31}
+                MDTextField:
+                    id:showchecked
+                    readonly: True
+                    text:""
+                    halign: 'center'
+                    valign: 'middle'
+                MDTextField:
+                    id:op
+                    readonly: True
+                    text:root.clickedbtn
+                    size_hint_x: None
+                    width:250
+                    halign: 'center'
+                    valign: 'middle'                    
+                MDTextField:
+                    readonly: True
+                    text:""
+                    id : ltime
+                    halign: 'center'
+                    valign: 'middle'                                    
+                MDTextField:
                     id: lresult
-                    pos_hint: {'center_x':0.61 , 'center_y':0.15}
-                    md_bg_color:  .5, .7, 0, 1
-                    halign: "center"
-                    size: self.texture_size
-                    #font_size: "18sp"
-                    theme_text_color: "Custom"
-                    text_color: 1, 0, 0, 1
-###############################################################################################
+                    readonly: True
+                    text:""
+                    multiline:True
+                    halign: 'center'
+                    valign: 'middle'                    
+    ###############################################################################################
     MDNavigationDrawer :
         id : nav_drawer
         orientation: 'vertical'
-        padding: "20dp","20dp"
-        spacing: '15dp'
+        padding: "10dp","10dp"
+        spacing: '10dp'
+        size_hint:0.4,1
         RelativeLayout:
             MDRaisedButton: # Sum
                 text:"Sum"
@@ -245,7 +282,9 @@
                 md_bg_color:  0.956,1, 0.824, 1
                 text_color:app.theme_cls.primary_color
                 font_size: "20sp"
-                on_press:root.sumf()
+                on_press:
+                    root.sumf()
+                    root.clickedbtn="Sum"
             MDRaisedButton:#AVG
                 text:"AVG"
                 pos_hint: {'center_x':0.5 , 'center_y':0.33}
@@ -254,7 +293,9 @@
                 theme_text_color: "Custom"
                 text_color: app.theme_cls.primary_color
                 font_size: "20sp"
-                on_press:root.avgf()
+                on_press:
+                    root.avgf()
+                    root.clickedbtn="AVG"
 
         ScrollView:
             RelativeLayout
@@ -275,17 +316,16 @@
                     font_size: "20sp"
                     on_press:
                         root.mulru()
-                        print("Hello==============")
+                        root.clickedbtn="Ru Multiplication"
                 MDRaisedButton:
                     text:"Log Mul"
                     pos_hint: {'center_x':0.5 , 'center_y':.3}
                     size_hint: 0.7,0.2
                     md_bg_color:  .31, .22, .29, 1
-                    theme_text_color: "Custom"
                     font_size: "20sp"
                     on_press:
                         root.mulog()
-                        print("Hello==============")
+                        root.clickedbtn="Log Multiplication"
 ################################################
     GridLayout:
 

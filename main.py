@@ -40,7 +40,7 @@ dbname=None #database crypted
 file_name=None #file uploaded
 table =None #Table affiché dans show datatable 
 checked_ele=None # le nome de colonne selectionner 
-send_flag=None
+send_flag=True
 # Security keys genration
 (pubkey, privkey) = rsa.newkeys(512)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
@@ -182,8 +182,6 @@ class MainScreen(Screen):
                     self.ids.datashow.text=f" Column [{checked_ele}] crypted succefully"
                 except:
                     self.ids.datashow.text=f"Warning !.. Column [{checked_ele} Aleardy crypted ]"
-            
-
     #_______________#
     def send_db(self):
         global dbname,send_flag,HOST
@@ -307,9 +305,10 @@ class OperationsScreen(Screen):
     def listchecked2(self,x): #selection de clonne 
         global checked_ele
         checked_ele=x
-        self.ids.showchecked.text = f" The column [ {x} ] is now Selected"
-        self.ids.lresult.text=f" [+] Waitting for Result "
-        self.ids.ltime.text=f"  [+] Waitting for Elapsed Time "
+        self.ids.showchecked.text = f"  {x} "
+        self.ids.op.text='...'
+        self.ids.lresult.text="..."
+        self.ids.ltime.text=" ... "
     def sumf(self):
         start=time.time()
         chosen_col=checked_ele
@@ -323,9 +322,9 @@ class OperationsScreen(Screen):
             sum=Soc.recv(BS)
             sum=dill.loads(sum)
             sum=priv_key.decrypt(sum)
-            self.ids.lresult.text=f" [+] Sum Result : \n  [{sum}]"
+            self.ids.lresult.text=f"{sum}"
         endt=(time.time() - start)*1000
-        self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "
+        self.ids.ltime.text=f"{round(endt,2)} ms "
     def avgf(self):
         start=time.time()
         chosen_col=checked_ele
@@ -339,9 +338,9 @@ class OperationsScreen(Screen):
             avg=Soc.recv(BS)
             avg=dill.loads(avg)
             avg=priv_key.decrypt(avg)
-            self.ids.lresult.text=f" [+] AVG Result : \n {avg}"
+            self.ids.lresult.text=f"{avg}"
         endt=(time.time() - start)*1000
-        self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "            
+        self.ids.ltime.text=f"{round(endt,2)} ms "            
     #_______________#
     def mulru(self):
         chosen_col=checked_ele
@@ -392,12 +391,12 @@ class OperationsScreen(Screen):
                 m1=result
                 
         #################__BreakOut
-            self.ids.lresult.text=f"Ru_mul Result : \n [{result}]"
+            self.ids.lresult.text=f"{result}"
             tab="End"
             tab=dill.dumps(tab)
             Soc.send(tab)
             endt=(time.time() - start)*1000
-            self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "
+            self.ids.ltime.text=f"{round(endt,2)} ms "
             return "Completed Task"
     def mulog(self):
         start=time.time()
@@ -433,14 +432,14 @@ class OperationsScreen(Screen):
                     try:
                         #709.78271 is the largest value I can compute the exp of on my machine
                         rprod=round(math.exp(rprod))
-                        self.ids.lresult.text=f"Log_mul Result : \n [{rprod}]"
+                        self.ids.lresult.text=f"{rprod}"
                     except:
                         self.ids.lresult.text("Input value is greater than allowed limit")
             Lprod="End"
             Lprod=dill.dumps(Lprod)
             Soc.send(Lprod)
             endt=(time.time() - start)*1000
-            self.ids.ltime.text=f"[+] Elapsed Time : \n [{round(endt,2)}] ms "
+            self.ids.ltime.text=f"{round(endt,2)} ms "
             return ("Log Mul Completed")
     def onback(self):
          self.manager.current="main_screen"
@@ -451,8 +450,9 @@ class RootWidget(ScreenManager):
 
 class MainApp(MDApp):
     def build(self):
-        theme_cls.theme_style="Dark"
-        theme_cls.primary_palette="Yellow"        
+        self.title= "FHEDB"
+        self.theme_cls.theme_style="Light"
+        self.theme_cls.primary_palette="Yellow"        
         return RootWidget()
 
 if __name__ == "__main__":
