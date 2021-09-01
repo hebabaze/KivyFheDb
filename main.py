@@ -3,7 +3,7 @@
 #from android.storage import primary_external_storage_path
 #external_storage = primary_external_storage_path()
 #external_storage = os.getenv('EXTERNAL_STORAGE')
-from logging import root
+from jnius import autoclass
 from kivy.properties import ListProperty
 import socket, os,math,time,rsa,dill
 from tinydb import TinyDB
@@ -89,8 +89,12 @@ class MainScreen(Screen):
         self.ids.datashow.text = f" The column [ {x} ] is now Selected"
     def choose_db(self): # fontion de choix de fichier 
         filechooser.open_file(on_selection=self.handle_selection)
-    #_______________#
+    def getpath():
+        Media = autoclass("android.net.MediaStore") #read the android/ios developer docs
+        Media.JavaAttribute
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
+        if platform=='android':
+            self.getpath()
         if not selection:
             pass
         else:
