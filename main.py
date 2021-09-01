@@ -102,8 +102,6 @@ class MainScreen(Screen):
             chosenpath=self.selection[0]
             global file_name,tabx,colx
             file_name=Path(str(self.selection[0])).name # extract db name from path
-            print(f"file name{file_name} and chosepath {chosenpath}")
-            print(type(chosenpath),type(self.selection),type(selection))
             self.db = TinyDB(chosenpath) # upload database
             tabx=self.db.table('Hr')      #upload database table 
             rdic=tabx.get(doc_id=1) # to check value type
