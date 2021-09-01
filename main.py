@@ -4,18 +4,18 @@
 #external_storage = primary_external_storage_path()
 #external_storage = os.getenv('EXTERNAL_STORAGE')
 from jnius import autoclass
-from kivy.properties import ListProperty
 import socket, os,math,time,rsa,dill
 from tinydb import TinyDB
-from kivy.clock import Clock
-
 from phe import paillier
 from binascii import hexlify 
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+from kivymd.uix.filemanager import MDFileManager
+from kivy.properties import ListProperty
+from kivy.clock import Clock
 from kivymd.uix.list import OneLineListItem
 from kivymd.uix.datatables import MDDataTable
 from kivy.metrics import dp
-from plyer import filechooser
+#from plyer import filechooser
 from pathlib import Path
 from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -25,7 +25,7 @@ theme_cls = ThemeManager()
 theme_cls.theme_style="Dark"
 theme_cls.primary_palette="Yellow" 
 from kivy.core.window import Window
-from  kivy.uix.filechooser import FileChooserIconView
+#from  kivy.uix.filechooser import FileChooserIconView
 Window.size=(440,650)
 Builder.load_file('build.kv')
 HOST = ''  # The server's hostname or IP address
@@ -72,7 +72,35 @@ class Connect(Screen):
 #########################################################################
 class MainScreen(Screen):
     selection = ListProperty([])
-    #_______________#
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.file_manager_obj=MDFileManager(
+                select_path=self.select_path,
+                exit_manager=self.exit_manager,
+                preview=False
+            )
+    ########################## MD Flile Manager Functions            
+    def select_path(self,path):
+        global file_name,tabx,colx
+        print(path)
+        print(type(path)  )
+        listpat=path.split('\\')
+        print(listpat)
+        file_name=listpat[-1]
+        self.db = TinyDB(path) # upload database
+        tabx=self.db.table('Hr')      #upload database table 
+        rdic=tabx.get(doc_id=1) # to check value type
+        self.columns=list(rdic.keys())
+        colx=self.columns
+        self.listfil(colx) #update list with column name 
+        self.ids.my_bar.value=0
+        self.ids.datashow.text=f"[{file_name[:-3]}] Data base Loeded"        
+        self.exit_manager()
+    def open_file_manager(self):
+        mypath = '/storage/emulated/0/' if platform == 'android' else 'e:'
+        self.file_manager_obj.show(mypath)
+    def exit_manager(self):
+        self.file_manager_obj.close()
     def listfil(self,lista):
         try:
             self.ids.container.clear_widgets()
@@ -84,6 +112,7 @@ class MainScreen(Screen):
         global checked_ele
         checked_ele=x
         self.ids.datashow.text = f" The column [ {x} ] is now Selected"
+    """"
     def choose_db(self): # fontion de choix de fichier 
         filechooser.open_file(on_selection=self.handle_selection)
     def getpath():
@@ -107,7 +136,7 @@ class MainScreen(Screen):
             self.listfil(colx) #update list with column name 
             self.ids.my_bar.value=0
             self.ids.datashow.text="Data base Loeded"
-        
+     """   
     def rsacrypt(self,data):       # Fonction de Cryptage RSA
         message=data.encode()
         crypto = rsa.encrypt(message, pubkey)

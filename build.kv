@@ -25,9 +25,7 @@
         id:sdt
     OperationsScreen
         name:"operations_screen"
-    XFileChooserIconView:
-        name:"file_chooser_icon_view"
-        id:fciv
+
 <Connect>:
     canvas.before:
         Color:
@@ -111,7 +109,9 @@
             spacing: '15dp','10dp'
             MDRB:#________"Choose DataBase"
                 text:" Select Databse"
-                on_press:root.choose_db()
+                on_press:
+                    root.open_file_manager()
+                    #root.choose_db()
             MDRB:#______"Crypt DataBase"
                 text:" Crypt Databse "
                 on_press:
@@ -326,7 +326,7 @@
                     on_press:
                         root.mulog()
                         root.clickedbtn="Log Multiplication"
-################################################
+    ################################################
     GridLayout:
 
         cols :1
@@ -338,39 +338,3 @@
             right_action_items: [["home", lambda x: root.onback()]]
             elevation:20
         ############################
-<XFileChooserIconView>:
-    rootpath: '/storage/emulated/0/'
-	orientation: 'vertical'
-	# Creating the File list / icon view
-	MDBoxLayout:
-		# Creating Icon view other side
-		FileChooserIconView:
-			canvas.before:
-				Color:
-					rgb: .5, .4, .5
-				Rectangle:
-					pos: self.pos
-					size: self.size
-			on_selection: root.fselected(*args)
-
-	# Adding label
-    Label:
-        id: label
-        size_hint_y: .09
-        #pos_hint: {'center_y':0.11}
-        halign: "center"
-        canvas:
-            Color:
-                rgb: 0.8, .99, .91
-            Rectangle:
-                pos: self.pos
-                size: self.size
-    RelativeLayout:
-        MDRaisedButton:
-            text: 'Ok'
-            pos_hint: {'center_x':0.31,'center_y':0.05}
-            on_press:root.ok()
-        MDRaisedButton:
-            text: 'Cancel'
-            pos_hint: {'center_x':0.61,'center_y':0.05}
-            on_press:root.cancel()
