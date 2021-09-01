@@ -73,9 +73,6 @@ class Connect(Screen):
 class MainScreen(Screen):
     selection = ListProperty([])
     #_______________#
-    def to_chfile(self):
-        self.manager.current="file_chooser_icon_view"
-        screen5 = self.manager.get_screen('file_chooser_icon_view')
     def listfil(self,lista):
         try:
             self.ids.container.clear_widgets()
@@ -238,30 +235,7 @@ class MainScreen(Screen):
             except:pass
     
 #############################################################################        
-class XFileChooserIconView(Screen):
-    
-    def fselected(self,*args):
-        try:
-            self.file_selected=args[1][0]
-        except: pass
-    def ok(self):
-        global file_name,tabx,colx
-        file_name=Path(str(self.file_selected)).name
-        self.db = TinyDB(self.file_selected) # upload database
-        tabx=self.db.table('Hr')      #upload database table 
-        rdic=tabx.get(doc_id=1) # to check value type
-        self.columns=list(rdic.keys())
-        colx=self.columns
-        self.manager.current="main_screen"
-        screen1 = self.manager.get_screen('main_screen')
-        screen1.ids.datashow.text="Data base Loeded"
-        try :screen1.ids.container.clear_widgets()
-        except:pass
-        for x in colx:
-            screen1.ids.container.add_widget(OneLineListItem(text=f"{x}",
-                on_press=lambda x: screen1.listchecked(x.text)))
-    def cancel(self):
-        self.manager.current="main_screen"
+
 ########################################################### #########
 class ShowDataTable(Screen):
     #_______________#
