@@ -39,7 +39,7 @@ HOST = ''  # The server's hostname or IP address
 PORT = ''        # The port used by the server
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-colx=None #column list 
+colx=[] #column list 
 crypted_cols=[]# Crypted Columns list 
 tabx =None # nomal Table 
 Xtable=None#Table Crypté
@@ -134,16 +134,18 @@ class MainScreen(Screen):
     def choose_db(self): # fontion de choix de fichier 
         filechooser.open_file(on_selection=self.handle_selection)
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
+        global colx,file_name,tabx
         if not selection:
             pass
         else:
             self.selection = selection
+            colx=crypted_cols=[]
+            print("colx=crypted_cols",colx,crypted_cols)
             chosenpath=self.selection[0]
             print('chosenpath',chosenpath)
             cmd="del chosenpath\\..\\*x.db" if platform=='win' else  'rm chosenpath/*x.db'
             try:os.system(cmd)
             except:pass
-            global file_name,tabx,colx
             file_name=Path(str(self.selection[0])).name # extract db name from path
             try:
                 self.db = TinyDB(chosenpath) # upload database
@@ -168,8 +170,8 @@ class MainScreen(Screen):
         return x.ciphertext()
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
-        global Xtable,dbname,file_name,tabx,checked_ele
-        if dbname:
+        global Xtable,dbname,file_name,tabx,checked_ele,crypted_cols
+        if crypted_cols==[colx.index(x) for x in colx]:
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
         elif not file_name:
             self.ids.datashow.text=f"Warning ! .Choose Database !"
@@ -194,6 +196,8 @@ class MainScreen(Screen):
                                 d[self.rsacrypt(a)]=self.enciph(int(b))
                         Xtable.insert(d)
                         self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
+                        crypted_cols=[colx.index(x) for x in colx]
+                        
 
     def cryptcolumn(self):
         global dbname,Xtable,file_name,crypted_cols
@@ -214,7 +218,6 @@ class MainScreen(Screen):
                     Xtable = dby.table('Dx')                
                     for x in tabx:  
                         Xtable.insert(x)
-                print("this is tabx",tabx)
                 for x in Xtable:
                     temp_dict={}
                     for key,val in  x.items():
@@ -228,14 +231,14 @@ class MainScreen(Screen):
                             crypt_temp.append(temp_dict)
                 self.ids.datashow.text=f" Column [{checked_ele}] crypted succefully"
                 #except Exception as e:self.ids.datashow.text=str(e)             
-            Xtable.truncate()
-            for x in crypt_temp:
-                Xtable.insert(x)
-            if e not in crypted_cols :
-                crypted_cols.append(e)
-                crypted_cols=sorted(crypted_cols)
-
+                Xtable.truncate()
+                for x in crypt_temp:
+                    Xtable.insert(x)
+                if e not in crypted_cols :
+                    crypted_cols.append(e)
+                    crypted_cols=sorted(crypted_cols)
         print("The crypted colonne List",crypted_cols)
+        print("this is Xtable\n",Xtable.all())
     #______________************ Function to send database
     def send_db(self):
         global dbname,send_flag,HOST
@@ -252,29 +255,24 @@ class MainScreen(Screen):
                 Soc.send(str(filesize).encode('utf-8'))
                 current=self.ids.my_bar.value #initialise Pbar
                 with open(dbname, "rb") as f:
-                    while True :
-                        for i in range(64,filesize,64):
-                            bytes_read = f.read(64)
-                            Soc.send(bytes_read)
-                            current+=(i/filesize)*100  #increment progres bar
-                            self.ids.my_bar.value=current #update Progress bar                          
-                            if filesize-i < 64 :
-                                bytes_read = f.read(filesize-i)
-                                Soc.send(bytes_read)
-                                current+=filesize-i  #increment progres bar
-                                self.ids.my_bar.value=current #update Progress bar  
-                        self.ids.datashow.text = f" [ { dbname } ] .. Sent Succefully ..!"   
-                        send_flag=True
-                        break
+                    bytes_read = f.read(filesize)
+                    Soc.send(bytes_read)
+                    self.ids.my_bar.value=100 #update Progress bar  
+                    self.ids.datashow.text = f" [ { dbname } ] .. Sent Succefully ..!"   
+                    send_flag=True
     #_______________************Function change Screen to operation screen 
     def operations(self):
+        global tabx,crypted_cols
         if send_flag:
+            rdic=tabx.get(doc_id=1)
+            int_cols=[colx.index(x) for x in rdic if not str(rdic[x]).isalpha()]
+            int_crypted_cols=[x for x in crypted_cols if x in int_cols]
             self.manager.current="operations_screen"
             screen3 = self.manager.get_screen('operations_screen')
             try:
                 screen3.ids.container2.clear_widgets()
-                for x in crypted_cols:
-                    screen3.ids.container2.add_widget(OneLineListItem(text=f"{x}",on_press=lambda x: screen3.listchecked2(x.text)))   
+                for x in int_crypted_cols:
+                    screen3.ids.container2.add_widget(OneLineListItem(text=f"{colx[x]}",on_press=lambda x: screen3.listchecked2(x.text)))   
             except:pass
         else:
             self.ids.datashow.text = f" Database not sent yet ..!"    
