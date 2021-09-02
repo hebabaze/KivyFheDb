@@ -81,7 +81,7 @@ class MainScreen(Screen):
                 ext=[".py", "db",".db",".jpg"],
             )
     
-    #______________************** MD Flile Manager Functions            
+    #______________************** MD Flile Manager Functions for mobile            
     def select_path(self,path):
         global file_name,tabx,colx
         print(path)
@@ -129,18 +129,20 @@ class MainScreen(Screen):
         checked_ele=x
         self.ids.datashow.text = f" The column [ {x} ] is now Selected"
         toast(f"This Column {x} is selected")
-    
+
     #______________************* Choose database on win env
     def choose_db(self): # fontion de choix de fichier 
         filechooser.open_file(on_selection=self.handle_selection)
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
-        if platform=='android':
-            self.getpath()
         if not selection:
             pass
         else:
             self.selection = selection
             chosenpath=self.selection[0]
+            print('chosenpath',chosenpath)
+            cmd="del chosenpath\\..\\*x.db" if platform=='win' else  'rm chosenpath/*x.db'
+            try:os.system(cmd)
+            except:pass
             global file_name,tabx,colx
             file_name=Path(str(self.selection[0])).name # extract db name from path
             try:
@@ -186,26 +188,25 @@ class MainScreen(Screen):
                     for x in tabx :
                         d={}
                         for a,b in x.items() :
-                            if len(str(b)) >64 :
-                                self.ids.datashow.text=f"The Row {a} is aleardy Crypted"
-                                d[self.rsacrypt(a)]=b
-                            else:
-                                if str(b).isalpha():
-                                    d[self.rsacrypt(a)]=self.rsacrypt(b)
-                                elif not str(b).isalpha() :
-                                    d[self.rsacrypt(a)]=self.enciph(int(b))
+                            if str(b).isalpha():
+                                d[self.rsacrypt(a)]=self.rsacrypt(b)
+                            elif not str(b).isalpha() :
+                                d[self.rsacrypt(a)]=self.enciph(int(b))
                         Xtable.insert(d)
                         self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
 
     def cryptcolumn(self):
         global dbname,Xtable,file_name,crypted_cols
+        crypt_temp=[]
         if not file_name :
             self.ids.datashow.text=f"Warning ! .Choose Database !"
         else:
             if not dbname:
                 dbname=file_name[:-3]+'x.db' # Create New DB file
             e=colx.index(checked_ele)
-            if colx[e] in crypted_cols:
+            if [colx.index(x) for x in colx]==crypted_cols:
+                self.ids.datashow.text=" All Columns are crypted"
+            elif e in crypted_cols:
                 self.ids.datashow.text=f"The Row {colx[e]} is aleardy Crypted"
             else:
                 dby=TinyDB(dbname) 
@@ -214,25 +215,26 @@ class MainScreen(Screen):
                     for x in tabx:  
                         Xtable.insert(x)
                 print("this is tabx",tabx)
-                i=1 
-                rdic=Xtable.get(doc_id=1) #L=[x for x in rdic if len(str(rdic[x])) > 64  ]
-                if not str(rdic[colx[e]]).isalpha() :
-                    print("str(rdic[colx[e]])" ,str(rdic[colx[e]]))
-                    for x in Xtable:
-                        Xtable.update({colx[e]:self.enciph(x[colx[e]])},doc_ids=[i])
-                        i+=1
-                else :
-                    for x in Xtable:
-                        print("Else : str(rdic[colx[e]])" ,str(rdic[colx[e]]))
-                        Xtable.update({colx[e]:self.rsacrypt(x[colx[e]])},doc_ids=[i])
-                        i+=1
+                for x in Xtable:
+                    temp_dict={}
+                    for key,val in  x.items():
+                        if key!=checked_ele:
+                            temp_dict[key]=val
+                        elif key==checked_ele:
+                            if not str(val).isalpha() :
+                                temp_dict[self.rsacrypt(key)]=self.enciph(val)
+                            else :
+                                temp_dict[self.rsacrypt(key)]=self.rsacrypt(val)
+                            crypt_temp.append(temp_dict)
                 self.ids.datashow.text=f" Column [{checked_ele}] crypted succefully"
-                #except Exception as e:self.ids.datashow.text=str(e)
-             
-            if colx[e] not in crypted_cols :
-                crypted_cols.append(colx[e] )
-        if colx==crypted_cols:
-            self.ids.datashow.text=" All Columns are crypted"
+                #except Exception as e:self.ids.datashow.text=str(e)             
+            Xtable.truncate()
+            for x in crypt_temp:
+                Xtable.insert(x)
+            if e not in crypted_cols :
+                crypted_cols.append(e)
+                crypted_cols=sorted(crypted_cols)
+
         print("The crypted colonne List",crypted_cols)
     #______________************ Function to send database
     def send_db(self):
@@ -271,7 +273,7 @@ class MainScreen(Screen):
             screen3 = self.manager.get_screen('operations_screen')
             try:
                 screen3.ids.container2.clear_widgets()
-                for x in colx:
+                for x in crypted_cols:
                     screen3.ids.container2.add_widget(OneLineListItem(text=f"{x}",on_press=lambda x: screen3.listchecked2(x.text)))   
             except:pass
         else:
