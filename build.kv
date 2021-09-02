@@ -16,8 +16,8 @@
     bold:True
     halign: "center"
 <RootWidget>:
-    Connect:
-        name:"connect"
+    #Connect:
+    #    name:"connect"
     MainScreen:
         name:"main_screen"
     ShowDataTable:
@@ -110,8 +110,7 @@
             MDRB:#________"Choose DataBase"
                 text:" Select Databse"
                 on_press:
-                    root.open_file_manager()
-                    #root.choose_db()
+                    root.upload_db()
             MDRB:#______"Crypt DataBase"
                 text:" Crypt Databse "
                 on_press:
@@ -121,7 +120,8 @@
                 on_press :root.send_db()
             MDRB:     #"Operations"
                 text:" Operations "
-                on_press : root.operations()
+                on_press : 
+                    root.operations()
         #*****************************************************#
         GridLayout: #Grid3
             cols:1

@@ -1,54 +1,53 @@
-#from android.permissions import request_permissions, Permission
-#request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.READ_EXTERNAL_STORAGE])
-#from android.storage import primary_external_storage_path
-#external_storage = primary_external_storage_path()
-#external_storage = os.getenv('EXTERNAL_STORAGE')
+import os  
+os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+#Kivy Import 
+from kivy.properties import ListProperty
+from kivy.clock import Clock
+from kivy.metrics import dp
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.lang import Builder
+from kivy.core.window import Window
+from kivy.utils import platform
+#Kivymd Import
+from kivymd.uix.filemanager import MDFileManager
+from kivymd.uix.list import OneLineListItem
+from kivymd.uix.datatables import MDDataTable
+from kivymd.app import MDApp
+from kivymd.theming import ThemeManager
+from kivymd.toast import toast
+# Others Import 
+import socket,math,time,rsa,dill,os
 from jnius import autoclass
-import socket, os,math,time,rsa,dill
 from tinydb import TinyDB
 from phe import paillier
 from binascii import hexlify 
-os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
-from kivymd.uix.filemanager import MDFileManager
-from kivy.properties import ListProperty
-from kivy.clock import Clock
-from kivymd.uix.list import OneLineListItem
-from kivymd.uix.datatables import MDDataTable
-from kivy.metrics import dp
-#from plyer import filechooser
+from plyer import filechooser
 from pathlib import Path
-from kivymd.app import MDApp
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.lang import Builder
-from kivymd.theming import ThemeManager
+#Config And Setting
 theme_cls = ThemeManager()
 theme_cls.theme_style="Dark"
 theme_cls.primary_palette="Yellow" 
-from kivy.core.window import Window
-#from  kivy.uix.filechooser import FileChooserIconView
 Window.size=(440,650)
 Builder.load_file('build.kv')
+(pubkey, privkey) = rsa.newkeys(512)
+pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
+pkr=pub_key.n
+cmd="del *x.db" if platform=='win' else  'rm *x.db'
+os.system(cmd)
+#Variable Declaration 
 HOST = ''  # The server's hostname or IP address
 PORT = ''        # The port used by the server
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-colx=None #list des colonne 
-tabx =None # Table en claire
+colx=None #column list 
+crypted_cols=[]# Crypted Columns list 
+tabx =None # nomal Table 
 Xtable=None#Table Crypté
-dbname=None #database crypted
+dbname=None #crypted database 
 file_name=None #file uploaded
-table =None #Table affiché dans show datatable 
-checked_ele=None # le nome de colonne selectionner 
-send_flag=True
-# Security keys genration
-(pubkey, privkey) = rsa.newkeys(512)
-pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
-pkr=pub_key.n
-from kivy.utils import platform
-
-cmd="del *x.db"
-os.system(cmd)
+table =None #te Table used in show datatable 
+checked_ele=None # selected colummn name 
+send_flag=True  # check dababase sending
 
 class Connect(Screen):
     #_______________#
@@ -71,15 +70,18 @@ class Connect(Screen):
             self.ids.constat.text='Connexion failed..!'
 #########################################################################
 class MainScreen(Screen):
-    selection = ListProperty([])
+    selection = ListProperty([]) # define Path list type
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.file_manager_obj=MDFileManager(
-                select_path=self.select_path,
+        Window.bind(on_keyboard=self.events)
+        self.manager_open = False
+        self.file_manager=MDFileManager(
                 exit_manager=self.exit_manager,
-                preview=False
+                select_path=self.select_path,
+                ext=[".py", "db",".db",".jpg"],
             )
-    ########################## MD Flile Manager Functions            
+    
+    #______________************** MD Flile Manager Functions            
     def select_path(self,path):
         global file_name,tabx,colx
         print(path)
@@ -87,20 +89,34 @@ class MainScreen(Screen):
         listpat=path.split('\\')
         print(listpat)
         file_name=listpat[-1]
-        self.db = TinyDB(path) # upload database
-        tabx=self.db.table('Hr')      #upload database table 
-        rdic=tabx.get(doc_id=1) # to check value type
-        self.columns=list(rdic.keys())
-        colx=self.columns
-        self.listfil(colx) #update list with column name 
-        self.ids.my_bar.value=0
-        self.ids.datashow.text=f"[{file_name[:-3]}] Data base Loeded"        
+        try:
+            self.db = TinyDB(path) # upload database
+            tabx=self.db.table('Hr')      #upload database table 
+            rdic=tabx.get(doc_id=1) # to check value type
+            self.columns=list(rdic.keys())
+            colx=self.columns
+            self.listfil(colx) #update list with column name 
+            self.ids.my_bar.value=0
+            self.ids.datashow.text=f"[{file_name[:-3]}] Data base Loeded"  
+        except Exception as e:
+            self.ids.datashow.text=str(e)       
         self.exit_manager()
-    def open_file_manager(self):
-        mypath = '/storage/emulated/0/' if platform == 'android' else 'e:'
-        self.file_manager_obj.show(mypath)
+        toast(path)
+    def file_manager_open(self):
+        mypath = '/storage/emulated/0/' if platform == 'android' else '/'
+        self.file_manager.show(mypath)
+        self.manager_open = True
     def exit_manager(self):
-        self.file_manager_obj.close()
+        self.manager_open = False
+        self.file_manager.close()
+    def events(self, instance, keyboard, keycode, text, modifiers):
+        '''Called when buttons are pressed on the mobile device.'''
+        if keyboard in (1001, 27):
+            if self.manager_open:
+                self.file_manager.back()
+        return True
+    
+    #______________*************  Functions Fill Lists with column name
     def listfil(self,lista):
         try:
             self.ids.container.clear_widgets()
@@ -112,12 +128,11 @@ class MainScreen(Screen):
         global checked_ele
         checked_ele=x
         self.ids.datashow.text = f" The column [ {x} ] is now Selected"
-    """"
+        toast(f"This Column {x} is selected")
+    
+    #______________************* Choose database on win env
     def choose_db(self): # fontion de choix de fichier 
         filechooser.open_file(on_selection=self.handle_selection)
-    def getpath():
-        Media = autoclass("android.net.MediaStore") #read the android/ios developer docs
-        Media.JavaAttribute
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
         if platform=='android':
             self.getpath()
@@ -128,15 +143,19 @@ class MainScreen(Screen):
             chosenpath=self.selection[0]
             global file_name,tabx,colx
             file_name=Path(str(self.selection[0])).name # extract db name from path
-            self.db = TinyDB(chosenpath) # upload database
-            tabx=self.db.table('Hr')      #upload database table 
-            rdic=tabx.get(doc_id=1) # to check value type
-            self.columns=list(rdic.keys())
-            colx=self.columns
-            self.listfil(colx) #update list with column name 
-            self.ids.my_bar.value=0
-            self.ids.datashow.text="Data base Loeded"
-     """   
+            try:
+                self.db = TinyDB(chosenpath) # upload database
+                tabx=self.db.table('Hr')      #upload database table 
+                rdic=tabx.get(doc_id=1) # to check value type
+                self.columns=list(rdic.keys())
+                colx=self.columns
+                self.listfil(colx) #update list with column name 
+                self.ids.my_bar.value=0
+                self.ids.datashow.text="Data base Loeded"
+            except Exception as e:
+                self.ids.datashow.text=str(e) 
+    
+    #______________************ Crypt Functions
     def rsacrypt(self,data):       # Fonction de Cryptage RSA
         message=data.encode()
         crypto = rsa.encrypt(message, pubkey)
@@ -147,7 +166,7 @@ class MainScreen(Screen):
         return x.ciphertext()
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
-        global Xtable,dbname,file_name,tabx
+        global Xtable,dbname,file_name,tabx,checked_ele
         if dbname:
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
         elif not file_name:
@@ -158,59 +177,64 @@ class MainScreen(Screen):
             dbx=TinyDB(dbname)        # Create Tinydb DB  
             Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
             if Xtable :
-                tabx=Xtable
-            if tabx:
-                for x in tabx :
-                    d={}
-                    for a,b in x.items() :
-                        if len(str(b)) >64 :
-                            self.ids.datashow.text=f"The Row {a} is aleardy Crypted"
-                            d[self.rsacrypt(a)]=b
-                        else:
-                            if str(b).isalpha():
-                                d[self.rsacrypt(a)]=self.rsacrypt(b)
-                            elif not str(b).isalpha() :
-                                d[self.rsacrypt(a)]=self.enciph(int(b))
-                    Xtable.insert(d)
-                    self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
+                for x in colx : # if the crypted table exist try to crypt the rest of column one by one 
+                    checked_ele=x
+                    self.cryptcolumn()
+                #tabx=Xtable 
+            else :
+                if tabx:
+                    for x in tabx :
+                        d={}
+                        for a,b in x.items() :
+                            if len(str(b)) >64 :
+                                self.ids.datashow.text=f"The Row {a} is aleardy Crypted"
+                                d[self.rsacrypt(a)]=b
+                            else:
+                                if str(b).isalpha():
+                                    d[self.rsacrypt(a)]=self.rsacrypt(b)
+                                elif not str(b).isalpha() :
+                                    d[self.rsacrypt(a)]=self.enciph(int(b))
+                        Xtable.insert(d)
+                        self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
 
     def cryptcolumn(self):
-        global dbname,Xtable,file_name
+        global dbname,Xtable,file_name,crypted_cols
         if not file_name :
             self.ids.datashow.text=f"Warning ! .Choose Database !"
         else:
             if not dbname:
                 dbname=file_name[:-3]+'x.db' # Create New DB file
             e=colx.index(checked_ele)
-            dby=TinyDB(dbname) 
-            if not Xtable:
-                Xtable = dby.table('Dx')
-                
-                for x in tabx:
-                    Xtable.insert(x)
-            else:
-                pass
-            i=1
-            rdic=Xtable.get(doc_id=1)
-            L=[]
-            L=[x for x in rdic if len(str(rdic[x])) > 64  ]
-            self.ids.datashow.text=str(L)
-            if colx[e] in L:
+            if colx[e] in crypted_cols:
                 self.ids.datashow.text=f"The Row {colx[e]} is aleardy Crypted"
-            elif colx[e] not in L :
-                try:
-                    if not str(rdic[colx[e]]).isalpha() :
-                        for x in Xtable:
-                            Xtable.update({colx[e]:self.enciph(x[colx[e]])},doc_ids=[i])
-                            i+=1
-                    else :
-                        for x in Xtable:
-                            Xtable.update({colx[e]:self.rsacrypt(x[colx[e]])},doc_ids=[i])
-                            i+=1
-                    self.ids.datashow.text=f" Column [{checked_ele}] crypted succefully"
-                except:
-                    self.ids.datashow.text=f"Warning !.. Column [{checked_ele} Aleardy crypted ]"
-    #_______________#
+            else:
+                dby=TinyDB(dbname) 
+                if not Xtable: # intialize crypted table
+                    Xtable = dby.table('Dx')                
+                    for x in tabx:  
+                        Xtable.insert(x)
+                print("this is tabx",tabx)
+                i=1 
+                rdic=Xtable.get(doc_id=1) #L=[x for x in rdic if len(str(rdic[x])) > 64  ]
+                if not str(rdic[colx[e]]).isalpha() :
+                    print("str(rdic[colx[e]])" ,str(rdic[colx[e]]))
+                    for x in Xtable:
+                        Xtable.update({colx[e]:self.enciph(x[colx[e]])},doc_ids=[i])
+                        i+=1
+                else :
+                    for x in Xtable:
+                        print("Else : str(rdic[colx[e]])" ,str(rdic[colx[e]]))
+                        Xtable.update({colx[e]:self.rsacrypt(x[colx[e]])},doc_ids=[i])
+                        i+=1
+                self.ids.datashow.text=f" Column [{checked_ele}] crypted succefully"
+                #except Exception as e:self.ids.datashow.text=str(e)
+             
+            if colx[e] not in crypted_cols :
+                crypted_cols.append(colx[e] )
+        if colx==crypted_cols:
+            self.ids.datashow.text=" All Columns are crypted"
+        print("The crypted colonne List",crypted_cols)
+    #______________************ Function to send database
     def send_db(self):
         global dbname,send_flag,HOST
         if not dbname:
@@ -240,17 +264,19 @@ class MainScreen(Screen):
                         self.ids.datashow.text = f" [ { dbname } ] .. Sent Succefully ..!"   
                         send_flag=True
                         break
-    #_______________#
+    #_______________************Function change Screen to operation screen 
     def operations(self):
         if send_flag:
             self.manager.current="operations_screen"
             screen3 = self.manager.get_screen('operations_screen')
-            try:screen3.ids.container2.clear_widgets()
+            try:
+                screen3.ids.container2.clear_widgets()
+                for x in colx:
+                    screen3.ids.container2.add_widget(OneLineListItem(text=f"{x}",on_press=lambda x: screen3.listchecked2(x.text)))   
             except:pass
-            for x in colx:
-                screen3.ids.container2.add_widget(OneLineListItem(text=f"{x}",on_press=lambda x: screen3.listchecked2(x.text)))   
         else:
             self.ids.datashow.text = f" Database not sent yet ..!"    
+    #______________*************Function to show data table content
     def showdt(self) :
         global Xtable,tabx,table
         self.manager.current="show_data_table"
@@ -262,9 +288,9 @@ class MainScreen(Screen):
         else:
             try:screen2.crtab(tabx,30)
             except:pass
-    
-#############################################################################        
-
+    #______________************* Function to choose with fonction to use for uplaod db
+    def upload_db(self):
+        return self.choose_db() if platform=='win' else self.file_manager_open()
 ########################################################### #########
 class ShowDataTable(Screen):
     #_______________#
