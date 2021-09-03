@@ -84,10 +84,7 @@ class MainScreen(Screen):
     #______________************** MD Flile Manager Functions for mobile            
     def select_path(self,path):
         global file_name,tabx,colx
-        print(path)
-        print(type(path)  )
         listpat=path.split('\\')
-        print(listpat)
         file_name=listpat[-1]
         try:
             self.db = TinyDB(path) # upload database
@@ -140,9 +137,7 @@ class MainScreen(Screen):
         else:
             self.selection = selection
             colx=crypted_cols=[]
-            print("colx=crypted_cols",colx,crypted_cols)
             chosenpath=self.selection[0]
-            print('chosenpath',chosenpath)
             cmd="del chosenpath\\..\\*x.db" if platform=='win' else  'rm chosenpath/*x.db'
             try:os.system(cmd)
             except:pass
@@ -237,8 +232,6 @@ class MainScreen(Screen):
                 if e not in crypted_cols :
                     crypted_cols.append(e)
                     crypted_cols=sorted(crypted_cols)
-        print("The crypted colonne List",crypted_cols)
-        print("this is Xtable\n",Xtable.all())
     #______________************ Function to send database
     def send_db(self):
         global dbname,send_flag,HOST
@@ -264,9 +257,11 @@ class MainScreen(Screen):
     def operations(self):
         global tabx,crypted_cols
         if send_flag:
-            rdic=tabx.get(doc_id=1)
-            int_cols=[colx.index(x) for x in rdic if not str(rdic[x]).isalpha()]
-            int_crypted_cols=[x for x in crypted_cols if x in int_cols]
+            try:
+                rdic=tabx.get(doc_id=1)
+                int_cols=[colx.index(x) for x in rdic if not str(rdic[x]).isalpha()]
+                int_crypted_cols=[x for x in crypted_cols if x in int_cols]
+            except: pass
             self.manager.current="operations_screen"
             screen3 = self.manager.get_screen('operations_screen')
             try:

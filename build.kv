@@ -16,8 +16,8 @@
     bold:True
     halign: "center"
 <RootWidget>:
-    Connect:
-        name:"connect"
+    #Connect:
+    #    name:"connect"
     MainScreen:
         name:"main_screen"
     ShowDataTable:
@@ -184,20 +184,30 @@
 ###################################################
 <OperationsScreen>:
     clickedbtn:""
+    MDScreen:
+        MDLabel:
+            text:'Crypted Columns'
+            md_bg_color:app.theme_cls.primary_color
+            halign:'center'
+            size_hint_y:0.08
+            size_hint_x:0.4
+            pos_hint:{'center_x':.5,'center_y':.8}
+            line_color: 1, 1, 1, 1
+            font_style:"Subtitle2"
+            font_name: 'assets/Bodoni Bold'
+            font_size: "18sp"
+            bold: True
     BoxLayout:
         orientation:"vertical"
-        size_hint : 0.2,0.5
-        pos_hint:{'center_x':.5,'center_y':.6}
+        size_hint : 0.2,0.6
+        pos_hint:{'center_x':.5,'center_y':.48}
         canvas:
             Color:
                 rgba: 0,0,0,0.005
             Rectangle:
                 pos: self.pos
                 size: self.size
-        MDLabel:
-            text:'Crypted Columns'
-            halign:'center'
-            size_hint_y:0.2
+
         ScrollView:
             halign:'center'
             do_scroll_x: False
@@ -275,44 +285,45 @@
         spacing: '10dp'
         size_hint:0.4,1
         RelativeLayout:
-            MDRaisedButton: # Sum
+            MDRB: # Sum
                 text:"Sum"
                 pos_hint: {'center_x':0.5 , 'center_y':0.6}
                 size_hint: 0.7,0.2
-                md_bg_color:  0.956,1, 0.824, 1
-                text_color:app.theme_cls.primary_color
                 font_size: "20sp"
                 on_press:
                     root.sumf()
                     root.clickedbtn="Sum"
-            MDRaisedButton:#AVG
+            MDRB:#AVG
                 text:"AVG"
                 pos_hint: {'center_x':0.5 , 'center_y':0.33}
                 size_hint: 0.7,0.2
-                md_bg_color:  0.9,.98, .84, 1
-                theme_text_color: "Custom"
-                text_color: app.theme_cls.primary_color
                 font_size: "20sp"
                 on_press:
                     root.avgf()
                     root.clickedbtn="AVG"
 
         ScrollView:
+            canvas.before:
+                Color:
+                    rgba:(0,0,0,1)
+                Rectangle:
+                    size:self.size
+                    pos: self.pos
             RelativeLayout
                 MDLabel:
                     pos_hint: {'center_x':0.5 , 'center_y':0.9}
                     size_hint: 0.7,0.2
                     text: "Product"
                     theme_text_color: "Custom"
-                    text_color: 0, 0, 0, 1
+                    text_color: 1, 1, 1, 1
                     halign : "center"
-                    height: self.texture_size[1]
-                    md_bg_color:  0.93, 0.63,0.60 , 1
+                    font_name: 'assets/Bodoni Bold'
+                    font_size: "22sp"                    
                 MDRaisedButton:
                     text:"Russ Mul"
                     pos_hint: {'center_x':0.5 , 'center_y':.6}
                     size_hint: 0.7,0.2
-                    md_bg_color:  .94,.53, .45, 1
+                    md_bg_color:app.theme_cls.primary_color
                     font_size: "20sp"
                     on_press:
                         root.mulru()
@@ -321,7 +332,7 @@
                     text:"Log Mul"
                     pos_hint: {'center_x':0.5 , 'center_y':.3}
                     size_hint: 0.7,0.2
-                    md_bg_color:  .31, .22, .29, 1
+                    md_bg_color:app.theme_cls.primary_color
                     font_size: "20sp"
                     on_press:
                         root.mulog()
