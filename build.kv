@@ -15,16 +15,6 @@
     text_color: 0,0,0,1
     bold:True
     halign: "center"
-<RootWidget>:
-    #Connect:
-    #    name:"connect"
-    MainScreen:
-        name:"main_screen"
-    ShowDataTable:
-        name:"show_data_table"
-        id:sdt
-    OperationsScreen
-        name:"operations_screen"
 
 <Connect>:
     canvas.before:
@@ -349,3 +339,13 @@
             right_action_items: [["home", lambda x: root.onback()]]
             elevation:20
         ############################
+<RootWidget>:
+    Connect:
+        name:"connect"
+    MainScreen:
+        name:"main_screen"
+    ShowDataTable:
+        name:"show_data_table"
+        id:sdt
+    OperationsScreen
+        name:"operations_screen"

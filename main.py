@@ -47,7 +47,7 @@ dbname=None #crypted database
 file_name=None #file uploaded
 table =None #te Table used in show datatable 
 checked_ele=None # selected colummn name 
-send_flag=True  # check dababase sending
+send_flag=False  # check dababase sending
 
 class Connect(Screen):
     #_______________#
@@ -57,8 +57,8 @@ class Connect(Screen):
         try :
             with self.Soc:
                 global HOST,PORT
-                HOST="192.168.1.107"
-                #HOST="135.181.108.235"
+                #HOST="192.168.1.107"
+                HOST="135.181.108.235"
                 #HOST=self.ids.Ip.text
                 PORT=65432
                 #PORT=int(self.ids.Port.text)
@@ -162,14 +162,14 @@ class MainScreen(Screen):
         return crypto
     def enciph(self,y):            # get encipher text
         x=pub_key.encrypt(y)
-        return x.ciphertext()
+        return str(x.ciphertext()), x.exponent
     #_______________#
     def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
         global Xtable,dbname,file_name,tabx,checked_ele,crypted_cols
-        if crypted_cols==[colx.index(x) for x in colx]:
+        if not file_name:
+            self.ids.datashow.text=f"Warning ! .Choose Database !"        
+        elif crypted_cols==[colx.index(x) for x in colx]:
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
-        elif not file_name:
-            self.ids.datashow.text=f"Warning ! .Choose Database !"
         else :
             try:dbname=file_name[:-3]+'x.db' # Create New DB file 
             except:self.ids.datashow.text=f"Warning ! .Choose Database !"
@@ -188,7 +188,7 @@ class MainScreen(Screen):
                             if str(b).isalpha():
                                 d[self.rsacrypt(a)]=self.rsacrypt(b)
                             elif not str(b).isalpha() :
-                                d[self.rsacrypt(a)]=self.enciph(int(b))
+                                d[self.rsacrypt(a)]=self.enciph(b) #changerd line
                         Xtable.insert(d)
                         self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
                         crypted_cols=[colx.index(x) for x in colx]
@@ -285,7 +285,7 @@ class MainScreen(Screen):
             except:pass
     #______________************* Function to choose with fonction to use for uplaod db
     def upload_db(self):
-        return self.choose_db() if platform=='win' else self.file_manager_open()
+        return self.choose_db() if platform=='linux' else self.file_manager_open()
 ########################################################### #########
 class ShowDataTable(Screen):
     #_______________#
@@ -338,8 +338,8 @@ class OperationsScreen(Screen):
     def sumf(self):
         start=time.time()
         chosen_col=checked_ele
-        if chosen_col not in colx or not chosen_col :
-            self.ids.lresult.text = "Warning : Choose a valid column name!"
+        if not chosen_col  :
+            self.ids.showchecked.text = "Warning : Choose a valid column name!"
         else :
             x='4'
             Soc.send(x.encode())
@@ -354,8 +354,8 @@ class OperationsScreen(Screen):
     def avgf(self):
         start=time.time()
         chosen_col=checked_ele
-        if chosen_col not in colx or not chosen_col :
-            self.ids.lresult.text = "Warning : Choose a valid column name!"
+        if not chosen_col :
+            self.ids.showchecked.text = "Warning : Choose a valid column name!"
         else:
             x='5'
             Soc.send(x.encode())
@@ -370,20 +370,21 @@ class OperationsScreen(Screen):
     #_______________#
     def mulru(self):
         chosen_col=checked_ele
-        if chosen_col not in colx or not chosen_col :
-            self.ids.lresult.text = "Warning : Choose a valid column name!"
+        if not chosen_col :
+            self.ids.showchecked.text = "Warning : Choose a column !"
         else :
             start=time.time()
             x='60'
             Soc.send(x.encode())
             idd=colx.index(chosen_col)
             T=[] # Pour Stocker Les Valeurs à calculer 
-            pkp = paillier.PaillierPublicKey(int(pkr)) #pkr=pub_key.n pour reconstruire le ciphertext
             # Stocker les valeur à calculer 
             for y in range(1,len(Xtable)+1):
                 Far=Xtable.get(doc_id=y)
+                print(f"FAR  {Far} \n")
                 T.append(list(Far.values())[idd])
-            P=[paillier.EncryptedNumber(pkp, x, 0) for x in T]
+                print(f" T {T} \n")
+            P=[paillier.EncryptedNumber(pub_key, int(x[0]), int(x[1])) for x in T]
             #Decrypter les valeur à traiter
             M=[priv_key.decrypt(x) for x in P]
             for x in M: # Check 0 result
@@ -405,6 +406,7 @@ class OperationsScreen(Screen):
                     m1=m1//2
                     m2=m2+m2
         ##########___Send tab
+                print(tab)
                 tab=dill.dumps(tab)
                 Soc.send(tab)
             #############___Receiv Sum
@@ -427,18 +429,17 @@ class OperationsScreen(Screen):
     def mulog(self):
         start=time.time()
         chosen_col=checked_ele
-        if chosen_col not in colx or not chosen_col :
-            self.ids.lresult.text = "Warning : Choose a valid column name!"        
+        if not chosen_col :
+            self.ids.showchecked.text = "Warning : Choose a valid column name!"        
         else :
             x='6'
             Soc.send(x.encode())
             idm=colx.index(chosen_col)
             L=[]
-            pkg = paillier.PaillierPublicKey(int(pkr))
             for x in range(1,len(tabx)+1):
                 Far=Xtable.get(doc_id=x)
                 L.append(list(Far.values())[idm])
-            P=[paillier.EncryptedNumber(pkg, x, 0) for x in L]
+            P=[paillier.EncryptedNumber(pub_key, int(x[0]), int(x[1])) for x in L]
             M=[priv_key.decrypt(x) for x in P]
             for x in M: # Check 0 result
                 if x==0:
