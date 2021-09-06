@@ -12,37 +12,39 @@ cmd1 = 'del *x.db'
 os.system(cmd)
 os.system(cmd1)
 def rentable() :
-  dbt = TinyDB('ISTA.db')
+  dbt = TinyDB('wesa.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
-  for i in tqdm(range(1,21),unit_divisor=1,desc=f"Creating mydb.db..",colour= 'Blue'):
+  for i in tqdm(range(1,20),unit_divisor=1,desc=f"Creating mydb.db..",colour= 'Blue'):
       tabx.insert({'id':i, 'age': i*10 ,'nom': 'Salah', 'years':1000 ,'ville' : 'Agadir' ,'phone' :693,'cin':98 })
-  logging.info(" database created : mydb.db" )
-  logging.info(f"All Databases Created \n")
   return dbt
 
 def tinyschool() :
-  dbt = TinyDB('lisa.db')
+  dbt = TinyDB('maroc.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
-  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':20.5 })
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':40.4})
-  logging.info(" database created : school.db" )
-  print(tabx.all())
+  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':10 })
+  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':20 })
+  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':30})
+  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':40})
+  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':50 })
+  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':60 })
+  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':70})
+  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':80})
+  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':90})
+  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':100})   
   return dbt
 
-L=[20.5,40.5,80.2,10.6]
+L=[100,200,300,400]
 P=[20,40,80,10]
 def school() :
-  dbt = TinyDB('ensa.db')
+  dbt = TinyDB('plstn.db')
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
-  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':L[0] })
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':L[1]})
-  tabx.insert({'nom': 'Rajae', 'years':2500 ,'id':L[2] })
-  tabx.insert({'nom': 'Rajae', 'years':2500 ,'id':L[3]})
-  logging.info(" database created : school.db" )
-  print(tabx.all())
+  tabx.insert({'City': 'Haifa', 'years':1917 ,'isf':L[0],'code':313 })
+  tabx.insert({'City': 'Yafa', 'years':1918 ,'isf':L[1],'code':313})
+  tabx.insert({'City': 'Jenin', 'years':1948 ,'isf':L[2],'code':313 })
+  tabx.insert({'City': 'Beir sab', 'years':1850 ,'isf':L[3],'code':313})
   return dbt
 
 rentable()
@@ -50,13 +52,19 @@ school()
 tinyschool()
 
 sum=0
-intsum=0
-mult=1
-intp=1
+sump=sum=0
+multp=mult=1
+
+
 for x in L:
     sum+=x
-    intp*=int(x)
     mult*=x
-print("       La somme  real est :",sum)
-print("       Le produit real  est :",mult)
-print("       Le produit int :",intp)
+P=[x for x in range(10,101,10)]
+print("P",P)
+for x in P:
+    sump+=x
+    multp*=x
+print(" Maroc La somme  real est :",sump)
+print(" Maroc Le produit int :",multp)
+print(" Plstn La somme  real est :",sum)
+print(" Plstn Le produit int :",mult)

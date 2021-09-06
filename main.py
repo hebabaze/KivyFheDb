@@ -17,7 +17,7 @@ from kivymd.app import MDApp
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 # Others Import 
-import socket,math,time,rsa,dill,os,paramiko
+import socket,math,time,rsa,dill,os
 from jnius import autoclass
 from tinydb import TinyDB
 from phe import paillier
@@ -58,8 +58,8 @@ class Connect(Screen):
         try :
             with self.Soc:
                 global HOST,PORT
-                #HOST="192.168.1.107"
-                HOST="135.181.108.235"
+                HOST="192.168.1.107"
+                #HOST="135.181.108.235"
                 #HOST=self.ids.Ip.text
                 PORT=65432
                 #PORT=int(self.ids.Port.text)
@@ -151,7 +151,7 @@ class MainScreen(Screen):
                 colx=self.columns
                 self.listfil(colx) #update list with column name 
                 self.ids.my_bar.value=0
-                self.ids.datashow.text="Data base Loeded"
+                self.ids.datashow.text=f"[{file_name[:-3]}] Data base Loeded"  
             except Exception as e:
                 self.ids.datashow.text=str(e) 
     
@@ -235,35 +235,25 @@ class MainScreen(Screen):
                     crypted_cols=sorted(crypted_cols)
     #______________************ Function to send database
     def send_db(self):
-        global dbname,send_flag,HOST
+        global dbname,send_flag
         if not dbname:
             self.ids.datashow.text="Crypt Database Before"
         else :
             x='3'
-            crypted_dbname=self.rsacrypt(dbname)
-            crypted_dbname=crypted_dbname+".db"
-            client=paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(hostname='135.181.108.235',username='root',password='Newlife',allow_agent=False,look_for_keys=False)
-            sftp=client.open_sftp()
-            cwd=os.getcwd()
-            print("cwd",cwd)
-            #remotepath=os.path.join('/tmp/fhe/',dbname)
-            remotepath=os.path.join("/tmp/fhe/","maxa")
-            print('remotepath',remotepath)
-            localpath=dbname
-            sftp.put(localpath,remotepath)   #put(localpath, remotepath)
-            
-            self.ids.my_bar.value=100 #update Progress bar  
-            self.ids.datashow.text = f" [ { dbname } ] .. Sent Succefully ..!"   
-            send_flag=True
-            
             Soc.send(x.encode())
-            print(dbname)
-            print(type(dbname))
-            Soc.send(remotepath.encode('utf-8'))
-
-            sftp.close()
+            filesize = os.path.getsize(dbname)
+            print(" filesize and fname ",filesize,dbname)
+            Soc.send((dbname+'@'+str(filesize)).encode())
+            try:
+                print(f"Receiving Ack {Soc.recv(12).decode()}")
+            except :self.ids.datashow.text = f" Timeout server unreached..!" 
+            print("Current directory **__>>" ,os.getcwd())
+            with open(dbname, "rb") as f:
+                bytes_read =f.read(filesize)
+                Soc.send(bytes(bytes_read))  
+            self.ids.my_bar.value=100 #update Progress bar  
+            self.ids.datashow.text = f" [ { dbname[:-3] } ] .. Sent Succefully ..!"   
+            send_flag=True
     #_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols
@@ -273,6 +263,9 @@ class MainScreen(Screen):
                 int_cols=[colx.index(x) for x in rdic if not str(rdic[x]).isalpha()]
                 int_crypted_cols=[x for x in crypted_cols if x in int_cols]
             except: pass
+            try:
+                cmd="del *x.db" if platform=='win' else  'rm *x.db'
+            except :pass
             self.manager.current="operations_screen"
             screen3 = self.manager.get_screen('operations_screen')
             try:
@@ -296,6 +289,10 @@ class MainScreen(Screen):
             except:pass
     #______________************* Function to choose with fonction to use for uplaod db
     def upload_db(self):
+        global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
+        colx=crypted_cols=[]
+        tabx =Xtable=dbname=file_name=table =None 
+        send_flag=False  # check dababase sending
         return self.choose_db() if platform=='win' else self.file_manager_open()
 ########################################################### #########
 class ShowDataTable(Screen):
