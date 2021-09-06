@@ -44,7 +44,7 @@ def school() :
   tabx.insert({'City': 'Haifa', 'years':1917 ,'isf':L[0],'code':313 })
   tabx.insert({'City': 'Yafa', 'years':1918 ,'isf':L[1],'code':313})
   tabx.insert({'City': 'Jenin', 'years':1948 ,'isf':L[2],'code':313 })
-  tabx.insert({'City': 'Beir sab', 'years':1850 ,'isf':L[3],'code':313})
+  tabx.insert({'City': 'Beirsab', 'years':1850 ,'isf':L[3],'code':313})
   return dbt
 
 rentable()

@@ -58,8 +58,8 @@ class Connect(Screen):
         try :
             with self.Soc:
                 global HOST,PORT
-                HOST="192.168.1.107"
-                #HOST="135.181.108.235"
+                #HOST="192.168.1.107"
+                HOST="135.181.108.235"
                 #HOST=self.ids.Ip.text
                 PORT=65432
                 #PORT=int(self.ids.Port.text)
@@ -242,7 +242,7 @@ class MainScreen(Screen):
             x='3'
             Soc.send(x.encode())
             filesize = os.path.getsize(dbname)
-            print(" filesize and fname ",filesize,dbname)
+            print(" filesize and dbname ",filesize,dbname)
             Soc.send((dbname+'@'+str(filesize)).encode())
             try:
                 print(f"Receiving Ack {Soc.recv(12).decode()}")
@@ -250,7 +250,8 @@ class MainScreen(Screen):
             print("Current directory **__>>" ,os.getcwd())
             with open(dbname, "rb") as f:
                 bytes_read =f.read(filesize)
-                Soc.send(bytes(bytes_read))  
+                Soc.sendall(bytes(bytes_read))
+            Soc.send("end".encode())  
             self.ids.my_bar.value=100 #update Progress bar  
             self.ids.datashow.text = f" [ { dbname[:-3] } ] .. Sent Succefully ..!"   
             send_flag=True
@@ -289,6 +290,9 @@ class MainScreen(Screen):
             except:pass
     #______________************* Function to choose with fonction to use for uplaod db
     def upload_db(self):
+        try:
+            cmd="del *x.db" if platform=='win' else  'rm *x.db'
+        except :pass
         global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
         colx=crypted_cols=[]
         tabx =Xtable=dbname=file_name=table =None 
@@ -389,9 +393,7 @@ class OperationsScreen(Screen):
             # Stocker les valeur à calculer 
             for y in range(1,len(Xtable)+1):
                 Far=Xtable.get(doc_id=y)
-                print(f"FAR  {Far} \n")
                 T.append(list(Far.values())[idd])
-                print(f" T {T} \n")
             P=[paillier.EncryptedNumber(pub_key, int(x[0]), int(x[1])) for x in T]
             #Decrypter les valeur à traiter
             M=[priv_key.decrypt(x) for x in P]
@@ -414,7 +416,6 @@ class OperationsScreen(Screen):
                     m1=m1//2
                     m2=m2+m2
         ##########___Send tab
-                print(tab)
                 tab=dill.dumps(tab)
                 Soc.send(tab)
             #############___Receiv Sum
