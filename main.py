@@ -1,4 +1,5 @@
-import os  
+import os
+from threading import local  
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 #Kivy Import 
 from kivy.properties import ListProperty
@@ -16,7 +17,7 @@ from kivymd.app import MDApp
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 # Others Import 
-import socket,math,time,rsa,dill,os
+import socket,math,time,rsa,dill,os,paramiko
 from jnius import autoclass
 from tinydb import TinyDB
 from phe import paillier
@@ -29,7 +30,7 @@ theme_cls.theme_style="Dark"
 theme_cls.primary_palette="Yellow" 
 Window.size=(440,650)
 Builder.load_file('build.kv')
-(pubkey, privkey) = rsa.newkeys(512)
+(pubkey, privkey) = rsa.newkeys(265)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
 pkr=pub_key.n
 cmd="del *x.db" if platform=='win' else  'rm *x.db'
@@ -239,20 +240,30 @@ class MainScreen(Screen):
             self.ids.datashow.text="Crypt Database Before"
         else :
             x='3'
-            if not HOST:
-                self.ids.datashow.text="U Should connected First"
-            else :
-                Soc.send(x.encode())
-                filesize = os.path.getsize(dbname)
-                Soc.send(f"{self.rsacrypt(dbname)}".encode('utf-8'))
-                Soc.send(str(filesize).encode('utf-8'))
-                current=self.ids.my_bar.value #initialise Pbar
-                with open(dbname, "rb") as f:
-                    bytes_read = f.read(filesize)
-                    Soc.send(bytes_read)
-                    self.ids.my_bar.value=100 #update Progress bar  
-                    self.ids.datashow.text = f" [ { dbname } ] .. Sent Succefully ..!"   
-                    send_flag=True
+            crypted_dbname=self.rsacrypt(dbname)
+            crypted_dbname=crypted_dbname+".db"
+            client=paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(hostname='135.181.108.235',username='root',password='Newlife',allow_agent=False,look_for_keys=False)
+            sftp=client.open_sftp()
+            cwd=os.getcwd()
+            print("cwd",cwd)
+            #remotepath=os.path.join('/tmp/fhe/',dbname)
+            remotepath=os.path.join("/tmp/fhe/","maxa")
+            print('remotepath',remotepath)
+            localpath=dbname
+            sftp.put(localpath,remotepath)   #put(localpath, remotepath)
+            
+            self.ids.my_bar.value=100 #update Progress bar  
+            self.ids.datashow.text = f" [ { dbname } ] .. Sent Succefully ..!"   
+            send_flag=True
+            
+            Soc.send(x.encode())
+            print(dbname)
+            print(type(dbname))
+            Soc.send(remotepath.encode('utf-8'))
+
+            sftp.close()
     #_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols
@@ -285,7 +296,7 @@ class MainScreen(Screen):
             except:pass
     #______________************* Function to choose with fonction to use for uplaod db
     def upload_db(self):
-        return self.choose_db() if platform=='linux' else self.file_manager_open()
+        return self.choose_db() if platform=='win' else self.file_manager_open()
 ########################################################### #########
 class ShowDataTable(Screen):
     #_______________#
