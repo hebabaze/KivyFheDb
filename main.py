@@ -41,7 +41,7 @@ PORT = ''        # The port used by the server
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 colx=[] #column list 
-crypted_cols=[]# Crypted Columns list 
+crypted_cols=[]# Index of crypted colonne
 tabx =None # nomal Table 
 Xtable=None#Table Crypté
 dbname=None #crypted database 
@@ -85,6 +85,9 @@ class MainScreen(Screen):
     #______________************** MD Flile Manager Functions for mobile            
     def select_path(self,path):
         global file_name,tabx,colx
+        try:
+            cmd="del *x.db" if platform=='win' else  'rm *x.db'
+        except :pass
         listpat=path.split('\\')
         file_name=listpat[-1]
         try:
@@ -182,17 +185,16 @@ class MainScreen(Screen):
                     self.cryptcolumn()
                 #tabx=Xtable 
             else :
-                if tabx:
-                    for x in tabx :
-                        d={}
-                        for a,b in x.items() :
-                            if str(b).isalpha():
-                                d[self.rsacrypt(a)]=self.rsacrypt(b)
-                            elif not str(b).isalpha() :
-                                d[self.rsacrypt(a)]=self.enciph(b) #changerd line
-                        Xtable.insert(d)
-                        self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
-                        crypted_cols=[colx.index(x) for x in colx]
+                for x in tabx :
+                    d={}
+                    for a,b in x.items() :
+                        if str(b).isalpha():
+                            d[self.rsacrypt(a)]=self.rsacrypt(b)
+                        elif not str(b).isalpha() :
+                            d[self.rsacrypt(a)]=self.enciph(b) #changerd line
+                    Xtable.insert(d)
+                    self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
+                    crypted_cols=[colx.index(x) for x in colx]
                         
 
     def cryptcolumn(self):
@@ -277,7 +279,7 @@ class MainScreen(Screen):
         else:
             self.ids.datashow.text = f" Database not sent yet ..!"    
     #______________*************Function to show data table content
-    def showdt(self) :
+    def showdt(self) : 
         global Xtable,tabx,table
         self.manager.current="show_data_table"
         screen2 = self.manager.get_screen('show_data_table')
@@ -290,9 +292,6 @@ class MainScreen(Screen):
             except:pass
     #______________************* Function to choose with fonction to use for uplaod db
     def upload_db(self):
-        try:
-            cmd="del *x.db" if platform=='win' else  'rm *x.db'
-        except :pass
         global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
         colx=crypted_cols=[]
         tabx =Xtable=dbname=file_name=table =None 
@@ -303,21 +302,19 @@ class ShowDataTable(Screen):
     #_______________#
     def crtab(self,tab,mtrc):
         global table,colx
-        try:
-            table=MDDataTable(
-                pos_hint={'center_x':0.5,'center_y':0.5},
-                size_hint=(0.9,0.6),
-                check=True,
-                use_pagination=True,
-                rows_num=4,
-                pagination_menu_height='100dp',
-                column_data=[(str(x),dp(mtrc))for x in colx],
-                row_data=[tuple(x.values()) for x in tab]
-                )
-            self.ids.sdtleft.remove_widget(table)
-        except:
-            pass
-        self.ids.sdtleft.add_widget(table)
+        #self.ids.remove_widget(table)
+        table=MDDataTable(
+            pos_hint={'center_x':0.5,'center_y':0.5},
+            size_hint=(0.9,0.6),
+            check=True,
+            use_pagination=True,
+            rows_num=4,
+            pagination_menu_height='100dp',
+            column_data=[(str(x),dp(mtrc))for x in colx],
+            row_data=[tuple(x.values()) for x in tab]
+            
+            )            
+        self.add_widget(table)
         table.bind(on_check_press=self.checked)
         table.bind(on_row_press=self.row_checked)
     #function for check presses

@@ -161,7 +161,7 @@
 ###############################
 <ShowDataTable> :
     GridLayout:
-        cols:2
+        cols:1
         GridLayout:
             cols:1
             id:sdtleft
@@ -239,32 +239,36 @@
                 padding:10
                 spacing:5
                 size_hint : 1,0.69
-                pos_hint:{'center_x':.2,'center_y':.31}
+                pos_hint:{'center_x':.35,'center_y':.29}
                 MDTextField:
                     id:showchecked
                     readonly: True
                     text:""
                     halign: 'center'
                     valign: 'middle'
+                    font_name: 'assets/Helvetica.ttf'
                 MDTextField:
                     id:op
                     readonly: True
                     text:root.clickedbtn
                     halign: 'center'
-                    valign: 'middle'                    
+                    valign: 'middle'  
+                    font_name: 'assets/Helvetica.ttf'
                 MDTextField:
                     readonly: True
                     text:""
                     id : ltime
                     halign: 'center'
-                    valign: 'middle'                                    
+                    valign: 'middle'
+                    font_name: 'assets/Helvetica.ttf'                                    
                 MDTextField:
                     id: lresult
                     readonly: True
                     text:""
                     multiline:True
                     halign: 'center'
-                    valign: 'middle'                    
+                    valign: 'middle'
+                    font_name: 'assets/Helvetica.ttf'                    
     ###############################################################################################
     MDNavigationDrawer :
         id : nav_drawer
@@ -278,6 +282,7 @@
                 pos_hint: {'center_x':0.5 , 'center_y':0.6}
                 size_hint: 0.7,0.2
                 font_size: "20sp"
+                font_name: 'assets/Helvetica-Bold.ttf'
                 on_press:
                     root.sumf()
                     root.clickedbtn="Sum"
@@ -286,6 +291,7 @@
                 pos_hint: {'center_x':0.5 , 'center_y':0.33}
                 size_hint: 0.7,0.2
                 font_size: "20sp"
+                font_name: 'assets/Helvetica-Bold.ttf'
                 on_press:
                     root.avgf()
                     root.clickedbtn="AVG"
