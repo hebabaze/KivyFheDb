@@ -3,14 +3,18 @@ from threading import local
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 #Kivy Import 
 from kivy.properties import ListProperty
-from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.utils import platform
+from kivy.core.image import Image
+from kivy.uix.image import Image
+from kivy.uix.behaviors import ButtonBehavior
 #Kivymd Import
-from kivymd.uix.filemanager import MDFileManager
+import sys
+sys.path.append('assets')
+from filemanager import MDFileManager
 from kivymd.uix.list import OneLineListItem
 from kivymd.uix.datatables import MDDataTable
 from kivymd.app import MDApp
@@ -24,6 +28,7 @@ from phe import paillier
 from binascii import hexlify 
 from plyer import filechooser
 from pathlib import Path
+from hoverable import HoverBehavior
 #Config And Setting
 theme_cls = ThemeManager()
 theme_cls.theme_style="Dark"
@@ -64,11 +69,15 @@ class Connect(Screen):
                 PORT=65432
                 #PORT=int(self.ids.Port.text)
                 Soc.connect((HOST, PORT))
+                x='0'
+                Soc.send(x.encode())
                 pks=dill.dumps(pkr)
                 Soc.send(pks)
                 self.manager.current="main_screen" 
         except:
             self.ids.constat.text='Connexion failed..!'
+    def onback(self):
+        sys.exit(0)
 #########################################################################
 class MainScreen(Screen):
     selection = ListProperty([]) # define Path list type
@@ -175,16 +184,16 @@ class MainScreen(Screen):
         elif crypted_cols==[colx.index(x) for x in colx]:
             self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
         else :
-            try:dbname=file_name[:-3]+'x.db' # Create New DB file 
-            except:self.ids.datashow.text=f"Warning ! .Choose Database !"
-            dbx=TinyDB(dbname)        # Create Tinydb DB  
-            Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
             if Xtable :
                 for x in colx : # if the crypted table exist try to crypt the rest of column one by one 
                     checked_ele=x
                     self.cryptcolumn()
                 #tabx=Xtable 
             else :
+                try:dbname=file_name[:-3]+'x.db' # Create New DB file 
+                except:self.ids.datashow.text=f"Warning ! .Choose Database !"
+                dbx=TinyDB(dbname)        # Create Tinydb DB  
+                Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
                 for x in tabx :
                     d={}
                     for a,b in x.items() :
@@ -252,11 +261,19 @@ class MainScreen(Screen):
             print("Current directory **__>>" ,os.getcwd())
             with open(dbname, "rb") as f:
                 bytes_read =f.read(filesize)
-                Soc.sendall(bytes(bytes_read))
-            Soc.send("end".encode())  
-            self.ids.my_bar.value=100 #update Progress bar  
-            self.ids.datashow.text = f" [ { dbname[:-3] } ] .. Sent Succefully ..!"   
-            send_flag=True
+                try:
+                    Soc.sendall(bytes(bytes_read))
+                except Exception as e :
+                    self.ids.datashow.text=str(e)
+
+            Soc.send("end".encode()) 
+            Acknowldgment=Soc.recv(40) .decode()
+            if Acknowldgment.endswith("fully"):
+                self.ids.my_bar.value=100 #update Progress bar  
+                self.ids.datashow.text = f" [ { dbname[:-3] } ] .. Sent Succefully ..!"   
+                send_flag=True
+            else:
+                self.ids.datashow.text=Acknowldgment
     #_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols
@@ -294,9 +311,13 @@ class MainScreen(Screen):
     def upload_db(self):
         global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
         colx=crypted_cols=[]
-        tabx =Xtable=dbname=file_name=table =None 
+        tabx =Xtable=dbname=file_name=table=checked_ele =None 
         send_flag=False  # check dababase sending
-        return self.choose_db() if platform=='win' else self.file_manager_open()
+        return self.choose_db() if platform=='linux' else self.file_manager_open()
+    def log_out(self):
+        global Soc
+        Soc.close()
+        sys.exit(0)
 ########################################################### #########
 class ShowDataTable(Screen):
     #_______________#
@@ -486,6 +507,8 @@ class OperationsScreen(Screen):
          self.manager.current="main_screen"
 
 ######################################################################
+class ImageButton(ButtonBehavior,HoverBehavior,Image):
+    pass
 class RootWidget(ScreenManager):
     pass
 
