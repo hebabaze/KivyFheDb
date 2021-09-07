@@ -40,7 +40,7 @@ HOST = ''  # The server's hostname or IP address
 PORT = ''        # The port used by the server
 BS = 4096 # send 4096 bytes each time step
 Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-colx=[] #column list 
+colx=[] #column list used in Operation[handle_selection choose_db crypt_db cryptcolumn operations upload_db ] ShowDataTable[crtab,sumf,avgf,mulru,mulog]
 crypted_cols=[]# Index of crypted colonne
 tabx =None # nomal Table 
 Xtable=None#Table Crypté
@@ -303,6 +303,14 @@ class ShowDataTable(Screen):
     def crtab(self,tab,mtrc):
         global table,colx
         #self.ids.remove_widget(table)
+        def ins_value(Y):
+            L=[]
+            for x in list(Y.values()):
+                if isinstance(x, list):
+                    L.append(list(x)[0])
+                else:
+                    L.append(x)
+            return tuple(L)
         table=MDDataTable(
             pos_hint={'center_x':0.5,'center_y':0.5},
             size_hint=(0.9,0.6),
@@ -311,7 +319,7 @@ class ShowDataTable(Screen):
             rows_num=4,
             pagination_menu_height='100dp',
             column_data=[(str(x),dp(mtrc))for x in colx],
-            row_data=[tuple(x.values()) for x in tab]
+            row_data=[ins_value(x) for x in tab]
             
             )            
         self.add_widget(table)
