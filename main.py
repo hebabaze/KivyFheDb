@@ -70,7 +70,7 @@ class Connect(Screen):
             PORT=65432
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd='Newlife' #self.ids.pswd.text
+            passwd='' #self.ids.pswd.text
             ###########Paramiko
             client=paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
