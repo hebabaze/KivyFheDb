@@ -25,14 +25,14 @@ def tinyschool() :
   tabx = dbt.table('Hr')
   tabx.insert({'nom': 'Salah', 'years':1000 ,'id':10 })
   tabx.insert({'nom': 'Salah', 'years':1000 ,'id':20 })
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':30})
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':40})
-  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':50 })
-  tabx.insert({'nom': 'Salah', 'years':1000 ,'id':60 })
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':70})
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':80})
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':90})
-  tabx.insert({'nom': 'Ahmed', 'years':2000 ,'id':100})   
+  tabx.insert({'nom': 'Ahmed', 'years':200 ,'id':30})
+  tabx.insert({'nom': 'Ahmed', 'years':200 ,'id':40})
+  tabx.insert({'nom': 'Salah', 'years':100 ,'id':50 })
+  tabx.insert({'nom': 'Salah', 'years':100 ,'id':60 })
+  tabx.insert({'nom': 'Ahmed', 'years':20 ,'id':70})
+  tabx.insert({'nom': 'Ahmed', 'years':20 ,'id':80})
+  tabx.insert({'nom': 'Ahmed', 'years':200 ,'id':90})
+  tabx.insert({'nom': 'Ahmed', 'years':20 ,'id':100})   
   return dbt
 
 L=[100,200,300,400]

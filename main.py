@@ -21,7 +21,7 @@ from kivymd.app import MDApp
 from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 # Others Import 
-import socket,math,time,rsa,dill,os
+import socket,math,time,rsa,dill,os,pysftp,paramiko,ssl
 from jnius import autoclass
 from tinydb import TinyDB
 from phe import paillier
@@ -43,8 +43,11 @@ os.system(cmd)
 #Variable Declaration 
 HOST = ''  # The server's hostname or IP address
 PORT = ''        # The port used by the server
+user = ""
+passwd = ""
+Soc=""
 BS = 4096 # send 4096 bytes each time step
-Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 colx=[] #column list used in Operation[handle_selection choose_db crypt_db cryptcolumn operations upload_db ] ShowDataTable[crtab,sumf,avgf,mulru,mulog]
 crypted_cols=[]# Index of crypted colonne
 tabx =None # nomal Table 
@@ -58,24 +61,45 @@ send_flag=False  # check dababase sending
 class Connect(Screen):
     #_______________#
     def db_connect(self):
-        
-        self.Soc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        global Soc
         try :
-            with self.Soc:
-                global HOST,PORT
-                #HOST="192.168.1.107"
-                HOST="135.181.108.235"
-                #HOST=self.ids.Ip.text
-                PORT=65432
-                #PORT=int(self.ids.Port.text)
-                Soc.connect((HOST, PORT))
-                x='0'
-                Soc.send(x.encode())
-                pks=dill.dumps(pkr)
-                Soc.send(pks)
-                self.manager.current="main_screen" 
-        except:
-            self.ids.constat.text='Connexion failed..!'
+            global HOST,PORT
+            #HOST="192.168.1.107"
+            HOST="135.181.108.235"
+            #HOST=self.ids.Ip.text
+            PORT=65432
+            #PORT=int(self.ids.Port.text)
+            user='root' #self.ids.user.text
+            passwd=self.ids.pswd.text
+            ###########Paramiko
+            client=paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(HOST,22,user,passwd)
+            #stdin,stdout,stderr=client.exec_command('pkill -9 python*')
+            #stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
+            #print(stderr.read().decode())
+            client.close()
+            #####SFTP
+            global sftp
+            sftp=pysftp.Connection(host=HOST, username=user, password=passwd)
+            #Sc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            ##########SSL
+            context= ssl.SSLContext()
+            context.verify_mode = ssl.CERT_NONE
+            Sc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            Soc=context.wrap_socket(Sc)
+            Soc.connect((HOST, PORT))            
+            print(Soc.version())
+            #Soc.connect((HOST, PORT))
+            x='0'
+            Soc.send(x.encode())
+            pks=dill.dumps(pkr)
+            Soc.send(pks)
+            self.manager.current="main_screen" 
+        except Exception as e:
+            self.ids.constat.text=str(e)
+            print(str(e))
+            #self.ids.constat.text='Connexion failed..!'
     def onback(self):
         sys.exit(0)
 #########################################################################
@@ -204,8 +228,6 @@ class MainScreen(Screen):
                     Xtable.insert(d)
                     self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
                     crypted_cols=[colx.index(x) for x in colx]
-                        
-
     def cryptcolumn(self):
         global dbname,Xtable,file_name,crypted_cols
         crypt_temp=[]
@@ -214,7 +236,11 @@ class MainScreen(Screen):
         else:
             if not dbname:
                 dbname=file_name[:-3]+'x.db' # Create New DB file
-            e=colx.index(checked_ele)
+            if not checked_ele:
+                self.ids.datashow.text=f"Warning ! .Choose a column !"
+                return
+            else :
+                e=colx.index(checked_ele)
             if [colx.index(x) for x in colx]==crypted_cols:
                 self.ids.datashow.text=" All Columns are crypted"
             elif e in crypted_cols:
@@ -254,11 +280,12 @@ class MainScreen(Screen):
             Soc.send(x.encode())
             filesize = os.path.getsize(dbname)
             print(" filesize and dbname ",filesize,dbname)
-            Soc.send((dbname+'@'+str(filesize)).encode())
-            try:
-                print(f"Receiving Ack {Soc.recv(12).decode()}")
-            except :self.ids.datashow.text = f" Timeout server unreached..!" 
+            Soc.send((dbname).encode())
             print("Current directory **__>>" ,os.getcwd())
+            localFilePath = dbname
+            remoteFilePath = '/tmp/'+dbname
+            sftp.put(localFilePath, remoteFilePath)            
+            """
             with open(dbname, "rb") as f:
                 bytes_read =f.read(filesize)
                 try:
@@ -267,6 +294,7 @@ class MainScreen(Screen):
                     self.ids.datashow.text=str(e)
 
             Soc.send("end".encode()) 
+            """
             Acknowldgment=Soc.recv(40) .decode()
             if Acknowldgment.endswith("fully"):
                 self.ids.my_bar.value=100 #update Progress bar  
@@ -316,6 +344,7 @@ class MainScreen(Screen):
         return self.choose_db() if platform=='linux' else self.file_manager_open()
     def log_out(self):
         global Soc
+        Soc.send("exit".encode())
         Soc.close()
         sys.exit(0)
 ########################################################### #########
@@ -333,8 +362,8 @@ class ShowDataTable(Screen):
                     L.append(x)
             return tuple(L)
         table=MDDataTable(
-            pos_hint={'center_x':0.5,'center_y':0.5},
-            size_hint=(0.9,0.6),
+            pos_hint={'center_x':0.5,'center_y':0.3},
+            size_hint=(1,.8),
             check=True,
             use_pagination=True,
             rows_num=4,
@@ -415,14 +444,11 @@ class OperationsScreen(Screen):
             x='60'
             Soc.send(x.encode())
             idd=colx.index(chosen_col)
-            T=[] # Pour Stocker Les Valeurs à calculer 
+            M=[] # Pour Stocker Les Valeurs à calculer 
             # Stocker les valeur à calculer 
-            for y in range(1,len(Xtable)+1):
-                Far=Xtable.get(doc_id=y)
-                T.append(list(Far.values())[idd])
-            P=[paillier.EncryptedNumber(pub_key, int(x[0]), int(x[1])) for x in T]
-            #Decrypter les valeur à traiter
-            M=[priv_key.decrypt(x) for x in P]
+            for y in range(1,len(tabx)+1):
+                Far=tabx.get(doc_id=y)
+                M.append(list(Far.values())[idd])
             for x in M: # Check 0 result
                 if x==0:
                     self.ids.lresult.text="0 Result Dectected"
@@ -470,33 +496,31 @@ class OperationsScreen(Screen):
             x='6'
             Soc.send(x.encode())
             idm=colx.index(chosen_col)
-            L=[]
+            M=[]
             for x in range(1,len(tabx)+1):
-                Far=Xtable.get(doc_id=x)
-                L.append(list(Far.values())[idm])
-            P=[paillier.EncryptedNumber(pub_key, int(x[0]), int(x[1])) for x in L]
-            M=[priv_key.decrypt(x) for x in P]
+                Far=tabx.get(doc_id=x)
+                M.append(list(Far.values())[idm])
             for x in M: # Check 0 result
                 if x==0:
-                    self.ids.lresult.text(" Product equal to zéro")
+                    self.ids.lresult.text=" Product equal to zéro"
                     Lprod="End"
                     Lprod=dill.dumps(Lprod)
                     Soc.send(Lprod)
                     return "Zéro Result Detected!.."
-                else:
-                    C=[math.log(e) for e in M]
-                    Ce=[pub_key.encrypt(x) for x in C]
-                    Lprod=dill.dumps(Ce)
-                    Soc.send(Lprod)
-                    rprod=Soc.recv(BS)
-                    rprod=dill.loads(rprod)
-                    rprod=priv_key.decrypt(rprod)
-                    try:
-                        #709.78271 is the largest value I can compute the exp of on my machine
-                        rprod=round(math.exp(rprod))
-                        self.ids.lresult.text=f"{rprod}"
-                    except:
-                        self.ids.lresult.text("Input value is greater than allowed limit")
+
+            C=[math.log(e) for e in M]
+            Ce=[pub_key.encrypt(x) for x in C]
+            Lprod=dill.dumps(Ce)
+            Soc.send(Lprod)
+            rprod=Soc.recv(BS)
+            rprod=dill.loads(rprod)
+            rprod=priv_key.decrypt(rprod)
+            try:
+                #709.78271 is the largest value I can compute the exp of on my machine
+                rprod=round(math.exp(rprod))
+                self.ids.lresult.text=f"{rprod}"
+            except:
+                self.ids.lresult.text("Input value is greater than allowed limit")
             Lprod="End"
             Lprod=dill.dumps(Lprod)
             Soc.send(Lprod)
@@ -516,7 +540,8 @@ class MainApp(MDApp):
     def build(self):
         self.title= "FHEDB"
         self.theme_cls.theme_style="Light"
-        self.theme_cls.primary_palette="Yellow"        
+        self.theme_cls.primary_palette="Yellow"
+        self.icon = 'assets/ico.jpg'        
         return RootWidget()
 
 if __name__ == "__main__":
