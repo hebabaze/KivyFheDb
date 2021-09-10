@@ -70,12 +70,12 @@ class Connect(Screen):
             PORT=65432
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd=self.ids.pswd.text
+            passwd='Newlife' #self.ids.pswd.text
             ###########Paramiko
             client=paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(HOST,22,user,passwd)
-            #stdin,stdout,stderr=client.exec_command('pkill -9 python*')
+            #stdin,stdout,stderr=client.exec_command('pkill -9 python')
             #stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
             #print(stderr.read().decode())
             client.close()
@@ -83,18 +83,18 @@ class Connect(Screen):
             global sftp
             sftp=pysftp.Connection(host=HOST, username=user, password=passwd)
             #Sc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            ##########SSL
+        ##########SSL
             context= ssl.SSLContext()
             context.verify_mode = ssl.CERT_NONE
             Sc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             Soc=context.wrap_socket(Sc)
             Soc.connect((HOST, PORT))            
             print(Soc.version())
-            #Soc.connect((HOST, PORT))
             x='0'
             Soc.send(x.encode())
             pks=dill.dumps(pkr)
             Soc.send(pks)
+            print(Soc.recv(6).decode())
             self.manager.current="main_screen" 
         except Exception as e:
             self.ids.constat.text=str(e)
@@ -273,28 +273,20 @@ class MainScreen(Screen):
     #______________************ Function to send database
     def send_db(self):
         global dbname,send_flag
+        print("Soc",Soc)
         if not dbname:
             self.ids.datashow.text="Crypt Database Before"
         else :
+            print(" Sending DataBase")
             x='3'
-            Soc.send(x.encode())
-            filesize = os.path.getsize(dbname)
-            print(" filesize and dbname ",filesize,dbname)
+            Soc.sendall(x.encode())
+            #dbname= os.path.getsize(dbname)
+            print(" Dbname ",dbname)
             Soc.send((dbname).encode())
             print("Current directory **__>>" ,os.getcwd())
             localFilePath = dbname
             remoteFilePath = '/tmp/'+dbname
             sftp.put(localFilePath, remoteFilePath)            
-            """
-            with open(dbname, "rb") as f:
-                bytes_read =f.read(filesize)
-                try:
-                    Soc.sendall(bytes(bytes_read))
-                except Exception as e :
-                    self.ids.datashow.text=str(e)
-
-            Soc.send("end".encode()) 
-            """
             Acknowldgment=Soc.recv(40) .decode()
             if Acknowldgment.endswith("fully"):
                 self.ids.my_bar.value=100 #update Progress bar  
@@ -302,6 +294,7 @@ class MainScreen(Screen):
                 send_flag=True
             else:
                 self.ids.datashow.text=Acknowldgment
+    
     #_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols
