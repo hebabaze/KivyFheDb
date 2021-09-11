@@ -61,29 +61,43 @@ send_flag=False  # check dababase sending
 class Connect(Screen):
     #_______________#
     def db_connect(self):
+        print("-------------------------------------------------------------------")
         global Soc
         try :
             global HOST,PORT
             #HOST="192.168.1.107"
             HOST="135.181.108.235"
             #HOST=self.ids.Ip.text
-            PORT=65432
+            PORT=443
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd='' #self.ids.pswd.text
+            passwd='Newlife' #self.ids.pswd.text
+        except Exception as e:
+                print("Identification",str(e))
+                self.ids.constat.text=f"Identification {str(e)}"
             ###########Paramiko
+        try:
             client=paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(HOST,22,user,passwd)
-            #stdin,stdout,stderr=client.exec_command('pkill -9 python')
-            #stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
-            #print(stderr.read().decode())
+            stdin,stdout,stderr=client.exec_command('pkill -9 python')
+            stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
+            print(stderr.read().decode())
+            for x in stdout:
+                print(x)
             client.close()
+        except Exception as e:
+            print("paramiko",str(e))
+            self.ids.constat.text=f"PARAMIKO {str(e)}"
             #####SFTP
-            global sftp
+        global sftp
+        try:
             sftp=pysftp.Connection(host=HOST, username=user, password=passwd)
-            #Sc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        except Exception as e:
+            print("SFTP",str(e))
+            self.ids.constat.text=f"SFTP {str(e)}"            
         ##########SSL
+        try:
             context= ssl.SSLContext()
             context.verify_mode = ssl.CERT_NONE
             Sc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -97,8 +111,8 @@ class Connect(Screen):
             print(Soc.recv(6).decode())
             self.manager.current="main_screen" 
         except Exception as e:
-            self.ids.constat.text=str(e)
-            print(str(e))
+            self.ids.constat.text=f"SSl {str(e)}"
+            print("SSL",str(e))
             #self.ids.constat.text='Connexion failed..!'
     def onback(self):
         sys.exit(0)
