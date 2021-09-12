@@ -28,9 +28,8 @@
         Rectangle:
             size:self.size
             pos: self.pos
-    GridLayout:
-        cols:1
-        rows:7
+    BoxLayout:
+        orientation:'vertical'
         MDToolbar:
             title: 'Access Screen'
             type: "top"
@@ -87,15 +86,15 @@
 <MainScreen>:
     canvas.before:
         Color:
-            rgba:(1,.8,0,1)
+            rgba:.96,.87,.30,.8
         Rectangle:
             size:self.size
             pos: self.pos
-    MDGridLayout:
-        cols :1
-        spacing: '10dp','15dp',
-        MDGridLayout: ##__Database Proccessing # Grid 1
-            cols:1
+    BoxLayout:
+        orientation:'vertical'
+        spacing: '10'
+        BoxLayout: #__Database Proccessing  Grid 1
+            orientation:'horizontal'
             size_hint: 1,0.3
             RelativeLayout:
                 MDLabel:
@@ -115,36 +114,44 @@
                     id:imgbtn
                     source:'assets/logout_hover.png'if imgbtn.hovered else "assets/logout_nothover.png"
                     on_press:root.log_out()
-                    pos_hint: {'center_x':0.84 , 'center_y':0.45}                       
-
-        MDBoxLayout:
-            size_hint:1,0.2
-        GridLayout:
-            size_hint: 1,0.7
-            cols: 2
-            padding: 20,20
-            spacing: '15dp','10dp'
+                    pos_hint: {'center_x':0.84 , 'center_y':0.45}
+        blanks1:
+        blanks1:
+        BoxLayout:
+            orientation:'horizontal'
+            size_hint:1,.3
+            padding: 15,3
+            spacing: '10'
             MDRB:#________"Choose DataBase"
                 text:" Select Databse"
+                size_hint: .5,1
                 on_press:
                     root.upload_db()
             MDRB:#______"Crypt DataBase"
                 text:" Crypt Databse "
+                size_hint: .5,1
                 on_press:
                     root.crypt_db()
+        BoxLayout:
+            orientation:'horizontal'
+            size_hint:1,0.3
+            padding: 15,3
+            spacing: '10'
             MDRB:    #_____"Send Database"
                 text:" Send Databse "
+                size_hint: .5,1
                 on_press :root.send_db()
             MDRB:     #"Operations"
                 text:" Operations "
+                size_hint: .5,1
                 on_press : 
                     root.operations()
-        #*****************************************************#
-        GridLayout: #Grid3
-            cols:1
+        #*****************************************************
+        BoxLayout:
+            orientation:'vertical'
             size_hint: 1,1
             padding: 10,10
-            spacing: '10dp','10dp'
+            spacing: '10'
             RelativeLayout
                 ProgressBar:
                     id : my_bar
@@ -160,11 +167,14 @@
                     size_hint_y: None
                     theme_text_color: "Error"
                     halign : "center"
+                    size_hint : 0.7, 0.3
                 MDRB:     #"Show DataTables"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.63}
-                    size_hint : 0.4, 0.25
+                    pos_hint: {'center_x':0.5 , 'center_y':0.6}
+                    size_hint : 0.4, 0.28
                     text:"Show DataTables"
                     on_press: root.showdt()
+            blanks1:
+            blanks1:
         AnchorLayout:
             theme_text_color: "Primary"
             text_color: 1,0,0,1        
@@ -186,14 +196,6 @@
                         height: self.minimum_height
                         anchor_x: 'center'
                         anchor_y: 'top'
-                #blanks1:
-                #    pos_hint: {'center_x':.94 , 'center_y':0.5}                        
-                #blanks1:
-                #    pos_hint: {'center_x':.94 , 'center_y':0.4}
-            #blanks1:
-            #blanks1:
-
-  
                 MDRB:#________"Crypt Column"
                     text:"Crypt Column"
                     size_hint :0.4,0.22
@@ -201,22 +203,22 @@
                     on_press: root.cryptcolumn()
 
 
-###############################
 <ShowDataTable> :
-    GridLayout:
-        cols:1
-        GridLayout:
-            cols:1
+    BoxLayout:
+        orientation:'vertical'
+        MDToolbar:
+            title: 'Show Data'
+            type:"top"
+            right_action_items: [["home", lambda x: root.onback()]]
+            elevation:15        
+        BoxLayout:
             id:sdtleft
-            size_hint :1,1
+            size_hint :1,.8
             padding: 20,10
-            MDToolbar:
-                title: 'Show Data'
-                right_action_items: [["home", lambda x: root.onback()]]
-                elevation:15
-###################################################
+
 <OperationsScreen>:
     clickedbtn:""
+
     MDScreen:
         MDLabel:
             text:'Crypted Columns'
@@ -251,38 +253,38 @@
                 size_hint :1,0.4
                 halign:'center'
         ScrollView:
-    MDGridLayout:
-        cols:2
+    BoxLayout:
+        orientation:'horizontal'
         size_hint : 1,0.6
         MDScreen:
-            MDGridLayout:
-                cols:1
+            BoxLayout:
+                orientation:'vertical'
                 padding:10
                 spacing:10
-                size_hint : 0.7,0.6
-                pos_hint:{'center_x':0.4,'center_y':0.33}
+                size_hint : 0.8,0.6
+                pos_hint:{'center_x':0.5,'center_y':0.4}
                 MDLabel:
                     text: "Selected column"
                     valign :"middle"
-                    size_hint : 0.5,0.1
+                    size_hint : 0.8,0.2
                 MDLabel:
                     text: "Operation"
-                    size_hint : 0.5,0.1
+                    size_hint : 0.8,0.2
                 MDLabel:
                     text: "Elapsed Time"
                     valign :"middle"
-                    size_hint : 0.5,0.1
+                    size_hint : 0.8,0.2
                 MDLabel:#lresult
                     text: " Result"
                     valign :"middle"
-                    size_hint : 0.5,0.1
+                    size_hint : 0.8,0.2
         MDScreen:
-            MDGridLayout:
-                cols:1
+            BoxLayout:
+                orientation:'vertical'
                 padding:10
                 spacing:5
-                size_hint : 1,0.69
-                pos_hint:{'center_x':.35,'center_y':.29}
+                size_hint : 1,0.6
+                pos_hint:{'center_x':.35,'center_y':.4}
                 MDTextField:
                     id:showchecked
                     readonly: True
@@ -312,7 +314,6 @@
                     halign: 'center'
                     valign: 'middle'
                     font_name: 'assets/Helvetica.ttf'                    
-    ###############################################################################################
     MDNavigationDrawer :
         id : nav_drawer
         orientation: 'vertical'
@@ -374,18 +375,22 @@
                     on_press:
                         root.mulog()
                         root.clickedbtn="Log Multiplication"
-    ################################################
-    GridLayout:
-
-        cols :1
+    BoxLayout:
+        orientation:'vertical'
         padding: 20,20
-        spacing: '15dp','15dp'
+        spacing: '15','15'
+        size_hint:1,0.2
+        pos_hint:{'center_y':.95}
+        BoxLayout:
+
+
         MDToolbar:
             title: 'Operations'
             left_action_items: [['menu', lambda x: nav_drawer.set_state('toggle')]]
             right_action_items: [["home", lambda x: root.onback()]]
             elevation:20
-        ############################
+            pos_hint: {"top":1}
+
 <RootWidget>:
     Connect:
         name:"connect"

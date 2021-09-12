@@ -62,7 +62,6 @@ send_flag=False  # check dababase sending
 class Connect(Screen):
     #_______________#
     def db_connect(self):
-        print("-------------------------------------------------------------------")
         global Soc
         try :
             global HOST,PORT
@@ -74,7 +73,6 @@ class Connect(Screen):
             user='root' #self.ids.user.text
             passwd='Newlife' #self.ids.pswd.text
         except Exception as e:
-                print("Identification",str(e))
                 self.ids.constat.text=f"Identification {str(e)}"
             ###########Paramiko
         try:
@@ -83,19 +81,14 @@ class Connect(Screen):
             client.connect(HOST,22,user,passwd)
             stdin,stdout,stderr=client.exec_command('pkill -9 python')
             stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
-            print(stderr.read().decode())
-            for x in stdout:
-                print(x)
             client.close()
         except Exception as e:
-            print("paramiko",str(e))
             self.ids.constat.text=f"PARAMIKO {str(e)}"
             #####SFTP
         global sftp
         try:
             sftp=pysftp.Connection(host=HOST, username=user, password=passwd)
         except Exception as e:
-            print("SFTP",str(e))
             self.ids.constat.text=f"SFTP {str(e)}"            
         ##########SSL
         try:
@@ -104,17 +97,14 @@ class Connect(Screen):
             Sc=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             Soc=context.wrap_socket(Sc)
             Soc.connect((HOST, PORT))            
-            print(Soc.version())
             x='0'
             Soc.send(x.encode())
             pks=dill.dumps(pkr)
             Soc.send(pks)
-            print(Soc.recv(6).decode())
+            tm=Soc.recv(6).decode()
             self.manager.current="main_screen" 
         except Exception as e:
             self.ids.constat.text=f"SSl {str(e)}"
-            print("SSL",str(e))
-            #self.ids.constat.text='Connexion failed..!'
     def onback(self):
         sys.exit(0)
 #########################################################################
@@ -289,17 +279,12 @@ class MainScreen(Screen):
     #______________************ Function to send database
     def send_db(self):
         global dbname,send_flag
-        print("Soc",Soc)
         if not dbname:
             self.ids.datashow.text="Crypt Database Before"
         else :
-            print(" Sending DataBase")
             x='3'
             Soc.sendall(x.encode())
-            #dbname= os.path.getsize(dbname)
-            print(" Dbname ",dbname)
             Soc.send((dbname).encode())
-            print("Current directory **__>>" ,os.getcwd())
             localFilePath = dbname
             remoteFilePath = '/tmp/'+dbname
             sftp.put(localFilePath, remoteFilePath)            
