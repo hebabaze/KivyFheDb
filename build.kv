@@ -1,3 +1,8 @@
+<blanks1>:
+    size_hint: None, None
+    x: dp(16)
+    y: dp(1)
+    size: dp(1), dp(1)
 <MDRB@MDRaisedButton>:
     md_bg_color:  0,0, 0, 1
     theme_text_color: "Custom"
@@ -23,8 +28,9 @@
         Rectangle:
             size:self.size
             pos: self.pos
-    MDGridLayout:
+    GridLayout:
         cols:1
+        rows:7
         MDToolbar:
             title: 'Access Screen'
             type: "top"
@@ -168,17 +174,33 @@
                 ScrollView:
                     do_scroll_x: False
                     do_scroll_y: True
-                    pos_hint: {'center_x':.94 , 'center_y':1}
+                    pos_hint: {'center_x':.84 , 'center_y':1}
                     MDList:
                         id: container
-                        size_hint :0.2,0.3
+                        size_hint:0.3,None
+                        padding: dp(-15)
+                        spacing: dp(13)
+                        default_size: None, dp(150)
+                        default_size_hint: .1, None
+                        size_hint_y: None
+                        height: self.minimum_height
                         anchor_x: 'center'
                         anchor_y: 'top'
+                #blanks1:
+                #    pos_hint: {'center_x':.94 , 'center_y':0.5}                        
+                #blanks1:
+                #    pos_hint: {'center_x':.94 , 'center_y':0.4}
+            #blanks1:
+            #blanks1:
+
+  
                 MDRB:#________"Crypt Column"
                     text:"Crypt Column"
                     size_hint :0.4,0.22
                     pos_hint: {'center_x':.5 , 'center_y':.3}
                     on_press: root.cryptcolumn()
+
+
 ###############################
 <ShowDataTable> :
     GridLayout:

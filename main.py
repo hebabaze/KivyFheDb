@@ -10,6 +10,7 @@ from kivy.core.window import Window
 from kivy.utils import platform
 from kivy.core.image import Image
 from kivy.uix.image import Image
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
 #Kivymd Import
 import sys
@@ -172,6 +173,7 @@ class MainScreen(Screen):
             pass
         for x in lista:
             self.ids.container.add_widget(OneLineListItem(text=f"{x}" , on_press=lambda x: self.listchecked(x.text)))
+
     def listchecked(self,x): # Function return selected element in the list 
         global checked_ele
         checked_ele=x
@@ -339,9 +341,13 @@ class MainScreen(Screen):
         except:pass
         if Xtable:
             screen2.crtab(Xtable,60)
-        else:
+            
+        elif tabx:
             try:screen2.crtab(tabx,30)
             except:pass
+        else:
+            self.ids.datashow.text=f"Warning ! .Choose Database !"
+
     #______________************* Function to choose with fonction to use for uplaod db
     def upload_db(self):
         global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
@@ -542,7 +548,8 @@ class ImageButton(ButtonBehavior,HoverBehavior,Image):
     pass
 class RootWidget(ScreenManager):
     pass
-
+class blanks1(BoxLayout):
+    pass
 class MainApp(MDApp):
     def build(self):
         self.title= "FHEDB"
