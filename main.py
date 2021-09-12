@@ -67,12 +67,12 @@ class Connect(Screen):
             global HOST,PORT
             #HOST="192.168.1.107"
             HOST="135.181.108.235"
-            HOST=self.ids.Ip.text
-            #PORT=443
-            PORT=int(self.ids.Port.text)
+            #HOST=self.ids.Ip.text
+            PORT=443
+            #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            #passwd='' 
-            self.ids.pswd.text
+            passwd= 'Newlife'
+            #self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
             ###########Paramiko
