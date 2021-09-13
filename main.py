@@ -361,8 +361,8 @@ class ShowDataTable(Screen):
                     L.append(x)
             return tuple(L)
         table=MDDataTable(
-            pos_hint={'center_x':0.5,'center_y':0.3},
-            size_hint=(1,.8),
+            pos_hint={'center_x':0.5,'center_y':0.5},
+            size_hint=(1,.6),
             check=True,
             use_pagination=True,
             rows_num=4,

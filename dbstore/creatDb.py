@@ -16,7 +16,7 @@ def rentable() :
   dbt.drop_table('Hr')
   tabx = dbt.table('Hr')
   for i in tqdm(range(1,20),unit_divisor=1,desc=f"Creating mydb.db..",colour= 'Blue'):
-      tabx.insert({'id':i, 'age': i*10 ,'nom': 'Salah', 'years':1000 ,'ville' : 'Agadir' ,'phone' :693,'cin':98 })
+      tabx.insert({'id':i, 'age': i*10 ,'nom': 'ahlam', 'years':23 ,'ville' : 'Agadir' ,'cin':98 })
   return dbt
 
 def tinyschool() :
