@@ -36,7 +36,7 @@ theme_cls.theme_style="Dark"
 theme_cls.primary_palette="Yellow" 
 Window.size=(440,650)
 Builder.load_file('build.kv')
-(pubkey, privkey) = rsa.newkeys(265)
+(pubkey, privkey) = rsa.newkeys(256)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
 pkr=pub_key.n
 cmd="del *x.db" if platform=='win' else  'rm *x.db'
@@ -57,7 +57,7 @@ dbname=None #crypted database
 file_name=None #file uploaded
 table =None #te Table used in show datatable 
 checked_ele=None # selected colummn name 
-send_flag=False  # check dababase sending
+send_flag=True  # check dababase sending
 
 class Connect(Screen):
     #_______________#
@@ -71,7 +71,7 @@ class Connect(Screen):
             PORT=443
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd= ''
+            passwd= 'Newlife'
             #self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
@@ -345,7 +345,7 @@ class MainScreen(Screen):
         global Soc
         Soc.send("exit".encode())
         Soc.close()
-        sys.exit(0)
+        self.manager.current="connect"
 ########################################################### #########
 class ShowDataTable(Screen):
     #_______________#

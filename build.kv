@@ -12,19 +12,16 @@
     font_style:"Subtitle2"
     font_name: 'assets/Bodoni Bold'
     font_size: "20sp"
-    #increment_width: "164dp"
-    size_hint: None, None
-    width: dp(200) + (self.ids.lbl_txt.texture_size[0] - self.ids.lbl_txt.texture_size[0])
-    height: dp(300)
-    size_hint_y:.9
+    size_hint: .4, .6
 <MDTXT@MDTextField>:
     size_hint: 0.4,.1
     pos_hint: {'center_x':0.5 , 'center_y':0.6}
-    required: True
+    #required: True
     font_size: "14sp"
     text_color: 0,0,0,1
     bold:True
     halign: "center"
+    line_color_focus: 1, 0, 1, 1
 
 <Connect>:
     canvas.before:
@@ -41,6 +38,7 @@
             right_action_items: [["close", lambda x: root.onback()]]
             elevation:10
             bold: True
+            anchor_title: "center"
         MDScreen:
             MDLabel:
                 text: "Please Fill the form bellow to procced"
@@ -65,7 +63,7 @@
                 hint_text:'Port'
                 pos_hint: {'center_x':.5,'center_y':0.46}
                 max_text_length: 5
-                on_text_validate:username.focus=True
+                on_text_validate:user.focus=True
             MDTXT:
                 id:user
                 hint_text:'username'
@@ -98,62 +96,51 @@
     BoxLayout:
         orientation:'vertical'
         spacing: '10'
-        BoxLayout: #__Database Proccessing  Grid 1
-            orientation:'horizontal'
-            size_hint: 1,.3
-            RelativeLayout:
-                MDLabel:
-                    md_bg_color:1,.937, .588, 1
-                    size_hint:1.5,1.2
-                    text: "Database Management"
-                    font_name: 'assets/Helvetica.ttf'
-                    halign: "center"
-                    valign: "middle"
-                    theme_text_color: "Custom"
-                    text_color: 0, 0, 0, 1
-                    id:title
-                    font_size: "22sp"
-                    bold: True
-                    pos_hint: {'center_x':0.3 , 'center_y':0.5}
-                ImageButton:
-                    size_hint :0.5 , 0.5
-                    id:imgbtn
-                    source:'assets/logout_hover.png'if imgbtn.hovered else "assets/logout_nothover.png"
-                    on_press:root.log_out()
-                    pos_hint: {'center_x':0.84 , 'center_y':0.45}
+        MDToolbar:
+            title: 'DataBases Management'
+            type:"top"
+            elevation:15
+            halign:'center'
+            anchor_title: "center"
         blanks1:
         blanks1:
-        BoxLayout:
-            orientation:'horizontal'
-            size_hint:1,.3
-            padding: 15,3
-            spacing: '10'
-            MDRB:#________"Choose DataBase"
-                text:" Select Databse"
-                #size_hint: .5,1
-                on_press:
-                    root.upload_db()
-            MDRB:#______"Crypt DataBase"
-                text:" Crypt Databse "
-                #size_hint: .5,1
-                on_press:
-                    root.crypt_db()
-        BoxLayout:
-            orientation:'horizontal'
-            size_hint:1,0.3
-            padding: 15,3
-            spacing: '10'
-            MDRB:    #_____"Send Database"
-                text:" Send Databse "
-                #size_hint: .5,1
-                on_press :root.send_db()
-            MDRB:     #"Operations"
-                text:" Operations "
-                #size_hint: .5,1
-                #increment_width: "20dp"
-
-                on_press : 
-                    root.operations()
+        RelativeLayout:
+            BoxLayout:
+                orientation:'horizontal'
+                size_hint:1,.5
+                id:lab1
+                padding: 10
+                spacing: '10'
+                pos_hint:{'center_x':.6,'center_y':.8}
+                RelativeLayout:
+                    MDRB:#________"Choose DataBase"
+                        text:" Select Databse"
+                        pos_hint:{'center_x':.17,'center_y':.3}
+                        on_press:
+                            root.upload_db()
+                    MDRB:#______"Crypt DataBase"
+                        text:" Crypt Databse "
+                        pos_hint:{'center_x':.63,'center_y':.3}
+                        on_press:
+                            root.crypt_db()
+            BoxLayout:
+                orientation:'horizontal'
+                pos_hint:{'center_x':.6,'center_y':.5}
+                id:lab2
+                size_hint:1,0.5
+                padding: 10
+                spacing: '10'
+                RelativeLayout:
+                    MDRB:    #_____"Send Database"
+                        text:" Send Databse "
+                        pos_hint:{'center_x':.17,'center_y':.3}
+                        on_press :root.send_db()
+                    MDRB:     #"Operations"
+                        text:" Operations "
+                        pos_hint:{'center_x':.63,'center_y':.3}
+                        increment_width: "20dp"
+                        on_press : 
+                            root.operations()
         #*****************************************************
         BoxLayout:
             orientation:'vertical'
@@ -166,24 +153,27 @@
                     min: 0
                     max: 100
                     value:0
-                    pos_hint: {'center_x':0.5 , 'center_y':1}
+                    pos_hint: {'center_x':0.5 , 'center_y':1.35}
                     size_hint :0.8,0.20
                 MDLabel:
-                    pos_hint: {'center_x':0.5 , 'center_y':0.87}
+                    pos_hint: {'center_x':0.5 , 'center_y':1.2}
                     multiline: True
                     id:datashow
                     size_hint_y: None
-                    theme_text_color: "Error"
+                    theme_text_color: "Custom"
                     halign : "center"
                     size_hint : 0.7, 0.3
+                    font_name: 'assets/Helvetica.ttf'
+                    font_size: "20sp"
+                    text_color: 0, 0, 0, 1
+                    bold:True
                 MDRB:     #"Show DataTables"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.5}
+                    pos_hint: {'center_x':0.5 , 'center_y':0.9}
                     size_hint : 0.4, 0.28
                     text:"Show DataTables"
                     font_size: "18sp"
                     on_press: root.showdt()
-            blanks1:
-            blanks1:
+
         AnchorLayout:
             theme_text_color: "Primary"
             text_color: 1,0,0,1        
@@ -193,7 +183,7 @@
                 ScrollView:
                     do_scroll_x: False
                     do_scroll_y: True
-                    pos_hint: {'center_x':.84 , 'center_y':.9}
+                    pos_hint: {'center_x':.84 , 'center_y':1.15}
                     MDList:
                         id: container
                         size_hint:0.3,None
@@ -210,9 +200,15 @@
                 MDRB:#________"Crypt Column"
                     text:"Crypt Column"
                     size_hint :0.4,0.22
-                    pos_hint: {'center_x':.5 , 'center_y':.25}
+                    pos_hint: {'center_x':.5 , 'center_y':.5}
                     on_press: root.cryptcolumn()
-
+    RelativeLayout:
+        ImageButton:
+            size_hint :0.2 , 0.1
+            id:imgbtn
+            source:'assets/logout_hover.png'if imgbtn.hovered else "assets/logout_nothover.png"
+            on_press:root.log_out()
+            pos_hint: {'center_x':0.5 , 'center_y':0.04}
 
 <ShowDataTable> :
     BoxLayout:
@@ -356,7 +352,7 @@
         ScrollView:
             canvas.before:
                 Color:
-                    rgba:(0,0,0,.005)
+                    rgba:(0,0,0,.015)
                 Rectangle:
                     size:self.size
                     pos: self.pos
@@ -373,7 +369,7 @@
                 MDRB:
                     text:"Russ Mul"
                     md_bg_color:0,.631,.945,1
-                    pos_hint: {'center_x':0.5 , 'center_y':.6}
+                    pos_hint: {'center_x':0.5 , 'center_y':.7}
                     size_hint: 0.7,0.2
                     font_size: "20sp"
                     on_press:
@@ -382,12 +378,21 @@
                 MDRB:
                     text:"Log Mul"
                     md_bg_color:1,.733,0,1
-                    pos_hint: {'center_x':0.5 , 'center_y':.3}
+                    pos_hint: {'center_x':0.5 , 'center_y':.45}
                     size_hint: 0.7,0.2
                     font_size: "20sp"
                     on_press:
                         root.mulog()
                         root.clickedbtn="Log Multiplication"
+                MDRB:
+                    text:"Egy Mul"
+                    md_bg_color:.01,.01,.01,1
+                    pos_hint: {'center_x':0.5 , 'center_y':.2}
+                    size_hint: 0.7,0.2
+                    font_size: "20sp"
+                    on_press:
+                        #root.mulegy()
+                        root.clickedbtn="Egypt Multiplication"                
     BoxLayout:
         orientation:'vertical'
         padding: 20,20
