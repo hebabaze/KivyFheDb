@@ -12,7 +12,7 @@
     font_style:"Subtitle2"
     font_name: 'assets/Bodoni Bold'
     font_size: "20sp"
-    size_hint: .4, .6
+    size_hint: .45, .5
 <MDTXT@MDTextField>:
     size_hint: 0.4,.1
     pos_hint: {'center_x':0.5 , 'center_y':0.6}
@@ -115,12 +115,12 @@
                 RelativeLayout:
                     MDRB:#________"Choose DataBase"
                         text:" Select Databse"
-                        pos_hint:{'center_x':.17,'center_y':.3}
+                        pos_hint:{'center_x':.15,'center_y':.3}
                         on_press:
                             root.upload_db()
                     MDRB:#______"Crypt DataBase"
                         text:" Crypt Databse "
-                        pos_hint:{'center_x':.63,'center_y':.3}
+                        pos_hint:{'center_x':.65,'center_y':.3}
                         on_press:
                             root.crypt_db()
             BoxLayout:
@@ -133,11 +133,11 @@
                 RelativeLayout:
                     MDRB:    #_____"Send Database"
                         text:" Send Databse "
-                        pos_hint:{'center_x':.17,'center_y':.3}
+                        pos_hint:{'center_x':.15,'center_y':.3}
                         on_press :root.send_db()
                     MDRB:     #"Operations"
                         text:" Operations "
-                        pos_hint:{'center_x':.63,'center_y':.3}
+                        pos_hint:{'center_x':.65,'center_y':.3}
                         increment_width: "20dp"
                         on_press : 
                             root.operations()
@@ -153,23 +153,22 @@
                     min: 0
                     max: 100
                     value:0
-                    pos_hint: {'center_x':0.5 , 'center_y':1.35}
+                    pos_hint: {'center_x':0.5 , 'center_y':1.22}
                     size_hint :0.8,0.20
                 MDLabel:
-                    pos_hint: {'center_x':0.5 , 'center_y':1.2}
+                    pos_hint: {'center_x':0.5 , 'center_y':1.1}
                     multiline: True
                     id:datashow
                     size_hint_y: None
                     theme_text_color: "Custom"
                     halign : "center"
                     size_hint : 0.7, 0.3
-                    font_name: 'assets/Helvetica.ttf'
-                    font_size: "20sp"
-                    text_color: 0, 0, 0, 1
-                    bold:True
+                    font_name: 'assets/Helvetica-Bold.ttf'
+                    font_size: "16sp"
+                    text_color: 0, 0, 1, 1
                 MDRB:     #"Show DataTables"
-                    pos_hint: {'center_x':0.5 , 'center_y':0.9}
-                    size_hint : 0.4, 0.28
+                    pos_hint: {'center_x':0.5 , 'center_y':0.83}
+                    size_hint : 0.46, 0.22
                     text:"Show DataTables"
                     font_size: "18sp"
                     on_press: root.showdt()
@@ -183,7 +182,7 @@
                 ScrollView:
                     do_scroll_x: False
                     do_scroll_y: True
-                    pos_hint: {'center_x':.84 , 'center_y':1.15}
+                    pos_hint: {'center_x':.84 , 'center_y':1}
                     MDList:
                         id: container
                         size_hint:0.3,None
@@ -196,10 +195,9 @@
                         anchor_x: 'center'
                         anchor_y: 'top'
                 blanks1:
-                blanks1:
                 MDRB:#________"Crypt Column"
                     text:"Crypt Column"
-                    size_hint :0.4,0.22
+                    size_hint :0.46,0.22
                     pos_hint: {'center_x':.5 , 'center_y':.5}
                     on_press: root.cryptcolumn()
     RelativeLayout:
@@ -232,7 +230,7 @@
             md_bg_color:app.theme_cls.primary_color
             halign:'center'
             size_hint_y:0.08
-            size_hint_x:0.4
+            size_hint_x:0.6
             pos_hint:{'center_x':.5,'center_y':.8}
             line_color: 1, 1, 1, 1
             font_style:"Subtitle2"
@@ -332,7 +330,7 @@
                 text:"Sum"
                 md_bg_color:.965,.325,.078,1
                 pos_hint: {'center_x':0.5 , 'center_y':0.6}
-                size_hint: 0.7,0.2
+                size_hint: 0.76,0.16
                 font_size: "18sp"
                 font_name: 'assets/Helvetica-Bold.ttf'
                 on_press:
@@ -342,7 +340,7 @@
                 text:"AVG"
                 md_bg_color:.486,.733,.0,1
                 pos_hint: {'center_x':0.5 , 'center_y':0.33}
-                size_hint: 0.7,0.2
+                size_hint: 0.76,0.16
                 font_size: "18sp"
                 font_name: 'assets/Helvetica-Bold.ttf'
                 on_press:
@@ -370,7 +368,7 @@
                     text:"Russ Mul"
                     md_bg_color:0,.631,.945,1
                     pos_hint: {'center_x':0.5 , 'center_y':.7}
-                    size_hint: 0.7,0.2
+                    size_hint: 0.76,0.16
                     font_size: "20sp"
                     on_press:
                         root.mulru()
@@ -379,7 +377,7 @@
                     text:"Log Mul"
                     md_bg_color:1,.733,0,1
                     pos_hint: {'center_x':0.5 , 'center_y':.45}
-                    size_hint: 0.7,0.2
+                    size_hint: 0.76,0.16
                     font_size: "20sp"
                     on_press:
                         root.mulog()
@@ -388,27 +386,20 @@
                     text:"Egy Mul"
                     md_bg_color:.01,.01,.01,1
                     pos_hint: {'center_x':0.5 , 'center_y':.2}
-                    size_hint: 0.7,0.2
+                    size_hint: 0.76,0.16
                     font_size: "20sp"
                     on_press:
                         #root.mulegy()
-                        root.clickedbtn="Egypt Multiplication"                
+                        root.clickedbtn="Egypt Multiplication"
     BoxLayout:
         orientation:'vertical'
-        padding: 20,20
-        spacing: '15','15'
-        size_hint:1,0.2
-        pos_hint:{'center_y':.95}
-        BoxLayout:
-
-
         MDToolbar:
             title: 'Operations'
+            type: "top"
             left_action_items: [['menu', lambda x: nav_drawer.set_state('toggle')]]
             right_action_items: [["home", lambda x: root.onback()]]
-            elevation:20
-            pos_hint: {"top":1}
-
+            elevation:15
+        BoxLayout:                        
 <RootWidget>:
     Connect:
         name:"connect"

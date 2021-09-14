@@ -1,12 +1,12 @@
 import os
-from threading import local  
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+from kivy.core.window import Window
+Window.size=(440,650)
 #Kivy Import 
 from kivy.properties import ListProperty
 from kivy.metrics import dp
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.lang import Builder
-from kivy.core.window import Window
 from kivy.utils import platform
 from kivy.core.image import Image
 from kivy.uix.image import Image
@@ -23,7 +23,6 @@ from kivymd.theming import ThemeManager
 from kivymd.toast import toast
 # Others Import 
 import socket,math,time,rsa,dill,os,pysftp,paramiko,ssl
-from jnius import autoclass
 from tinydb import TinyDB
 from phe import paillier
 from binascii import hexlify 
@@ -34,7 +33,6 @@ from hoverable import HoverBehavior
 theme_cls = ThemeManager()
 theme_cls.theme_style="Dark"
 theme_cls.primary_palette="Yellow" 
-Window.size=(440,650)
 Builder.load_file('build.kv')
 (pubkey, privkey) = rsa.newkeys(256)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
@@ -57,12 +55,12 @@ dbname=None #crypted database
 file_name=None #file uploaded
 table =None #te Table used in show datatable 
 checked_ele=None # selected colummn name 
-send_flag=True  # check dababase sending
-
+send_flag=False  # check dababase sending
+sftp=None
 class Connect(Screen):
     #_______________#
     def db_connect(self):
-        global Soc
+        global Soc,sftp
         try :
             global HOST,PORT
             #HOST="192.168.1.107"
@@ -85,13 +83,11 @@ class Connect(Screen):
             client.close()
         except Exception as e:
             self.ids.constat.text=f"PARAMIKO {str(e)}"
-            #####SFTP
-        global sftp
-        try:
-            sftp=pysftp.Connection(host=HOST, username=user, password=passwd)
-        except Exception as e:
-            self.ids.constat.text=f"SFTP {str(e)}"            
-        ##########SSL
+#__SFTP________            
+        cnopts = pysftp.CnOpts()
+        cnopts.hostkeys = None
+        sftp=pysftp.Connection(host=HOST, username=user, password=passwd,cnopts=cnopts)
+#__SSL_________        
         try:
             context= ssl.SSLContext()
             context.verify_mode = ssl.CERT_NONE
@@ -137,7 +133,9 @@ class MainScreen(Screen):
             colx=self.columns
             self.listfil(colx) #update list with column name 
             self.ids.my_bar.value=0
-            self.ids.datashow.text=f"[{file_name[:-3]}] Data base Loeded"  
+            rmtfpth=os.path.basename(file_name)
+            self.ids.datashow.text=f"[{rmtfpth[:-3]}] Data Base Loaded" 
+            print("________From select CWD",os.getcwd()) 
         except Exception as e:
             self.ids.datashow.text=str(e)       
         self.exit_manager()
@@ -213,7 +211,8 @@ class MainScreen(Screen):
         if not file_name:
             self.ids.datashow.text=f"Warning ! .Choose Database !"        
         elif crypted_cols==[colx.index(x) for x in colx]:
-            self.ids.datashow.text=f"Warning ! ..Database [{dbname}] Aleardy Crypted"
+            rmtfpth=os.path.basename(dbname)
+            self.ids.datashow.text=f"Warning ! ..Database [{rmtfpth}] Aleardy Crypted"
         else :
             if Xtable :
                 for x in colx : # if the crypted table exist try to crypt the rest of column one by one 
@@ -228,13 +227,14 @@ class MainScreen(Screen):
                 for x in tabx :
                     d={}
                     for a,b in x.items() :
-                        if str(b).isalpha():
-                            d[self.rsacrypt(a)]=self.rsacrypt(b)
-                        elif not str(b).isalpha() :
-                            d[self.rsacrypt(a)]=self.enciph(b) #changerd line
+                        if not str(b).isalpha() :
+                            d[self.rsacrypt(a)]=self.enciph(b)
+                        else:
+                            d[self.rsacrypt(a)]=self.rsacrypt(b)                            
                     Xtable.insert(d)
-                    self.ids.datashow.text=f"Database [{dbname}] Crypted succefully"
-                    crypted_cols=[colx.index(x) for x in colx]
+                rmtfpth=os.path.basename(dbname)
+                self.ids.datashow.text=f"Database [{rmtfpth}] Crypted succefully"
+                crypted_cols=[colx.index(x) for x in colx]
     def cryptcolumn(self):
         global dbname,Xtable,file_name,crypted_cols
         crypt_temp=[]
@@ -279,7 +279,7 @@ class MainScreen(Screen):
                     crypted_cols=sorted(crypted_cols)
     #______________************ Function to send database
     def send_db(self):
-        global dbname,send_flag
+        global dbname,send_flag,sftp
         if not dbname:
             self.ids.datashow.text="Crypt Database Before"
         else :
@@ -287,16 +287,16 @@ class MainScreen(Screen):
             Soc.sendall(x.encode())
             Soc.send((dbname).encode())
             localFilePath = dbname
-            remoteFilePath = '/tmp/'+dbname
+            rmtfpth=os.path.basename(dbname)
+            remoteFilePath = '/tmp/'+rmtfpth
             sftp.put(localFilePath, remoteFilePath)            
             Acknowldgment=Soc.recv(40) .decode()
             if Acknowldgment.endswith("fully"):
                 self.ids.my_bar.value=100 #update Progress bar  
-                self.ids.datashow.text = f" [ { dbname[:-3] } ] .. Sent Succefully ..!"   
+                self.ids.datashow.text = f" [ { rmtfpth[:-3] } ] .. Sent Succefully ..!"   
                 send_flag=True
             else:
                 self.ids.datashow.text=Acknowldgment
-    
     #_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols
@@ -340,7 +340,7 @@ class MainScreen(Screen):
         colx=crypted_cols=[]
         tabx =Xtable=dbname=file_name=table=checked_ele =None 
         send_flag=False  # check dababase sending
-        return self.choose_db() if platform=='linux' else self.file_manager_open()
+        return self.file_manager_open() if platform=='android' else self.choose_db()
     def log_out(self):
         global Soc
         Soc.send("exit".encode())
