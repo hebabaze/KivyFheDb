@@ -68,9 +68,8 @@ class Connect(Screen):
             #HOST=self.ids.Ip.text
             PORT=443
             #PORT=int(self.ids.Port.text)
-            user='root' #self.ids.user.text
-            passwd= 'Takeit'
-            #self.ids.pswd.text
+            user=self.ids.user.text
+            passwd= self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
             ###########Paramiko
@@ -124,13 +123,6 @@ class MainScreen(Screen):
         file_name=listpat[-1]
         dpath=path[:-len(file_name)]
         try:
-            cmd="del dpath*x.db" if platform=='win' else  'rm dpath\*x.db'
-        except :pass
-        print(" the dpath is ",dpath)        
-        try:
-            cmd="del *x.db" if platform=='win' else  'rm *x.db'
-        except :pass
-        try:
             self.db = TinyDB(path) # upload database
             tabx=self.db.table('Hr')      #upload database table 
             rdic=tabx.get(doc_id=1) # to check value type
@@ -140,7 +132,6 @@ class MainScreen(Screen):
             self.ids.my_bar.value=0
             rmtfpth=os.path.basename(file_name)
             self.ids.datashow.text=f"[{rmtfpth[:-3]}] Data Base Loaded" 
-            print("________From select CWD",os.getcwd()) 
         except Exception as e:
             self.ids.datashow.text=str(e)       
         self.exit_manager()
@@ -684,7 +675,6 @@ class OperationsScreen(Screen):
             Temp=[]
             Old=[]
             rest=round((first-m1),2)
-            print("rest",rest)
             Temp.append(rest)
             Temp.append(second)
             Old.append(first)
@@ -699,8 +689,6 @@ class OperationsScreen(Screen):
                     n=L[i+1]
                     if m>n : first , second = m , n
                     else : first , second = n , m
-                    print("m",m)
-                    print("n",n)
                     check_float = isinstance(first, float)
             return check_float
         def addfloatpart(L):
@@ -785,7 +773,6 @@ class OperationsScreen(Screen):
                         ltmp.append(s)
                     ltmp.extend(lval)
                     bol=numberisfloat(ltmp)
-                    print("bol==>",bol)
                     if bol==True:
                         v=addfloatpart(ltmp)
                         data=[pub_key.encrypt(x) for x in v]
@@ -916,7 +903,7 @@ class MainApp(MDApp):
     def build(self):
         self.title= "FHEDB"
         self.theme_cls.theme_style="Light"
-        self.theme_cls.primary_palette="Yellow"
+        self.theme_cls.primary_palette="Red"
         self.icon = 'assets/ico.jpg'        
         return RootWidget()
 

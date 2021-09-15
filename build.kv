@@ -114,12 +114,12 @@
                 pos_hint:{'center_x':.6,'center_y':.8}
                 RelativeLayout:
                     MDRB:#________"Choose DataBase"
-                        text:" Select Databse"
+                        text:" Select Database"
                         pos_hint:{'center_x':.15,'center_y':.3}
                         on_press:
                             root.upload_db()
                     MDRB:#______"Crypt DataBase"
-                        text:" Crypt Databse "
+                        text:" Crypt Database "
                         pos_hint:{'center_x':.65,'center_y':.3}
                         on_press:
                             root.crypt_db()
@@ -132,7 +132,7 @@
                 spacing: '10'
                 RelativeLayout:
                     MDRB:    #_____"Send Database"
-                        text:" Send Databse "
+                        text:" Send Database "
                         pos_hint:{'center_x':.15,'center_y':.3}
                         on_press :root.send_db()
                     MDRB:     #"Operations"
@@ -289,7 +289,7 @@
                 padding:10
                 spacing:5
                 size_hint : 1,0.6
-                pos_hint:{'center_x':.35,'center_y':.4}
+                pos_hint:{'center_x':.35,'center_y':.42}
                 MDTextField:
                     id:showchecked
                     readonly: True
