@@ -59,7 +59,7 @@ send_flag=False  # check dababase sending
 sftp=None
 class Connect(Screen):
     #_______________#
-    def db_connect(self):
+    def connect_db(self):
         global Soc,sftp
         try :
             global HOST,PORT
@@ -69,7 +69,7 @@ class Connect(Screen):
             PORT=443
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd= 'Newlife'
+            passwd= 'Takeit'
             #self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
@@ -78,8 +78,8 @@ class Connect(Screen):
             client=paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(HOST,22,user,passwd)
-            stdin,stdout,stderr=client.exec_command('pkill -9 python')
-            stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
+            #stdin,stdout,stderr=client.exec_command('pkill -9 python')
+            #stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
             client.close()
         except Exception as e:
             self.ids.constat.text=f"PARAMIKO {str(e)}"
@@ -117,14 +117,19 @@ class MainScreen(Screen):
                 ext=[".py", "db",".db",".jpg"],
             )
     
-    #______________************** MD Flile Manager Functions for mobile            
+#______________************** MD Flile Manager Functions for mobile            
     def select_path(self,path):
         global file_name,tabx,colx
+        listpat=path.split('\\')
+        file_name=listpat[-1]
+        dpath=path[:-len(file_name)]
+        try:
+            cmd="del dpath*x.db" if platform=='win' else  'rm dpath\*x.db'
+        except :pass
+        print(" the dpath is ",dpath)        
         try:
             cmd="del *x.db" if platform=='win' else  'rm *x.db'
         except :pass
-        listpat=path.split('\\')
-        file_name=listpat[-1]
         try:
             self.db = TinyDB(path) # upload database
             tabx=self.db.table('Hr')      #upload database table 
@@ -144,6 +149,9 @@ class MainScreen(Screen):
         mypath = '/storage/emulated/0/' if platform == 'android' else '/'
         self.file_manager.show(mypath)
         self.manager_open = True
+        try:
+            cmd="del *x.db" if platform=='win' else  'rm *x.db'
+        except :pass
     def exit_manager(self):
         self.manager_open = False
         self.file_manager.close()
@@ -154,7 +162,7 @@ class MainScreen(Screen):
                 self.file_manager.back()
         return True
     
-    #______________*************  Functions Fill Lists with column name
+#______________*************  Functions Fill Lists with column name
     def listfil(self,lista):
         try:
             self.ids.container.clear_widgets()
@@ -163,13 +171,14 @@ class MainScreen(Screen):
         for x in lista:
             self.ids.container.add_widget(OneLineListItem(text=f"{x}" , on_press=lambda x: self.listchecked(x.text)))
 
-    def listchecked(self,x): # Function return selected element in the list 
+# Function return selected element in the list     
+    def listchecked(self,x): 
         global checked_ele
         checked_ele=x
         self.ids.datashow.text = f" The column [ {x} ] is now Selected"
         toast(f"This Column {x} is selected")
 
-    #______________************* Choose database on win env
+#______________************* Choose database on win env
     def choose_db(self): # fontion de choix de fichier 
         filechooser.open_file(on_selection=self.handle_selection)
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
@@ -196,7 +205,7 @@ class MainScreen(Screen):
             except Exception as e:
                 self.ids.datashow.text=str(e) 
     
-    #______________************ Crypt Functions
+#______________************ Crypt Functions RSA & Paillier
     def rsacrypt(self,data):       # Fonction de Cryptage RSA
         message=data.encode()
         crypto = rsa.encrypt(message, pubkey)
@@ -205,8 +214,8 @@ class MainScreen(Screen):
     def enciph(self,y):            # get encipher text
         x=pub_key.encrypt(y)
         return str(x.ciphertext()), x.exponent
-    #_______________#
-    def crypt_db(self): #__Fonction de cryptage import une fonction d'autre fichier
+#__Crypt Database Function   
+    def crypt_db(self):
         global Xtable,dbname,file_name,tabx,checked_ele,crypted_cols
         if not file_name:
             self.ids.datashow.text=f"Warning ! .Choose Database !"        
@@ -235,6 +244,7 @@ class MainScreen(Screen):
                 rmtfpth=os.path.basename(dbname)
                 self.ids.datashow.text=f"Database [{rmtfpth}] Crypted succefully"
                 crypted_cols=[colx.index(x) for x in colx]
+#__Crypt Column Function                
     def cryptcolumn(self):
         global dbname,Xtable,file_name,crypted_cols
         crypt_temp=[]
@@ -277,7 +287,7 @@ class MainScreen(Screen):
                 if e not in crypted_cols :
                     crypted_cols.append(e)
                     crypted_cols=sorted(crypted_cols)
-    #______________************ Function to send database
+#______________************ Send database Function
     def send_db(self):
         global dbname,send_flag,sftp
         if not dbname:
@@ -288,6 +298,7 @@ class MainScreen(Screen):
             Soc.send((dbname).encode())
             localFilePath = dbname
             rmtfpth=os.path.basename(dbname)
+            dpath=dbname[:-len(rmtfpth)]
             remoteFilePath = '/tmp/'+rmtfpth
             sftp.put(localFilePath, remoteFilePath)            
             Acknowldgment=Soc.recv(40) .decode()
@@ -297,7 +308,10 @@ class MainScreen(Screen):
                 send_flag=True
             else:
                 self.ids.datashow.text=Acknowldgment
-    #_______________************Function change Screen to operation screen 
+            try:
+                cmd="del dpath*x.db" if platform=='win' else  'rm dpath*x.db'
+            except :pass            
+#_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols
         if send_flag:
@@ -318,7 +332,7 @@ class MainScreen(Screen):
             except:pass
         else:
             self.ids.datashow.text = f" Database not sent yet ..!"    
-    #______________*************Function to show data table content
+#______________*************Function to show data table content
     def showdt(self) : 
         global Xtable,tabx,table
         self.manager.current="show_data_table"
@@ -334,19 +348,21 @@ class MainScreen(Screen):
         else:
             self.ids.datashow.text=f"Warning ! .Choose Database !"
 
-    #______________************* Function to choose with fonction to use for uplaod db
+#______________************* Function to choose with fonction to use for uplaod db
     def upload_db(self):
         global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
         colx=crypted_cols=[]
         tabx =Xtable=dbname=file_name=table=checked_ele =None 
         send_flag=False  # check dababase sending
-        return self.file_manager_open() if platform=='android' else self.choose_db()
+        return self.file_manager_open() if platform=='win' else self.choose_db()
+#____________************** Log OUT Function    
     def log_out(self):
         global Soc
         Soc.send("exit".encode())
         Soc.close()
         self.manager.current="connect"
 ########################################################### #########
+
 class ShowDataTable(Screen):
     #_______________#
     def crtab(self,tab,mtrc):
@@ -526,6 +542,366 @@ class OperationsScreen(Screen):
             endt=(time.time() - start)*1000
             self.ids.ltime.text=f"{round(endt,2)} ms "
             return ("Log Mul Completed")
+    
+    
+#______Egy Mul
+#____________************* Egy Mul :
+######################################### Egyptian Multiplication ##################################################
+    def mulegy(self):
+        #Function for finding Highest 2 power less than or equal to a given number
+        def greatest2power(n,i=0):
+            while int(math.pow(2,i)) <= n : i = i+1
+            return int(math.pow(2,i-1))
+        def splitlist(myList):
+            if len(myList) == 0:
+                return 0
+            elif len(myList) == 1:
+                return myList[0]
+            half = len(myList)//2
+            leftSide = myList[:half]
+            rightSide = myList[half:]
+            if len(leftSide)>2 or len(rightSide)>2:
+                l=splitlist(leftSide)
+                r=splitlist(rightSide)
+                return l,r
+            return leftSide,rightSide
+        def egyptian(L):
+            #Finding greater of two and assigning Highest to first
+            
+            for i in range(0,len(L)-1):
+                m=L[i]
+                n=L[i+1]
+                if m>n : first , second = m , n
+                else : first , second = n , m
+                #Lists for holding two columns
+                fcol , scol = [] , []
+                seed = 1
+            #populating two columns in the Egyptian table
+                while seed <= greatest2power(first):
+                    fcol.append(seed)
+                    scol.append(second*seed)
+                    seed = seed*2
+                valid , backseed = [] , seed//2
+                #computing the valid 2 powers in first column
+                while backseed>=1:
+                    valid.append(backseed)
+                    temp = backseed
+                    backseed = greatest2power(first-backseed)
+                    first = first - temp
+                answer = 0
+            #Computing the product by adding second column elements , those mapped to valid first column
+            tab=[] 
+            for sol in valid:
+                for a,b in zip(fcol,scol):
+                    if a==sol:
+                        answer = answer+b
+                        tab.append(b)
+            return tab
+        def Long(L11,L12):
+            if len(L11)==2 and len(L12)==2:
+                Lx,Ly=egyptian(L11),egyptian(L12)
+                Nlx=[]
+                Nly=[]
+                if len(Lx)>1 and len(Ly)>1:
+                    sx=0
+                    for i in Lx:
+                        sx+=i
+                    Nlx.append(sx)
+                    sy=0
+                    for i in Ly:
+                        sy+=i
+                    Nly.append(sy)
+                    Nlx.extend(Nly)
+                    res=egyptian(Nlx)
+                elif len(Lx)>1 and len(Ly)==1:
+                    sx=0
+                    for i in Lx:
+                        sx+=i
+                    Nlx.append(sx)
+                    Nlx.extend(Ly)
+                    res=egyptian(Nlx)
+                elif len(Lx)==1 and len(Ly)>1:
+                    sy=0
+                    for i in Ly:
+                        sy+=i
+                    Nly.append(sy)
+                    Nly.extend(Lx)
+                    res=egyptian(Nly)
+                elif len(Lx)==1 and len(Ly)==1:
+                    Lx.extend(Ly)
+                    res=egyptian(Lx)
+            elif len(L11)==1 and len(L12)==1:
+                L11.extend(L12)
+                res=egyptian(L11)
+            elif len(L11)==1 and len(L12)==2:
+                Lyy=egyptian(L12)
+                temp=[]
+                s=0
+                if len(Lyy)>1:
+                    for x in Lyy:
+                        s+=x
+                    temp.append(s)
+                    temp.extend(L11)
+                    res=egyptian(temp)
+                elif len(Lyy)==1:
+                    L11.extend(Lyy)
+                    res=egyptian(L11)
+            elif len(L11)==2 and len(L12)==1:
+                Lxx=egyptian(L11)
+                temp=[]
+                s=0
+                if len(Lxx)>1:
+                    for x in Lxx:
+                        s+=x
+                    temp.append(s)
+                    temp.extend(L12)
+                    res=egyptian(temp)
+                elif len(Lxx)==1:
+                    Lxx.extend(L12)
+                    res=egyptian(Lxx)
+            return res
+               #Fonction qui transforme une liste de plusieurs dimension a une dimension
+        def flatten_list(_2d_list):
+            flat_list = []
+            # Iterate through the outer list
+            for element in _2d_list:
+                if type(element) is list:
+                    # If the element is of type list, iterate through the sublist
+                    for item in element:
+                        flat_list.append(item)
+                else:
+                    flat_list.append(element)
+            return flat_list
+        def prodList(L):
+            LY=[]
+            p=1
+            for x in L:
+                p*=x
+            LY.append(p)
+            return LY 
+        def folatprecision(first,second):
+            m1=int(first)
+            Temp=[]
+            Old=[]
+            rest=round((first-m1),2)
+            print("rest",rest)
+            Temp.append(rest)
+            Temp.append(second)
+            Old.append(first)
+            Old.append(second)
+            val=egyptian(Old)
+            extra=egyptian(Temp)
+            val.extend(extra)
+            return val
+        def numberisfloat(L):
+            for i in range(0,len(L)-1):
+                    m=L[i]
+                    n=L[i+1]
+                    if m>n : first , second = m , n
+                    else : first , second = n , m
+                    print("m",m)
+                    print("n",n)
+                    check_float = isinstance(first, float)
+            return check_float
+        def addfloatpart(L):
+            for i in range(0,len(L)-1):
+                m=L[i]
+                n=L[i+1]
+                if m>n : first , second = m , n
+                else : first , second = n , m
+                val=folatprecision(first,second)
+            return val 
+        chosen_col=checked_ele
+        if not chosen_col :
+            self.ids.showchecked.text = "Warning : Choose a column !"
+        else :
+            x='61'
+            Soc.send(x.encode())            
+            start=time.time()
+            idd=colx.index(chosen_col)
+            M=[] # Pour Stocker Les Valeurs à calculer 
+            # Stocker les valeur à calculer 
+            for y in range(1,len(tabx)+1):
+                Far=tabx.get(doc_id=y)
+                M.append(list(Far.values())[idd])
+            for x in M: # Check 0 result
+                if x==0:
+                    self.ids.lresult.text="0 Result Dectected"
+                    return "Zéro Result Detected!.."
+            L1,L2=splitlist(M)
+            if len(L1)==1 or len(L2)==1:
+                res=Long(L1,L2)
+                data=[pub_key.encrypt(x) for x in res]
+                data=dill.dumps(data)
+                Soc.send(data)
+            else:
+                check_float1=numberisfloat(L1)
+                check_float2=numberisfloat(L2)
+                if check_float1==True and check_float2==True:
+                    val1=addfloatpart(L1)
+                    val2=addfloatpart(L2)
+                    lval1=val1
+                    lval2=val2
+                    if len(val1)>1:
+                        s=0
+                        lval1=[]
+                        for x in val1:
+                            s+=x
+                        lval1.append(s)
+                    if len(val2)>1:
+                        s=0
+                        lval2=[]
+                        for x in val2:
+                            s+=x
+                        lval2.append(s)
+                    lval1.extend(lval2)
+                    bol=numberisfloat(lval1)
+                    if bol==True:
+                        v=addfloatpart(lval1)
+                        data=[pub_key.encrypt(x) for x in v]
+                        data=dill.dumps(data)
+                        Soc.send(data)
+                    else:
+                        res=egyptian(lval1)
+                        data=[pub_key.encrypt(x) for x in res]
+                        data=dill.dumps(data)
+                        Soc.send(data)
+                elif check_float1==True and check_float2==False:
+                    val1=addfloatpart(L1)
+                    lval=val1
+                    if len(val1)>1:
+                        s=0
+                        lval=[]
+                        for x in val1:
+                            s+=x
+                        lval.append(s)
+                    tmp=egyptian(L2)
+                    ltmp=tmp
+                    if len(tmp)>1:
+                        s=0
+                        ltmp=[]
+                        for x in tmp:
+                            s+=x
+                        ltmp.append(s)
+                    ltmp.extend(lval)
+                    bol=numberisfloat(ltmp)
+                    print("bol==>",bol)
+                    if bol==True:
+                        v=addfloatpart(ltmp)
+                        data=[pub_key.encrypt(x) for x in v]
+                        data=dill.dumps(data)
+                        Soc.send(data)
+                    res=egyptian(ltmp)                    
+                    data=[pub_key.encrypt(x) for x in res]
+                    data=dill.dumps(data)
+                    Soc.send(data)
+                elif check_float1==False and check_float2==True:
+                    val2=addfloatpart(L2)
+                    lval=val2
+                    if len(val2)>1:
+                        s=0
+                        lval=[]
+                        for x in val2:
+                            s+=x
+                        lval.append(s)
+                    tmp=egyptian(L1)
+                    ltmp=tmp
+                    if len(tmp)>1:
+                        s=0
+                        ltmp=[]
+                        for x in tmp:
+                            s+=x
+                        ltmp.append(s)
+                    ltmp.extend(lval)
+                    bol=numberisfloat(ltmp)
+                    if bol==True:
+                        v=addfloatpart(ltmp)
+                        data=[pub_key.encrypt(x) for x in v]
+                        data=dill.dumps(data)
+                        Soc.send(data)
+                    res=egyptian(ltmp)
+                    data=[pub_key.encrypt(x) for x in res]
+                    data=dill.dumps(data)
+                    Soc.send(data)
+                elif check_float1==False and check_float2==False:
+                    if type(L1)==list and type(L2)==list:
+                        res=Long(L1,L2)
+                        data=[pub_key.encrypt(x) for x in res]
+                        data=dill.dumps(data)
+                        Soc.send(data)
+                    elif type(L1)==tuple and type(L2)==tuple:
+                        Lx1=list(L1[0])
+                        Lx2=list(L1[1])
+                        Lx1=flatten_list(L1[0])
+                        Lx2=flatten_list(L1[1])
+                        if len(Lx1)>2:
+                            Lx1=prodList(Lx1)
+                    
+                        if len(Lx2)>2:
+                            Lx2=prodList(Lx2)
+
+                        Ly1=list(L2[0])
+                        Ly2=list(L2[1])
+                        Ly1=flatten_list(L2[0])
+                        Ly2=flatten_list(L2[1])
+                    
+                        if len(Ly1)>2:
+                            Ly1=prodList(Ly1)
+                        if len(Ly2)>2:
+                            Ly2=prodList(Ly2)
+                        res1=Long(Lx1,Lx2)   
+                        res2=Long(Ly1,Ly2)
+                        if len(res1)>1 and len(res2)>1:
+                            R1,R2=[],[]
+                            s1,s2=0,0
+                            for i in res1:
+                                s1+=i
+                            R1.append(s1)
+                            for i in res2:
+                                s2+=i
+                            R2.append(s2)
+                            R1.extend(R2)
+                            res=egyptian(R1)
+                            data=[pub_key.encrypt(x) for x in res]
+                            data=dill.dumps(data)
+                            Soc.send(data)
+                        elif len(res1)==1 and len(res2)>1:
+                            s=0
+                            R1=[]
+                            for i in res2:
+                                s+=i
+                            R1.append(s)
+                            R1.extend(res1)
+                            res=egyptian(R1)
+                            data=[pub_key.encrypt(x) for x in res]
+                            data=dill.dumps(data)
+                            Soc.send(data)
+                        elif len(res1)>1 and len(res2)==1:
+                            s=0
+                            R1=[]
+                            for i in res1:
+                                s+=i
+                            R1.append(s)
+                            R1.extend(res1)
+                            res=egyptian(R1)
+                            data=[pub_key.encrypt(x) for x in res]
+                            data=dill.dumps(data)
+                            Soc.send(data)
+                        elif len(res1)==1 and len(res2)==1:
+                            res1.extend(res2)
+                            res=egyptian(res1)
+                            data=[pub_key.encrypt(x) for x in res]
+                            data=dill.dumps(data)
+                            Soc.send(data)
+            #############___Receiv Result
+            result=Soc.recv(BS)
+            result=dill.loads(result)
+            result=priv_key.decrypt(result)
+            self.ids.lresult.text=f"{round(result,2)} " 
+            tab="End"
+            tab=dill.dumps(tab)
+            Soc.send(tab)
+#_______onback    
     def onback(self):
          self.manager.current="main_screen"
 

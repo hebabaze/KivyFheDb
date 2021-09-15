@@ -74,7 +74,7 @@
                 hint_text:'Password'
                 pos_hint: {'center_x':.5,'center_y':0.26}
                 password:True
-                on_text_validate:root.db_connect()                                
+                on_text_validate:root.connect_db()
             MDRaisedButton:
                 md_bg_color:0,0,0,1
                 theme_text_color: "Custom"
@@ -84,7 +84,7 @@
                 text:"Connect"
                 font_name: 'assets/Bodoni Bold'
                 font_size: "18sp"
-                on_press:root.db_connect()
+                on_press:root.connect_db()
                 line_color: 1, 1, 1, 1
 <MainScreen>:
     canvas.before:
@@ -182,7 +182,7 @@
                 ScrollView:
                     do_scroll_x: False
                     do_scroll_y: True
-                    pos_hint: {'center_x':.84 , 'center_y':1}
+                    pos_hint: {'center_x':.84 , 'center_y':1.1}
                     MDList:
                         id: container
                         size_hint:0.3,None
@@ -389,7 +389,7 @@
                     size_hint: 0.76,0.16
                     font_size: "20sp"
                     on_press:
-                        #root.mulegy()
+                        root.mulegy()
                         root.clickedbtn="Egypt Multiplication"
     BoxLayout:
         orientation:'vertical'
