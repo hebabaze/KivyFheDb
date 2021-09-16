@@ -1,6 +1,8 @@
 import os
 os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
 from kivy.core.window import Window
+Window.softinput_mode="below_target"
+from kivy.core.window import Window
 Window.size=(440,650)
 #Kivy Import 
 from kivy.properties import ListProperty
@@ -70,7 +72,7 @@ class Connect(Screen):
             PORT=443
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd= 'Takeit' #self.ids.pswd.text
+            passwd= 'Newlife' #self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
 #___Paramiko
