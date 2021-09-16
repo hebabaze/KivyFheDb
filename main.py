@@ -884,6 +884,8 @@ class OperationsScreen(Screen):
             result=Soc.recv(BS)
             result=dill.loads(result)
             result=priv_key.decrypt(result)
+            endt=(time.time() - start)*1000
+            self.ids.ltime.text=f"{round(endt,2)} ms "
             self.ids.lresult.text=f"{round(result,2)} " 
             tab="End"
             tab=dill.dumps(tab)
