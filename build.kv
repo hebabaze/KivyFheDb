@@ -202,7 +202,7 @@
                     on_press: root.cryptcolumn()
     RelativeLayout:
         ImageButton:
-            size_hint :0.2 , 0.1
+            size_hint :0.12 , 0.06
             id:imgbtn
             source:'assets/logout_hover.png'if imgbtn.hovered else "assets/logout_nothover.png"
             on_press:root.log_out()
@@ -300,7 +300,7 @@
                 MDTextField:
                     id:op
                     readonly: True
-                    text:root.clickedbtn
+                    text:"..."
                     halign: 'center'
                     valign: 'middle'  
                     font_name: 'assets/Helvetica.ttf'
@@ -334,8 +334,8 @@
                 font_size: "18sp"
                 font_name: 'assets/Helvetica-Bold.ttf'
                 on_press:
+                    root.ids.op.text="Sum"
                     root.sumf()
-                    root.clickedbtn="Sum"
             MDRB:#AVG
                 text:"AVG"
                 md_bg_color:.486,.733,.0,1
@@ -344,9 +344,8 @@
                 font_size: "18sp"
                 font_name: 'assets/Helvetica-Bold.ttf'
                 on_press:
+                    root.ids.op.text="AVG"
                     root.avgf()
-                    root.clickedbtn="AVG"
-
         ScrollView:
             canvas.before:
                 Color:
@@ -371,8 +370,9 @@
                     size_hint: 0.76,0.16
                     font_size: "20sp"
                     on_press:
+                        root.lresult=""
                         root.mulru()
-                        root.clickedbtn="Ru Multiplication"
+                        root.ids.op.text="Ru Multiplication"
                 MDRB:
                     text:"Log Mul"
                     md_bg_color:1,.733,0,1
@@ -380,8 +380,9 @@
                     size_hint: 0.76,0.16
                     font_size: "20sp"
                     on_press:
+                        root.ids.op.text="Log Multiplication"
                         root.mulog()
-                        root.clickedbtn="Log Multiplication"
+                        
                 MDRB:
                     text:"Egy Mul"
                     md_bg_color:.01,.01,.01,1
@@ -389,8 +390,9 @@
                     size_hint: 0.76,0.16
                     font_size: "20sp"
                     on_press:
+                        root.ids.op.text="Egypt Multiplication"
                         root.mulegy()
-                        root.clickedbtn="Egypt Multiplication"
+                        
     BoxLayout:
         orientation:'vertical'
         MDToolbar:

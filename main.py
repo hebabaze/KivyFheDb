@@ -61,6 +61,7 @@ class Connect(Screen):
     #_______________#
     def connect_db(self):
         global Soc,sftp
+#___Authetification        
         try :
             global HOST,PORT
             #HOST="192.168.1.107"
@@ -68,25 +69,28 @@ class Connect(Screen):
             #HOST=self.ids.Ip.text
             PORT=443
             #PORT=int(self.ids.Port.text)
-            user=self.ids.user.text
-            passwd= self.ids.pswd.text
+            user='root' #self.ids.user.text
+            passwd= 'Takeit' #self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
-            ###########Paramiko
+#___Paramiko
         try:
             client=paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(HOST,22,user,passwd)
-            #stdin,stdout,stderr=client.exec_command('pkill -9 python')
-            #stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
+            stdin,stdout,stderr=client.exec_command('pkill -9 python')
+            stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
             client.close()
         except Exception as e:
             self.ids.constat.text=f"PARAMIKO {str(e)}"
-#__SFTP________            
-        cnopts = pysftp.CnOpts()
-        cnopts.hostkeys = None
-        sftp=pysftp.Connection(host=HOST, username=user, password=passwd,cnopts=cnopts)
-#__SSL_________        
+#___SFTP________            
+        try:
+            cnopts = pysftp.CnOpts()
+            cnopts.hostkeys = None
+            sftp=pysftp.Connection(host=HOST, username=user, password=passwd,cnopts=cnopts)
+        except Exception as e:
+            self.ids.constat.text=f"PySFTP {str(e)}"            
+#___SSL_________        
         try:
             context= ssl.SSLContext()
             context.verify_mode = ssl.CERT_NONE
@@ -114,8 +118,7 @@ class MainScreen(Screen):
                 exit_manager=self.exit_manager,
                 select_path=self.select_path,
                 ext=[".py", "db",".db",".jpg"],
-            )
-    
+            )  
 #______________************** MD Flile Manager Functions for mobile            
     def select_path(self,path):
         global file_name,tabx,colx
@@ -345,7 +348,7 @@ class MainScreen(Screen):
         colx=crypted_cols=[]
         tabx =Xtable=dbname=file_name=table=checked_ele =None 
         send_flag=False  # check dababase sending
-        return self.file_manager_open() if platform=='win' else self.choose_db()
+        return self.file_manager_open() if platform=='android' else self.choose_db()
 #____________************** Log OUT Function    
     def log_out(self):
         global Soc
@@ -493,6 +496,7 @@ class OperationsScreen(Screen):
             endt=(time.time() - start)*1000
             self.ids.ltime.text=f"{round(endt,2)} ms "
             return "Completed Task"
+#____________************* Log Mul
     def mulog(self):
         start=time.time()
         chosen_col=checked_ele
@@ -532,12 +536,8 @@ class OperationsScreen(Screen):
             Soc.send(Lprod)
             endt=(time.time() - start)*1000
             self.ids.ltime.text=f"{round(endt,2)} ms "
-            return ("Log Mul Completed")
-    
-    
-#______Egy Mul
+            return ("Log Mul Completed")  
 #____________************* Egy Mul :
-######################################### Egyptian Multiplication ##################################################
     def mulegy(self):
         #Function for finding Highest 2 power less than or equal to a given number
         def greatest2power(n,i=0):
