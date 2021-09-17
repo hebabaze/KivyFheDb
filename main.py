@@ -59,10 +59,11 @@ table =None #te Table used in show datatable
 checked_ele=None # selected colummn name 
 send_flag=False  # check dababase sending
 sftp=None
+client=""
 class Connect(Screen):
     #_______________#
     def connect_db(self):
-        global Soc,sftp
+        global Soc,sftp,client
 #___Authetification        
         try :
             global HOST,PORT
@@ -72,7 +73,7 @@ class Connect(Screen):
             PORT=443
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd= 'Newlife' #self.ids.pswd.text
+            passwd= '' #self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
 #___Paramiko
@@ -80,9 +81,9 @@ class Connect(Screen):
             client=paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             client.connect(HOST,22,user,passwd)
-            stdin,stdout,stderr=client.exec_command('pkill -9 python')
-            stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
-            client.close()
+            #stdin,stdout,stderr=client.exec_command('pkill -9 python')
+            #stdin,stdout,stderr=client.exec_command('python3 FHE/main.py </dev/null &>/dev/null &')
+            #client.close()
         except Exception as e:
             self.ids.constat.text=f"PARAMIKO {str(e)}"
 #___SFTP________            
@@ -103,8 +104,9 @@ class Connect(Screen):
             Soc.send(x.encode())
             pks=dill.dumps(pkr)
             Soc.send(pks)
-            tm=Soc.recv(6).decode()
-            self.manager.current="main_screen" 
+            self.manager.current="main_screen"
+            screen1 = self.manager.get_screen('main_screen')
+            screen1.ids.datashow.text=f"successfully connected to {HOST}." 
         except Exception as e:
             self.ids.constat.text=f"SSl {str(e)}"
     def onback(self):
@@ -146,7 +148,7 @@ class MainScreen(Screen):
         self.file_manager.show(mypath)
         self.manager_open = True
         try:
-            cmd="del *x.db" if platform=='win' else  'rm *x.db'
+            cmd="del *x.db" if platform=='win' else  'rm *x.db'                                                                                                                                                                                                                                                                                            
         except :pass
     def exit_manager(self):
         self.manager_open = False
@@ -285,7 +287,7 @@ class MainScreen(Screen):
                     crypted_cols=sorted(crypted_cols)
 #______________************ Send database Function
     def send_db(self):
-        global dbname,send_flag,sftp
+        global dbname,send_flag,sftp,client
         if not dbname:
             self.ids.datashow.text="Crypt Database Before"
         else :
@@ -296,31 +298,47 @@ class MainScreen(Screen):
             rmtfpth=os.path.basename(dbname)
             dpath=dbname[:-len(rmtfpth)]
             remoteFilePath = '/tmp/'+rmtfpth
-            sftp.put(localFilePath, remoteFilePath)            
-            Acknowldgment=Soc.recv(40) .decode()
-            if Acknowldgment.endswith("fully"):
-                self.ids.my_bar.value=100 #update Progress bar  
-                self.ids.datashow.text = f" [ { rmtfpth[:-3] } ] .. Sent Succefully ..!"   
-                send_flag=True
-            else:
-                self.ids.datashow.text=Acknowldgment
+            try:
+                stdin,stdout,stderr=client.exec_command('rm remoteFilePath')# delet file if exist before
+                client.close()
+            except:pass
+            try:
+                sftp.put(localFilePath, remoteFilePath)            
+                Acknowldgment=Soc.recv(40) .decode()
+                if Acknowldgment.endswith("fully"):
+                    self.ids.my_bar.value=100 #update Progress bar  
+                    self.ids.datashow.text = f" [ { rmtfpth[:-3] } ] .. Sent Succefully ..!"   
+                    send_flag=True
+                else:
+                    self.ids.datashow.text="Server busy try again "
+            except Exception as e :
+                self.ids.datashow.text=str(e)
             try:
                 cmd="del dpath*x.db" if platform=='win' else  'rm dpath*x.db'
+                os.system(cmd)
             except :pass            
 #_______________************Function change Screen to operation screen 
     def operations(self):
-        global tabx,crypted_cols
+        global tabx,crypted_cols,checked_ele
         if send_flag:
             try:
                 rdic=tabx.get(doc_id=1)
                 int_cols=[colx.index(x) for x in rdic if not str(rdic[x]).isalpha()]
                 int_crypted_cols=[x for x in crypted_cols if x in int_cols]
+                checked_ele=None
             except: pass
             try:
                 cmd="del *x.db" if platform=='win' else  'rm *x.db'
+                os.system(cmd)
             except :pass
             self.manager.current="operations_screen"
             screen3 = self.manager.get_screen('operations_screen')
+            try:
+                screen3.ids.showchecked.text="..."
+                screen3.ids.op.text="..."
+                screen3.ids.ltime.text="..."
+                screen3.ids.lresult.text="..."
+            except:pass
             try:
                 screen3.ids.container2.clear_widgets()
                 for x in int_crypted_cols:
@@ -344,9 +362,12 @@ class MainScreen(Screen):
         else:
             self.ids.datashow.text=f"Warning ! .Choose Database !"
 
-#______________************* Function to choose with fonction to use for uplaod db
+#______________************* Function to choose  uplaod method bellow the Operating system
     def upload_db(self):
         global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
+        try:
+            os.remove(dbname)
+        except :pass
         colx=crypted_cols=[]
         tabx =Xtable=dbname=file_name=table=checked_ele =None 
         send_flag=False  # check dababase sending
@@ -354,6 +375,9 @@ class MainScreen(Screen):
 #____________************** Log OUT Function    
     def log_out(self):
         global Soc
+        try:
+            os.remove(dbname)
+        except :pass
         Soc.send("exit".encode())
         Soc.close()
         self.manager.current="connect"
@@ -677,13 +701,22 @@ class OperationsScreen(Screen):
             Temp=[]
             Old=[]
             rest=round((first-m1),2)
+            print("rest",rest)
             Temp.append(rest)
             Temp.append(second)
             Old.append(first)
             Old.append(second)
             val=egyptian(Old)
             extra=egyptian(Temp)
-            val.extend(extra)
+            check_float = isinstance(second, float)
+            if check_float==True:
+                m2=int(second)
+                rest2=round((second-m2),2)
+                r=rest*rest2
+                val.extend(extra)
+                val.append(r)
+            elif check_float==False:
+                val.extend(extra)
             return val
         def numberisfloat(L):
             for i in range(0,len(L)-1):
@@ -907,7 +940,7 @@ class MainApp(MDApp):
     def build(self):
         self.title= "FHEDB"
         self.theme_cls.theme_style="Light"
-        self.theme_cls.primary_palette="Red"
+        self.theme_cls.primary_palette="Yellow"
         self.icon = 'assets/ico.jpg'        
         return RootWidget()
 
