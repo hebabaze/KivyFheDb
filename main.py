@@ -39,7 +39,7 @@ Builder.load_file('build.kv')
 (pubkey, privkey) = rsa.newkeys(256)
 pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
 pkr=pub_key.n
-cmd="del *x.db" if platform=='win' else  'rm *x.db'
+cmd="del *.dbx" if platform=='win' else  'rm *x.dbx'
 os.system(cmd)
 #Variable Declaration 
 HOST = ''  # The server's hostname or IP address
@@ -73,7 +73,7 @@ class Connect(Screen):
             PORT=443
             #PORT=int(self.ids.Port.text)
             user='root' #self.ids.user.text
-            passwd= '' #self.ids.pswd.text
+            passwd= 'Takeit' #self.ids.pswd.text
         except Exception as e:
                 self.ids.constat.text=f"Identification {str(e)}"
 #___Paramiko
@@ -125,10 +125,9 @@ class MainScreen(Screen):
             )  
 #______________************** MD Flile Manager Functions for mobile            
     def select_path(self,path):
-        global file_name,tabx,colx
+        global file_name,tabx,colx,dbname
         listpat=path.split('\\')
         file_name=listpat[-1]
-        dpath=path[:-len(file_name)]
         try:
             self.db = TinyDB(path) # upload database
             tabx=self.db.table('Hr')      #upload database table 
@@ -138,6 +137,7 @@ class MainScreen(Screen):
             self.listfil(colx) #update list with column name 
             self.ids.my_bar.value=0
             rmtfpth=os.path.basename(file_name)
+            dbname = hexlify(rsa.encrypt(file_name.encode(), pubkey)).decode()[:8]+".dbx"
             self.ids.datashow.text=f"[{rmtfpth[:-3]}] Data Base Loaded" 
         except Exception as e:
             self.ids.datashow.text=str(e)       
@@ -148,7 +148,7 @@ class MainScreen(Screen):
         self.file_manager.show(mypath)
         self.manager_open = True
         try:
-            cmd="del *x.db" if platform=='win' else  'rm *x.db'                                                                                                                                                                                                                                                                                            
+            cmd="del *.dbx" if platform=='win' else  'rm *.dbx'                                                                                                                                                                                                                                                                                            
         except :pass
     def exit_manager(self):
         self.manager_open = False
@@ -180,14 +180,14 @@ class MainScreen(Screen):
     def choose_db(self): # fontion de choix de fichier 
         filechooser.open_file(on_selection=self.handle_selection)
     def handle_selection(self,selection): # fonction qui gére le choix de fichier
-        global colx,file_name,tabx
+        global colx,file_name,tabx,dbname
         if not selection:
             pass
         else:
             self.selection = selection
             colx=crypted_cols=[]
             chosenpath=self.selection[0]
-            cmd="del chosenpath\\..\\*x.db" if platform=='win' else  'rm chosenpath/*x.db'
+            cmd="del chosenpath\\..\\*.dbx" if platform=='win' else  'rm chosenpath/*.dbx'
             try:os.system(cmd)
             except:pass
             file_name=Path(str(self.selection[0])).name # extract db name from path
@@ -202,7 +202,7 @@ class MainScreen(Screen):
                 self.ids.datashow.text=f"[{file_name[:-3]}] Data base Loeded"  
             except Exception as e:
                 self.ids.datashow.text=str(e) 
-    
+            dbname = hexlify(rsa.encrypt(file_name.encode(), pubkey)).decode()[:8]+".dbx"
 #______________************ Crypt Functions RSA & Paillier
     def rsacrypt(self,data):       # Fonction de Cryptage RSA
         message=data.encode()
@@ -213,13 +213,12 @@ class MainScreen(Screen):
         x=pub_key.encrypt(y)
         return str(x.ciphertext()), x.exponent
 #__Crypt Database Function   
-    def crypt_db(self):
+    def crypt_db(self):        
         global Xtable,dbname,file_name,tabx,checked_ele,crypted_cols
         if not file_name:
             self.ids.datashow.text=f"Warning ! .Choose Database !"        
         elif crypted_cols==[colx.index(x) for x in colx]:
-            rmtfpth=os.path.basename(dbname)
-            self.ids.datashow.text=f"Warning ! ..Database [{rmtfpth}] Aleardy Crypted"
+            self.ids.datashow.text=f"Warning ! ..Database [{os.path.basename(file_name)[:-3]}] Aleardy Crypted"
         else :
             if Xtable :
                 for x in colx : # if the crypted table exist try to crypt the rest of column one by one 
@@ -227,8 +226,6 @@ class MainScreen(Screen):
                     self.cryptcolumn()
                 #tabx=Xtable 
             else :
-                try:dbname=file_name[:-3]+'x.db' # Create New DB file 
-                except:self.ids.datashow.text=f"Warning ! .Choose Database !"
                 dbx=TinyDB(dbname)        # Create Tinydb DB  
                 Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
                 for x in tabx :
@@ -239,8 +236,7 @@ class MainScreen(Screen):
                         else:
                             d[self.rsacrypt(a)]=self.rsacrypt(b)                            
                     Xtable.insert(d)
-                rmtfpth=os.path.basename(dbname)
-                self.ids.datashow.text=f"Database [{rmtfpth}] Crypted succefully"
+                self.ids.datashow.text=f"Database [{os.path.basename(file_name)[:-3]}] Crypted succefully"
                 crypted_cols=[colx.index(x) for x in colx]
 #__Crypt Column Function                
     def cryptcolumn(self):
@@ -249,8 +245,6 @@ class MainScreen(Screen):
         if not file_name :
             self.ids.datashow.text=f"Warning ! .Choose Database !"
         else:
-            if not dbname:
-                dbname=file_name[:-3]+'x.db' # Create New DB file
             if not checked_ele:
                 self.ids.datashow.text=f"Warning ! .Choose a column !"
                 return
@@ -296,7 +290,6 @@ class MainScreen(Screen):
             Soc.send((dbname).encode())
             localFilePath = dbname
             rmtfpth=os.path.basename(dbname)
-            dpath=dbname[:-len(rmtfpth)]
             remoteFilePath = '/tmp/'+rmtfpth
             try:
                 stdin,stdout,stderr=client.exec_command('rm remoteFilePath')# delet file if exist before
@@ -313,10 +306,6 @@ class MainScreen(Screen):
                     self.ids.datashow.text="Server busy try again "
             except Exception as e :
                 self.ids.datashow.text=str(e)
-            try:
-                cmd="del dpath*x.db" if platform=='win' else  'rm dpath*x.db'
-                os.system(cmd)
-            except :pass            
 #_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols,checked_ele
@@ -328,7 +317,7 @@ class MainScreen(Screen):
                 checked_ele=None
             except: pass
             try:
-                cmd="del *x.db" if platform=='win' else  'rm *x.db'
+                cmd="del *.dbx" if platform=='win' else  'rm *.dbx'
                 os.system(cmd)
             except :pass
             self.manager.current="operations_screen"
@@ -381,7 +370,7 @@ class MainScreen(Screen):
         Soc.send("exit".encode())
         Soc.close()
         self.manager.current="connect"
-########################################################### #########
+#======================================================================================
 
 class ShowDataTable(Screen):
     #_______________#
@@ -427,7 +416,7 @@ class ShowDataTable(Screen):
 
     def onback(self):
         self.manager.current="main_screen"
-###############################################################################
+#======================================================================================
 class OperationsScreen(Screen):
     #_______________#
     def listchecked2(self,x): #selection de clonne 
@@ -701,7 +690,6 @@ class OperationsScreen(Screen):
             Temp=[]
             Old=[]
             rest=round((first-m1),2)
-            print("rest",rest)
             Temp.append(rest)
             Temp.append(second)
             Old.append(first)
