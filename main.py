@@ -1,15 +1,15 @@
 import os
-os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
-from kivy.core.window import Window
-Window.softinput_mode="below_target"
-from kivy.core.window import Window
-Window.size=(440,650)
-#Kivy Import 
+from kivy.utils import platform
+if platform=='win':
+    os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+    from kivy.core.window import Window
+    Window.size=(440,650)
+#Kivy Import
+from kivy.core.window import Window 
 from kivy.properties import ListProperty
 from kivy.metrics import dp
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.lang import Builder
-from kivy.utils import platform
 from kivy.core.image import Image
 from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
@@ -32,6 +32,7 @@ from plyer import filechooser
 from pathlib import Path
 from hoverable import HoverBehavior
 #Config And Setting
+Window.softinput_mode="below_target" #resize screen when keyboard launched
 theme_cls = ThemeManager()
 theme_cls.theme_style="Dark"
 theme_cls.primary_palette="Yellow" 
@@ -124,8 +125,18 @@ class MainScreen(Screen):
                 ext=[".py", "db",".db",".jpg"],
             )  
 #______________************** MD Flile Manager Functions for mobile            
+#______________************ Crypt Functions RSA & Paillier
+    def rsacrypt(self,data):       # Fonction de Cryptage RSA
+        message=data.encode()
+        crypto = rsa.encrypt(message, pubkey)
+        crypto = hexlify(crypto).decode()
+        return crypto
+    def enciph(self,y):            # get encipher text
+        x=pub_key.encrypt(y)
+        return str(x.ciphertext()), x.exponent    
+#______________============ Select DataBase =================______________________    
     def select_path(self,path):
-        global file_name,tabx,colx,dbname
+        global file_name,tabx,colx
         listpat=path.split('\\')
         file_name=listpat[-1]
         try:
@@ -136,9 +147,10 @@ class MainScreen(Screen):
             colx=self.columns
             self.listfil(colx) #update list with column name 
             self.ids.my_bar.value=0
-            rmtfpth=os.path.basename(file_name)
-            dbname = hexlify(rsa.encrypt(file_name.encode(), pubkey)).decode()[:8]+".dbx"
-            self.ids.datashow.text=f"[{rmtfpth[:-3]}] Data Base Loaded" 
+            global dbname
+            dbname = self.rsacrypt(file_name)[:8]+".dbx"
+            print("From Selection",dbname)
+            self.ids.datashow.text=f"[{os.path.basename(file_name)[:-3]}] Data Base Loaded" 
         except Exception as e:
             self.ids.datashow.text=str(e)       
         self.exit_manager()
@@ -199,22 +211,13 @@ class MainScreen(Screen):
                 colx=self.columns
                 self.listfil(colx) #update list with column name 
                 self.ids.my_bar.value=0
-                self.ids.datashow.text=f"[{file_name[:-3]}] Data base Loeded"  
-            except Exception as e:
-                self.ids.datashow.text=str(e) 
+                self.ids.datashow.text=f"[{file_name[:-3]}] Database loaded"  
+            except Exception as e:self.ids.datashow.text=str(e) 
             dbname = hexlify(rsa.encrypt(file_name.encode(), pubkey)).decode()[:8]+".dbx"
-#______________************ Crypt Functions RSA & Paillier
-    def rsacrypt(self,data):       # Fonction de Cryptage RSA
-        message=data.encode()
-        crypto = rsa.encrypt(message, pubkey)
-        crypto = hexlify(crypto).decode()
-        return crypto
-    def enciph(self,y):            # get encipher text
-        x=pub_key.encrypt(y)
-        return str(x.ciphertext()), x.exponent
+
 #__Crypt Database Function   
     def crypt_db(self):        
-        global Xtable,dbname,file_name,tabx,checked_ele,crypted_cols
+        global Xtable,file_name,tabx,checked_ele,crypted_cols
         if not file_name:
             self.ids.datashow.text=f"Warning ! .Choose Database !"        
         elif crypted_cols==[colx.index(x) for x in colx]:
@@ -226,6 +229,9 @@ class MainScreen(Screen):
                     self.cryptcolumn()
                 #tabx=Xtable 
             else :
+                
+                global dbname
+                print("Crypt DB dbname",dbname)
                 dbx=TinyDB(dbname)        # Create Tinydb DB  
                 Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
                 for x in tabx :
@@ -300,7 +306,7 @@ class MainScreen(Screen):
                 Acknowldgment=Soc.recv(40) .decode()
                 if Acknowldgment.endswith("fully"):
                     self.ids.my_bar.value=100 #update Progress bar  
-                    self.ids.datashow.text = f" [ { rmtfpth[:-3] } ] .. Sent Succefully ..!"   
+                    self.ids.datashow.text = f" [ { file_name[:-3] } ] .. Sent Succefully ..!"   
                     send_flag=True
                 else:
                     self.ids.datashow.text="Server busy try again "
@@ -353,14 +359,14 @@ class MainScreen(Screen):
 
 #______________************* Function to choose  uplaod method bellow the Operating system
     def upload_db(self):
-        global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag
+        global colx,crypted_cols,tabx,Xtable,dbname,file_name,table,send_flag,checked_ele
         try:
             os.remove(dbname)
         except :pass
         colx=crypted_cols=[]
-        tabx =Xtable=dbname=file_name=table=checked_ele =None 
+        tabx =Xtable=file_name=table=checked_ele =None 
         send_flag=False  # check dababase sending
-        return self.file_manager_open() if platform=='android' else self.choose_db()
+        return self.file_manager_open() if platform=='android'  else self.choose_db()
 #____________************** Log OUT Function    
     def log_out(self):
         global Soc
