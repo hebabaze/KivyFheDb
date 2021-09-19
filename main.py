@@ -1,10 +1,12 @@
 import os
+from traceback import print_tb
 from kivy.utils import platform
 if platform=='win':
     os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
     from kivy.core.window import Window
     Window.size=(440,650)
 #Kivy Import
+from kivymd.uix.button import *
 from kivy.core.window import Window 
 from kivy.properties import ListProperty
 from kivy.metrics import dp
@@ -15,9 +17,11 @@ from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import ButtonBehavior
 #Kivymd Import
+from kivymd.uix.button import MDFloatingActionButtonSpeedDial
 import sys
 sys.path.append('assets')
 from filemanager import MDFileManager
+from kivymd.uix.screen import MDScreen
 from kivymd.uix.list import OneLineListItem
 from kivymd.uix.datatables import MDDataTable
 from kivymd.app import MDApp
@@ -58,7 +62,7 @@ dbname=None #crypted database
 file_name=None #file uploaded
 table =None #te Table used in show datatable 
 checked_ele=None # selected colummn name 
-send_flag=False  # check dababase sending
+send_flag=True  # check dababase sending
 sftp=None
 client=""
 class Connect(Screen):
@@ -315,6 +319,7 @@ class MainScreen(Screen):
 #_______________************Function change Screen to operation screen 
     def operations(self):
         global tabx,crypted_cols,checked_ele
+        send_flag=True
         if send_flag:
             try:
                 rdic=tabx.get(doc_id=1)
@@ -340,7 +345,8 @@ class MainScreen(Screen):
                     screen3.ids.container2.add_widget(OneLineListItem(text=f"{colx[x]}",on_press=lambda x: screen3.listchecked2(x.text)))   
             except:pass
         else:
-            self.ids.datashow.text = f" Database not sent yet ..!"    
+            pass
+            #self.ids.datashow.text = f" Database not sent yet ..!"    
 #______________*************Function to show data table content
     def showdt(self) : 
         global Xtable,tabx,table
@@ -423,7 +429,7 @@ class ShowDataTable(Screen):
     def onback(self):
         self.manager.current="main_screen"
 #======================================================================================
-class OperationsScreen(Screen):
+class OperationsScreen(MDScreen):
     #_______________#
     def listchecked2(self,x): #selection de clonne 
         global checked_ele
@@ -432,6 +438,14 @@ class OperationsScreen(Screen):
         self.ids.op.text='...'
         self.ids.lresult.text="..."
         self.ids.ltime.text=" ... "
+        col_values=[]
+        for dc in  tabx:
+            col_values.append(dc[x])
+        self.ids.container3.clear_widgets()
+        print(col_values)
+        for x in col_values:
+            self.ids.container3.add_widget(OneLineListItem(text=f"{x}"))   
+            
     def sumf(self):
         start=time.time()
         chosen_col=checked_ele
@@ -502,7 +516,6 @@ class OperationsScreen(Screen):
                 Soc.send(tab)
             #############___Receiv Sum
                 result=Soc.recv(BS)
-                #result=zlib.decompress(result)
                 result=dill.loads(result)
             ##################_____Decrypt
                 result=priv_key.decrypt(result)
@@ -922,8 +935,23 @@ class OperationsScreen(Screen):
 #_______onback    
     def onback(self):
          self.manager.current="main_screen"
+########################_______
+class Calculator(Screen):
+    data = {'Egypt': 'assets\egy.png',
+        'Russe':'assets\eru.png',
+        'Log': 'language-cpp'}
 
-######################################################################
+    def onback(self):
+        self.manager.current="main_screen"
+    def callback(self, instance):
+        if instance.icon=='C++':
+            print("You clicked on Log")
+
+        print(instance.icon)
+        #print("Text:",dir(instance))    
+
+##############################################
+#######################################################
 class ImageButton(ButtonBehavior,HoverBehavior,Image):
     pass
 class RootWidget(ScreenManager):
