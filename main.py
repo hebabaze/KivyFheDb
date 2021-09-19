@@ -940,7 +940,7 @@ class OperationsScreen(MDScreen):
         self.manager.current="calculator"
 ########################_______
 class Calculator(Screen):
-    data = {'Egypt': 'assets\egy.png',
+    data = {'Egypt': 'assets\egy.jpg',
         'Russe':'assets\eru.png',
         'Log': 'assets\log.png'}
 
@@ -950,7 +950,7 @@ class Calculator(Screen):
         L=[0,0]
         A=self.ids.val1.text
         B=self.ids.val2.text
-        if instance.icon=='assets\egy.png':
+        if instance.icon=='assets\egy.jpg':
             if str(A).isalpha() or str(B).isalpha():
                 self.ids.infoshow.text="Insert a valid Values"
                 self.ids.result.text=self.ids.fheresult.text=f"NA"
@@ -958,10 +958,110 @@ class Calculator(Screen):
                 self.ids.infoshow.text="Insert Values"
                 self.ids.result.text=self.ids.fheresult.text=f"..."
             else: 
+                _start=time.time()
                 L[0],L[1]=eval(A),eval(B)           
                 x='10'
                 Soc.send(x.encode())
-                print("You clicked on Egypt")
+                #Function for finding Highest 2 power less than or equal to a given number
+                def greatest2power(n,i=0):
+                    while int(math.pow(2,i)) <= n : i = i+1
+                    return int(math.pow(2,i-1))
+                def egyptian(L):
+                    #Finding greater of two and assigning Highest to first
+                    for i in range(0,len(L)-1):
+                        m=L[i]
+                        n=L[i+1]
+                        if m>n : first , second = m , n
+                        else : first , second = n , m
+                        print("m",m)
+                        print("n",n)
+
+                        #Lists for holding two columns
+
+                        fcol , scol = [] , []
+
+                        seed = 1
+                    #populating two columns in the Egyptian table
+
+                        while seed <= greatest2power(first):
+                            fcol.append(seed)
+                            scol.append(second*seed)
+                            seed = seed*2
+
+                        valid , backseed = [] , seed//2
+
+                        #computing the valid 2 powers in first column
+
+                        while backseed>=1:
+                            valid.append(backseed)
+                            temp = backseed
+                            backseed = greatest2power(first-backseed)
+                            first = first - temp
+
+                        answer = 0
+
+                    #Computing the product by adding second column elements , those mapped to valid first column
+                    tab=[] 
+                    for sol in valid:
+                        for a,b in zip(fcol,scol):
+                            if a==sol:
+                                answer = answer+b
+                                tab.append(b)
+                                print("scol",tab)
+                    return tab
+                m=L[0]
+                n=L[1]
+                sendval=""
+                if m>n : first , second = m , n
+                else : first , second = n , m
+                check_float = isinstance(first, float)
+                if check_float==False:
+                    c=[]
+                    c.append(first)
+                    c.append(second)
+                    R=egyptian(c)
+                    print("normal numbers answer is",R)
+                    sendval=R
+                if check_float==True:
+                    m1=int(m)
+                    Temp=[]
+                    Old=[]
+                    rest=round((m-m1),2)
+                    print("rest",rest)
+                    Temp.append(rest)
+                    Temp.append(n)
+                    Old.append(m)
+                    Old.append(n)
+                    val=egyptian(Old)
+                    extra=egyptian(Temp)
+                    val.extend(extra)
+                    print("answer is :",val)
+                    sendval=val
+                    check_float = isinstance(second, float)
+                    if check_float==True:
+                        m2=int(second)
+                        rest2=round((second-m2),2)
+                        r=rest*rest2
+                        val.extend(extra)
+                        print("new val",val)
+                        val.append(r)
+                        print("new r",r)
+                        sendval=val
+                    elif check_float==False:
+                        val.extend(extra)
+                        sendval=val
+                    print("answer is :",val)
+                print(sendval)
+                sendv=[pub_key.encrypt(x) for x in sendval]               
+                Soc.send(dill.dumps(sendv))
+                egytab=Soc.recv(BS)
+                egytab=dill.loads(egytab)
+                egytab=priv_key.decrypt(egytab)
+                self.ids.op.text="Egyptian Multiplication"
+                self.ids.fheresult.text=f"{egytab}"
+                self.ids.result.text=f"{eval(A)*eval(B)}"   
+                self.ids.infoshow.text=""
+                self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
         if instance.icon=='assets\eru.png':
             if str(A).isalpha() or str(B).isalpha():
                 self.ids.infoshow.text="Insert a valid Values"
@@ -970,6 +1070,7 @@ class Calculator(Screen):
                 self.ids.infoshow.text="Insert Values"
                 self.ids.result.text=self.ids.fheresult.text=f"..."            
             else:
+                _start=time.time()
                 x='11'
                 Soc.send(x.encode())
                 L[0],L[1]=eval(A),eval(B)
@@ -985,6 +1086,8 @@ class Calculator(Screen):
                 result=Soc.recv(BS)
                 result=dill.loads(result)
                 result=priv_key.decrypt(result)
+                self.ids.op.text="Russe Multiplication"
+                self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
                 self.ids.result.text=f"{eval(A)*eval(B)}"
                 self.ids.fheresult.text=f"{result}"
         if instance.icon=='assets\log.png':
@@ -995,7 +1098,7 @@ class Calculator(Screen):
                 self.ids.infoshow.text="Insert Values"
                 self.ids.result.text=self.ids.fheresult.text=f"..."            
             else:      
-                print("Log Mul ______")
+                _start=time.time()
                 x='12'
                 Soc.send(x.encode())
                 L[0],L[1]=eval(A),eval(B)
@@ -1008,11 +1111,12 @@ class Calculator(Screen):
                 rprod=priv_key.decrypt(rprod)
                 try:
                     rprod=round(math.exp(rprod))
+                    self.ids.op.text="Log Multiplication"
                     self.ids.result.text=f"{eval(A)*eval(B)}"
                     self.ids.fheresult.text=f"{rprod}"
+                    self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
                 except:
                     self.ids.lresult.text("Input value is greater than allowed limit")
-                #self.ids.ltime.text=f"{round(endt,2)} ms "
 
     def addition(self):
         L=[0,0]
@@ -1025,6 +1129,7 @@ class Calculator(Screen):
             self.ids.infoshow.text="Insert Values"
             self.ids.result.text=self.ids.fheresult.text=f"..."
         else:
+            _start=time.time()
             x='13'
             Soc.send(x.encode())
             L[0],L[1]=eval(A),eval(B)
@@ -1036,8 +1141,10 @@ class Calculator(Screen):
             resul=Soc.recv(BS)
             resul=dill.loads(resul)
             resul=priv_key.decrypt(resul)
+            self.ids.op.text="Addition"
             self.ids.fheresult.text=f"{resul}"   
             self.ids.infoshow.text=""
+            self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
 
 ##############################################
 #######################################################
