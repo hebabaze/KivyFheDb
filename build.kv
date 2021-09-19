@@ -343,7 +343,7 @@
                     readonly: True
                     text:"..."
                     halign: 'center'
-                    valign: 'middle'  
+                    valign: 'middle'
                     font_name: 'assets/Helvetica.ttf'
                 MDTextField:
                     readonly: True
@@ -351,7 +351,7 @@
                     id : ltime
                     halign: 'center'
                     valign: 'middle'
-                    font_name: 'assets/Helvetica.ttf'                                    
+                    font_name: 'assets/Helvetica.ttf'
                 MDTextField:
                     id: lresult
                     readonly: True
@@ -359,7 +359,7 @@
                     multiline:True
                     halign: 'center'
                     valign: 'middle'
-                    font_name: 'assets/Helvetica.ttf'                    
+                    font_name: 'assets/Helvetica.ttf'
     MDNavigationDrawer :
         id : nav_drawer
         orientation: 'vertical'
@@ -380,13 +380,22 @@
             MDRB:#AVG
                 text:"AVG"
                 md_bg_color:.486,.733,.0,1
-                pos_hint: {'center_x':0.5 , 'center_y':0.33}
+                pos_hint: {'center_x':0.5 , 'center_y':0.38}
                 size_hint: 0.76,0.16
                 font_size: "18sp"
                 font_name: 'assets/Helvetica-Bold.ttf'
                 on_press:
                     root.ids.op.text="AVG"
                     root.avgf()
+            MDRB:#_______Calc
+                text:"Calc"
+                md_bg_color:.01,.01,.01,1
+                pos_hint: {'center_x':0.5 , 'center_y':0.16}
+                size_hint: 0.76,0.16
+                font_size: "18sp"
+                font_name: 'assets/Helvetica-Bold.ttf'
+                on_press:
+                    root.calc()                    
         ScrollView:
             canvas.before:
                 Color:
@@ -433,7 +442,6 @@
                     on_press:
                         root.ids.op.text="Egypt Multiplication"
                         root.mulegy()
-                        
     BoxLayout:
         orientation:'vertical'
         MDToolbar:
@@ -447,6 +455,7 @@
     Screen:
         MDScreen:
             MDTextField:
+                id:val1
                 hint_text: "First Value"
                 size_hint:.3,.08
                 mode: "rectangle"
@@ -454,14 +463,15 @@
                 pos_hint:{'center_x':.49,'center_y':.85}
                 line_color_focus: 0, 0, 0, 1
             MDTextField:
+                id:val2
                 hint_text: "Second Value"
                 size_hint:.3,.08
                 pos_hint:{'center_x':.49,'center_y':.75}
                 mode: "rectangle"
                 bold:True
                 line_color_focus: 0, 0, 0, 1
-        MDScreen:
-            md_bg_color:0.8,0.6,0.6,1
+        MDScreen:#Floating Action
+            #md_bg_color:0.8,0.6,0.6,1
             size_hint: 1,.3
             padding: 20,20 
             pos_hint: {'center_x':0.5 , 'center_y':.5}
@@ -469,35 +479,35 @@
                 MDFloatingActionButton:
                     hint_animation: True
                     icon:'plus'
-                    pos_hint:{'center_x':.9,'center_y':.4}
-                    elevation_normal: 12
-                    on_press:print("Hrllo World")
-    Screen:
-        pos_hint:{'center_x':.5,'center_y':1}
+                    pos_hint:{'center_x':.91,'center_y':.34}
+                    elevation_normal: 20
+                    on_press:root.addition()
+    Screen:#__________Speed Dial
+        pos_hint:{'center_x':.52,'center_y':.978}
         MDFloatingActionButtonSpeedDial:
             data: root.data
             #hint_animation: True
             right_pad:True
             rotation_root_button: True
             root_button_anim: True #button rotation
-            label_text_color: 1,0,0,1
+            #label_text_color: 1,0,0,1
             bg_color_stack_button:0,0,1,.5#bg of icons
             bg_color_root_button:1,0,0,1 #SD color
             color_icon_root_button:1,1,.99,1
             elevation_normal: 12
             icon:'multiplication'
             callback: root.callback
-    Screen:
+    Screen:#____________Labels
         MDLabel:
             pos_hint:{'center_x':.3,'center_y':.6}
-            text:"Operation "
+            text:"Op : "
             size_hint:.5,.3
             theme_text_color: "Custom"
             text_color: 0,0,0,.9999 
             font_size: "20sp"               
         MDLabel:
             pos_hint:{'center_x':.3,'center_y':.5}
-            text:"Time.. :"
+            text:"Time :"
             size_hint:.5,.3
             theme_text_color: "Custom"
             text_color: 0,0,0,.9999             
@@ -506,16 +516,24 @@
             pos_hint:{'center_x':.3,'center_y':.4}
             text:"Result :"
             size_hint:.5,.3
-            theme_text_color: "Custom"
-            text_color: 0,1,0,1 
-            font_size: "22sp"
-            bold:True
-    BoxLayout:
+            #theme_text_color: "Custom"
+            #text_color: 0,1,0,1 
+            font_size: "20sp"
+            #bold:True
+        MDLabel:
+            pos_hint:{'center_x':.3,'center_y':.3}
+            text:"FHE Result :"
+            size_hint:.5,.3
+            #theme_text_color: "Custom"
+            #text_color: 0,1,0,1 
+            font_size: "20sp"
+            #bold:True            
+    BoxLayout:#_________Texts
         orientation:'vertical'
         padding:10
-        spacing:5
+        spacing:10
         size_hint : .5,.5
-        pos_hint:{'center_x':.55,'center_y':.6}
+        pos_hint:{'center_x':.55,'center_y':.5}
         MDTextField:
             readonly: True
             text:""
@@ -532,12 +550,33 @@
             font_size: "18sp"
         MDTextField:
             readonly: True
-            text:""
+            id:result
+            text:"..."
             halign: 'center'
             valign: 'middle'
             font_name: 'assets/Helvetica.ttf'
             font_size: "20sp"
-                                    
+        MDTextField:
+            readonly: True
+            id:fheresult
+            text:"..."
+            halign: 'center'
+            valign: 'middle'
+            font_name: 'assets/Helvetica.ttf'
+            font_size: "20sp"            
+    Screen:
+        pos_hint:{'center_x':.52,'center_y':.2}
+        size_hint:.8,.2
+        
+        MDLabel:
+            size_hint:1,.5
+            id: infoshow
+            text: ''
+            theme_text_color: "Custom"
+            text_color: 0,0,0,.9999 
+            md_bg_color:1,250/255,240/250,1 
+            halign:'center'           
+            font_size:24
     GridLayout:
         cols:1
         MDToolbar:
@@ -547,14 +586,14 @@
             elevation:15
         BoxLayout:
 <RootWidget>:
-    # Connect:
-    #     name:"connect"
-    # MainScreen:
-    #     name:"main_screen"
-    # ShowDataTable:
-    #     name:"show_data_table"
-    #     id:sdt
-    # OperationsScreen
-    #     name:"operations_screen"
+    Connect:
+        name:"connect"
+    MainScreen:
+        name:"main_screen"
+    ShowDataTable:
+        name:"show_data_table"
+        id:sdt
+    OperationsScreen
+        name:"operations_screen"
     Calculator:
         name: "calculator"

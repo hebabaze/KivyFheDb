@@ -1,4 +1,5 @@
 import os
+from re import A
 from traceback import print_tb
 from kivy.utils import platform
 if platform=='win':
@@ -934,21 +935,109 @@ class OperationsScreen(MDScreen):
             Soc.send(tab)
 #_______onback    
     def onback(self):
-         self.manager.current="main_screen"
+        self.manager.current="main_screen"
+    def calc(self):
+        self.manager.current="calculator"
 ########################_______
 class Calculator(Screen):
     data = {'Egypt': 'assets\egy.png',
         'Russe':'assets\eru.png',
-        'Log': 'language-cpp'}
+        'Log': 'assets\log.png'}
 
     def onback(self):
         self.manager.current="main_screen"
     def callback(self, instance):
-        if instance.icon=='C++':
-            print("You clicked on Log")
+        L=[0,0]
+        A=self.ids.val1.text
+        B=self.ids.val2.text
+        if instance.icon=='assets\egy.png':
+            if str(A).isalpha() or str(B).isalpha():
+                self.ids.infoshow.text="Insert a valid Values"
+                self.ids.result.text=self.ids.fheresult.text=f"NA"
+            elif A=='' or B=='':
+                self.ids.infoshow.text="Insert Values"
+                self.ids.result.text=self.ids.fheresult.text=f"..."
+            else: 
+                L[0],L[1]=eval(A),eval(B)           
+                x='10'
+                Soc.send(x.encode())
+                print("You clicked on Egypt")
+        if instance.icon=='assets\eru.png':
+            if str(A).isalpha() or str(B).isalpha():
+                self.ids.infoshow.text="Insert a valid Values"
+                self.ids.result.text=self.ids.fheresult.text=f"NA"
+            elif A=='' or B=='':
+                self.ids.infoshow.text="Insert Values"
+                self.ids.result.text=self.ids.fheresult.text=f"..."            
+            else:
+                x='11'
+                Soc.send(x.encode())
+                L[0],L[1]=eval(A),eval(B)
+                tab=[]
+                while L[0]>0:
+                    if L[0]%2==1 :
+                        e2=pub_key.encrypt(L[1])
+                        tab.append(e2)
+                    L[0]=L[0]//2
+                    L[1]=L[1]+L[1]
+                tab=dill.dumps(tab)
+                Soc.send(tab)
+                result=Soc.recv(BS)
+                result=dill.loads(result)
+                result=priv_key.decrypt(result)
+                self.ids.result.text=f"{eval(A)*eval(B)}"
+                self.ids.fheresult.text=f"{result}"
+        if instance.icon=='assets\log.png':
+            if str(A).isalpha() or str(B).isalpha():
+                self.ids.infoshow.text="Insert a valid Values"
+                self.ids.result.text=self.ids.fheresult.text=f"NA"
+            elif A=='' or B=='':
+                self.ids.infoshow.text="Insert Values"
+                self.ids.result.text=self.ids.fheresult.text=f"..."            
+            else:      
+                print("Log Mul ______")
+                x='12'
+                Soc.send(x.encode())
+                L[0],L[1]=eval(A),eval(B)
+                C=[math.log(e) for e in L]
+                Ce=[pub_key.encrypt(x) for x in C]
+                Lprod=dill.dumps(Ce)
+                Soc.send(Lprod)
+                rprod=Soc.recv(BS)
+                rprod=dill.loads(rprod)
+                rprod=priv_key.decrypt(rprod)
+                try:
+                    rprod=round(math.exp(rprod))
+                    self.ids.result.text=f"{eval(A)*eval(B)}"
+                    self.ids.fheresult.text=f"{rprod}"
+                except:
+                    self.ids.lresult.text("Input value is greater than allowed limit")
+                #self.ids.ltime.text=f"{round(endt,2)} ms "
 
-        print(instance.icon)
-        #print("Text:",dir(instance))    
+    def addition(self):
+        L=[0,0]
+        A=self.ids.val1.text
+        B=self.ids.val2.text
+        if str(A).isalpha() or str(B).isalpha():
+            self.ids.infoshow.text="Insert a valid Values"
+            self.ids.result.text=self.ids.fheresult.text=f"NA"
+        elif A=='' or B=='':
+            self.ids.infoshow.text="Insert Values"
+            self.ids.result.text=self.ids.fheresult.text=f"..."
+        else:
+            x='13'
+            Soc.send(x.encode())
+            L[0],L[1]=eval(A),eval(B)
+            self.ids.result.text=f"{sum(L)}"
+            L[0]=pub_key.encrypt(L[0])
+            L[1]=pub_key.encrypt(L[1])
+            print(L)
+            Soc.send(dill.dumps(L))
+            resul=Soc.recv(BS)
+            resul=dill.loads(resul)
+            resul=priv_key.decrypt(resul)
+            self.ids.fheresult.text=f"{resul}"   
+            self.ids.infoshow.text=""
 
 ##############################################
 #######################################################
