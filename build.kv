@@ -485,16 +485,16 @@
     Screen:#__________Speed Dial
         pos_hint:{'center_x':.52,'center_y':.978}
         MDFloatingActionButtonSpeedDial:
-            data: root.data
+            data:{'Egypt': 'assets\egy.jpg','Russe':'assets\eru.png','Log': 'assets\log.png'}
             #hint_animation: True
-            right_pad:True
-            rotation_root_button: True
+            #right_pad:True
+            #rotation_root_button: True
             root_button_anim: True #button rotation
             #label_text_color: 1,0,0,1
-            bg_color_stack_button:0,0,1,.5#bg of icons
-            bg_color_root_button:1,0,0,1 #SD color
+            #bg_color_stack_button:0,0,1,.5#bg of icons
+            bg_color_root_button:1,0.1,0.1,1 #SD color
             color_icon_root_button:1,1,.99,1
-            elevation_normal: 12
+            elevation_normal: 20
             icon:'multiplication'
             callback: root.callback
     Screen:#____________Labels
@@ -514,7 +514,7 @@
             font_size: "20sp"
         MDLabel:
             pos_hint:{'center_x':.3,'center_y':.4}
-            text:"Result :"
+            text:"Clear Result :"
             size_hint:.5,.3
             #theme_text_color: "Custom"
             #text_color: 0,1,0,1 
@@ -527,7 +527,7 @@
             #theme_text_color: "Custom"
             #text_color: 0,1,0,1 
             font_size: "20sp"
-            #bold:True            
+            #bold:True
     BoxLayout:#_________Texts
         orientation:'vertical'
         padding:10
@@ -542,6 +542,10 @@
             valign: 'middle'
             font_name: 'assets/Helvetica.ttf'
             font_size: "18sp"
+            text_color: 0,0,0,1
+            bold:True
+            halign: "center"
+            line_color_focus: 1, 0, 1, 1
         MDTextField:
             id:time
             readonly: True
@@ -550,6 +554,10 @@
             valign: 'middle'  
             font_name: 'assets/Helvetica.ttf'
             font_size: "18sp"
+            text_color: 0,0,0,1
+            bold:True
+            halign: "center"
+            line_color_focus: 1, 0, 1, 1            
         MDTextField:
             readonly: True
             id:result
@@ -558,6 +566,10 @@
             valign: 'middle'
             font_name: 'assets/Helvetica.ttf'
             font_size: "20sp"
+            text_color: 0,0,0,1
+            bold:True
+            halign: "center"
+            line_color_focus: 1, 0, 1, 1
         MDTextField:
             readonly: True
             id:fheresult
@@ -565,27 +577,31 @@
             halign: 'center'
             valign: 'middle'
             font_name: 'assets/Helvetica.ttf'
-            font_size: "20sp"            
+            font_size: "20sp"
+            text_color: 0,0,0,1
+            bold:True
+            halign: "center"
+            line_color_focus: 1, 0, 1, 1
     Screen:
         pos_hint:{'center_x':.52,'center_y':.2}
-        size_hint:.8,.2
-        
+        size_hint:.8,.3
         MDLabel:
-            size_hint:1,.5
+            size_hint:1,.6
             id: infoshow
             text: ''
             theme_text_color: "Custom"
-            text_color: 0,0,0,.9999 
-            md_bg_color:1,250/255,240/250,1 
-            halign:'center'           
+            text_color: 0,0,0,.9999
+            md_bg_color:1,250/255,240/250,1
+            halign:'center'
             font_size:24
     GridLayout:
         cols:1
         MDToolbar:
             title: 'FHE Calculator'
             type: "top"
+            halign:'center'
             right_action_items: [["home", lambda x: root.onback()]]
-            elevation:15
+            elevation:15            
         BoxLayout:
 <RootWidget>:
     Connect:

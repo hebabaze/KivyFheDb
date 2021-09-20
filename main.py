@@ -1,6 +1,5 @@
 import os
 from re import A
-from traceback import print_tb
 from kivy.utils import platform
 if platform=='win':
     os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
@@ -43,7 +42,7 @@ theme_cls.theme_style="Dark"
 theme_cls.primary_palette="Yellow" 
 Builder.load_file('build.kv')
 (pubkey, privkey) = rsa.newkeys(256)
-pub_key,priv_key=paillier.generate_paillier_keypair(n_length=128)
+pub_key,priv_key=paillier.generate_paillier_keypair(n_length=448)
 pkr=pub_key.n
 cmd="del *.dbx" if platform=='win' else  'rm *x.dbx'
 os.system(cmd)
@@ -154,7 +153,6 @@ class MainScreen(Screen):
             self.ids.my_bar.value=0
             global dbname
             dbname = self.rsacrypt(file_name)[:8]+".dbx"
-            print("From Selection",dbname)
             self.ids.datashow.text=f"[{os.path.basename(file_name)[:-3]}] Data Base Loaded" 
         except Exception as e:
             self.ids.datashow.text=str(e)       
@@ -236,7 +234,6 @@ class MainScreen(Screen):
             else :
                 
                 global dbname
-                print("Crypt DB dbname",dbname)
                 dbx=TinyDB(dbname)        # Create Tinydb DB  
                 Xtable = dbx.table('Dx')   # Create New Table in New DB (dbx)
                 for x in tabx :
@@ -342,6 +339,7 @@ class MainScreen(Screen):
             except:pass
             try:
                 screen3.ids.container2.clear_widgets()
+                screen3.ids.container3.clear_widgets()
                 for x in int_crypted_cols:
                     screen3.ids.container2.add_widget(OneLineListItem(text=f"{colx[x]}",on_press=lambda x: screen3.listchecked2(x.text)))   
             except:pass
@@ -443,7 +441,6 @@ class OperationsScreen(MDScreen):
         for dc in  tabx:
             col_values.append(dc[x])
         self.ids.container3.clear_widgets()
-        print(col_values)
         for x in col_values:
             self.ids.container3.add_widget(OneLineListItem(text=f"{x}"))   
             
@@ -940,10 +937,6 @@ class OperationsScreen(MDScreen):
         self.manager.current="calculator"
 ########################_______
 class Calculator(Screen):
-    data = {'Egypt': 'assets\egy.jpg',
-        'Russe':'assets\eru.png',
-        'Log': 'assets\log.png'}
-
     def onback(self):
         self.manager.current="main_screen"
     def callback(self, instance):
@@ -1023,15 +1016,15 @@ class Calculator(Screen):
                     print("normal numbers answer is",R)
                     sendval=R
                 if check_float==True:
-                    m1=int(m)
+                    m1=int(first)
                     Temp=[]
                     Old=[]
-                    rest=round((m-m1),2)
+                    rest=round((first-m1),2)
                     print("rest",rest)
                     Temp.append(rest)
-                    Temp.append(n)
-                    Old.append(m)
-                    Old.append(n)
+                    Temp.append(second)
+                    Old.append(first)
+                    Old.append(second)
                     val=egyptian(Old)
                     extra=egyptian(Temp)
                     val.extend(extra)
@@ -1042,30 +1035,30 @@ class Calculator(Screen):
                         m2=int(second)
                         rest2=round((second-m2),2)
                         r=rest*rest2
-                        val.extend(extra)
-                        print("new val",val)
-                        val.append(r)
-                        print("new r",r)
-                        sendval=val
+                        sendval.append(r)
+                        #print("new val",val)
+                        #val.append(r)
+                        #print("new r",r)
+                        #sendval=val
                     elif check_float==False:
-                        val.extend(extra)
+                        #sendval.extend(extra)
                         sendval=val
                     print("answer is :",val)
-                print(sendval)
-                sendv=[pub_key.encrypt(x) for x in sendval]               
-                Soc.send(dill.dumps(sendv))
-                egytab=Soc.recv(BS)
-                egytab=dill.loads(egytab)
-                egytab=priv_key.decrypt(egytab)
-                self.ids.op.text="Egyptian Multiplication"
-                self.ids.fheresult.text=f"{egytab}"
-                self.ids.result.text=f"{eval(A)*eval(B)}"   
-                self.ids.infoshow.text=""
-                self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
+            print(sendval)
+            sendv=[pub_key.encrypt(x) for x in sendval]               
+            Soc.send(dill.dumps(sendv))
+            egytab=Soc.recv(BS)
+            egytab=dill.loads(egytab)
+            egytab=priv_key.decrypt(egytab)
+            self.ids.op.text="Egyptian Multiplication"
+            self.ids.fheresult.text=f"{egytab}"
+            self.ids.result.text=f"{eval(A)*eval(B)}"   
+            self.ids.infoshow.text=""
+            self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
         if instance.icon=='assets\eru.png':
             if str(A).isalpha() or str(B).isalpha():
                 self.ids.infoshow.text="Insert a valid Values"
-                self.ids.result.text=self.ids.fheresult.text=f"NA"
+                self.ids.result.text=self.ids.fheresult.text=f"N/A"
             elif A=='' or B=='':
                 self.ids.infoshow.text="Insert Values"
                 self.ids.result.text=self.ids.fheresult.text=f"..."            
@@ -1088,12 +1081,12 @@ class Calculator(Screen):
                 result=priv_key.decrypt(result)
                 self.ids.op.text="Russe Multiplication"
                 self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
-                self.ids.result.text=f"{eval(A)*eval(B)}"
-                self.ids.fheresult.text=f"{result}"
+                self.ids.result.text=f"{round(eval(A)*eval(B),2)}"
+                self.ids.fheresult.text=f"{round(result,2)}"
         if instance.icon=='assets\log.png':
             if str(A).isalpha() or str(B).isalpha():
                 self.ids.infoshow.text="Insert a valid Values"
-                self.ids.result.text=self.ids.fheresult.text=f"NA"
+                self.ids.result.text=self.ids.fheresult.text=f"N/A"
             elif A=='' or B=='':
                 self.ids.infoshow.text="Insert Values"
                 self.ids.result.text=self.ids.fheresult.text=f"..."            
@@ -1112,8 +1105,8 @@ class Calculator(Screen):
                 try:
                     rprod=round(math.exp(rprod))
                     self.ids.op.text="Log Multiplication"
-                    self.ids.result.text=f"{eval(A)*eval(B)}"
-                    self.ids.fheresult.text=f"{rprod}"
+                    self.ids.result.text=f"{round(eval(A)*eval(B),2)}"
+                    self.ids.fheresult.text=f"{round(rprod,2)}"
                     self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
                 except:
                     self.ids.lresult.text("Input value is greater than allowed limit")
@@ -1124,7 +1117,7 @@ class Calculator(Screen):
         B=self.ids.val2.text
         if str(A).isalpha() or str(B).isalpha():
             self.ids.infoshow.text="Insert a valid Values"
-            self.ids.result.text=self.ids.fheresult.text=f"NA"
+            self.ids.result.text=self.ids.fheresult.text=f"N/A"
         elif A=='' or B=='':
             self.ids.infoshow.text="Insert Values"
             self.ids.result.text=self.ids.fheresult.text=f"..."
@@ -1133,16 +1126,15 @@ class Calculator(Screen):
             x='13'
             Soc.send(x.encode())
             L[0],L[1]=eval(A),eval(B)
-            self.ids.result.text=f"{sum(L)}"
+            self.ids.result.text=f"{round(sum(L),2)}"
             L[0]=pub_key.encrypt(L[0])
             L[1]=pub_key.encrypt(L[1])
-            print(L)
             Soc.send(dill.dumps(L))
             resul=Soc.recv(BS)
             resul=dill.loads(resul)
             resul=priv_key.decrypt(resul)
             self.ids.op.text="Addition"
-            self.ids.fheresult.text=f"{resul}"   
+            self.ids.fheresult.text=f"{round(resul,2)}"   
             self.ids.infoshow.text=""
             self.ids.time.text=f"{round(time.time()-_start,2)*1000} ms"
 
